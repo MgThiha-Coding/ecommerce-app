@@ -44,66 +44,267 @@ class _CartPageState extends ConsumerState<CartPage> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: [
-              AppBarWidget(),
+              const AppBarWidget(),
               Expanded(
                 child: cartListAsync.when(
                   data: (cartListData) {
                     final cartList = cartListData?.data ?? [];
 
-                    if (cartList.isEmpty) {
-                      return const Center(child: Text('No Cart Items yet'));
-                    }
-
+                    // Always show Card
                     return Card(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Column(
                         children: [
                           Expanded(
-                            child: ListView.builder(
-                              itemCount: cartList.length,
-                              itemBuilder: (context, index) {
-                                final cartItemname =
-                                    cartList[index].productName;
-                                final cartItemCount = cartList[index].quantity;
-                                final uomPrice = cartList[index].uomPrice;
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                  ),
-                                  child: Card(
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: Colors.blue.shade500,
-                                        child: Text(
-                                          '${index + 1}',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      title: Text(
-                                        cartItemname,
-                                        style: GoogleFonts.poppins(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      subtitle: Row(
-                                        children: [
-                                          Text(
-                                            '${uomPrice.toStringAsFixed(0)} × ${cartItemCount.toInt()} = ${(uomPrice * cartItemCount).toStringAsFixed(0)}',
-                                            style: GoogleFonts.poppins(
-                                              color: Colors.red,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ],
+                            child: cartList.isEmpty
+                                ? const Center(
+                                    child: Text(
+                                      'No Cart Items yet',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 16,
                                       ),
                                     ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: cartList.length,
+                                    itemBuilder: (context, index) {
+                                      final cartItemname =
+                                          cartList[index].productName;
+                                      final cartItemCount =
+                                          cartList[index].quantity;
+                                      final uomPrice = cartList[index].uomPrice;
+                                      final id = cartList[index].id;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 4,
+                                        ),
+                                        child: Card(
+                                          child: ListTile(
+                                            leading: CircleAvatar(
+                                              backgroundColor:
+                                                  Colors.blue.shade500,
+                                              child: Text(
+                                                '${index + 1}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            title: Text(
+                                              cartItemname,
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            subtitle: Row(
+                                              children: [
+                                                Text(
+                                                  '${uomPrice.toStringAsFixed(0)} × ${cartItemCount.toInt()} = ${(uomPrice * cartItemCount).toStringAsFixed(0)}',
+                                                  style: GoogleFonts.poppins(
+                                                    color: Colors.red,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            trailing: IconButton(
+                                              style: IconButton.styleFrom(
+                                                backgroundColor: Colors.grey
+                                                    // ignore: deprecated_member_use
+                                                    .withOpacity(0.3),
+                                                shape: CircleBorder(),
+                                              ),
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return AlertDialog(
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
+                                                            ),
+                                                      ),
+                                                      title: Text(
+                                                        'Delete Item',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                              color: Colors
+                                                                  .red
+                                                                  .shade700,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 16,
+                                                            ),
+                                                      ),
+                                                      content: Text(
+                                                        'Are you sure you want to delete this item from your cart?',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                              color: Colors
+                                                                  .black87,
+                                                              fontSize: 14,
+                                                            ),
+                                                      ),
+                                                      actionsAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      actions: [
+                                                        TextButton(
+                                                          style: TextButton.styleFrom(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .grey
+                                                                    .shade200,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                                  horizontal:
+                                                                      20,
+                                                                  vertical: 10,
+                                                                ),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    8,
+                                                                  ),
+                                                            ),
+                                                          ),
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                          },
+                                                          child: Text(
+                                                            'Cancel',
+                                                            style:
+                                                                GoogleFonts.poppins(
+                                                                  color: Colors
+                                                                      .black87,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                        Consumer(
+                                                          builder: (context, ref, _) {
+                                                            final removeState =
+                                                                ref.watch(
+                                                                  removeCartItemNotifierProvider,
+                                                                );
+                                                            final isLoading =
+                                                                removeState
+                                                                    .isLoading;
+
+                                                            return TextButton(
+                                                              style: TextButton.styleFrom(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .red
+                                                                        .shade600,
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          20,
+                                                                      vertical:
+                                                                          10,
+                                                                    ),
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        8,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                              onPressed:
+                                                                  isLoading
+                                                                  ? null
+                                                                  : () async {
+                                                                      final notifier = ref.read(
+                                                                        removeCartItemNotifierProvider
+                                                                            .notifier,
+                                                                      );
+                                                                      await notifier
+                                                                          .removeCartItem(
+                                                                            id,
+                                                                          );
+
+                                                                      await ref
+                                                                          .read(
+                                                                            getCartItemNotifierProvider.notifier,
+                                                                          )
+                                                                          .getCartItem();
+                                                                      await ref
+                                                                          .read(
+                                                                            getTotalCartItemNotifierProvider.notifier,
+                                                                          )
+                                                                          .getTotalCartItem();
+
+                                                                      if (!ref
+                                                                          .watch(
+                                                                            removeCartItemNotifierProvider,
+                                                                          )
+                                                                          .isLoading) {
+                                                                        Navigator.pop(
+                                                                          context,
+                                                                        );
+                                                                      }
+                                                                    },
+
+                                                              child: isLoading
+                                                                  ? const SizedBox(
+                                                                      height:
+                                                                          16,
+                                                                      width: 16,
+                                                                      child: SpinKitCircle(
+                                                                        size:
+                                                                            15,
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                    )
+                                                                  : Text(
+                                                                      'Yes',
+                                                                      style: GoogleFonts.poppins(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ),
 
+                          CartSummaryWidget(),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -113,9 +314,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade800,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadiusGeometry.circular(
-                                      12,
-                                    ),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                                 onPressed: () {},
@@ -132,14 +331,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                       ),
                     );
                   },
-                  error: (error, _) {
-                    return Center(child: Text(error.toString()));
-                  },
-                  loading: () {
-                    return Center(
-                      child: SpinKitCircle(size: 50, color: Colors.white),
-                    );
-                  },
+                  error: (error, _) => Center(child: Text(error.toString())),
+                  loading: () => const Center(
+                    child: SpinKitCircle(size: 50, color: Colors.white),
+                  ),
                 ),
               ),
             ],
@@ -222,7 +417,8 @@ class AppBarWidget extends ConsumerWidget {
                     ),
                     child: Center(
                       child: Text(
-                        count!.data.toString(),
+                      
+                       count!.data.toString(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 9,
@@ -238,6 +434,68 @@ class AppBarWidget extends ConsumerWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class CartSummaryWidget extends ConsumerWidget {
+  const CartSummaryWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartItemsAsync = ref.watch(getCartItemNotifierProvider);
+    final cartItemCountAsync = ref.watch(getTotalCartItemNotifierProvider);
+
+    return Card(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Item count (API 2)
+            cartItemCountAsync.when(
+              data: (count) => Text(
+                "Items: ${count?.data ?? 0}",
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blue.shade800,
+                ),
+              ),
+              loading: () => const Text("Items: ..."),
+              error: (_, __) => const Text("Items: error"),
+            ),
+
+            // Total price (API 1, calculated)
+            cartItemsAsync.when(
+              data: (cartListData) {
+                final cartList = cartListData?.data ?? [];
+                final totalPrice = cartList.fold<double>(
+                  0.0,
+                  (sum, item) => sum + (item.quantity * item.uomPrice),
+                );
+
+                return Text(
+                  "Total: ${totalPrice.toStringAsFixed(0)}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red.shade600,
+                  ),
+                );
+              },
+              loading: () => const Text("Total: ..."),
+              error: (_, __) => const Text("Total: error"),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -51,6 +51,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               refreshToken: data.data.refreshToken,
               userId: data.data.user.id.toString(),
             );
+           
+            
+            await storage.isLoggedIn();
             if (!mounted) return;
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WrapperPage()));
           }

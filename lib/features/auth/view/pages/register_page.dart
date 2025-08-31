@@ -1,16 +1,26 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
+import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
+import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/verify_code_page.dart';
+import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   final VoidCallback toggle;
   const RegisterPage({super.key, required this.toggle});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -18,19 +28,105 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-    
+
+  Future<String?> getDeviceName() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (kIsWeb) {
+      WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
+      return '${webBrowserInfo.browserName}${webBrowserInfo.platform}${webBrowserInfo.product}${webBrowserInfo.productSub}${webBrowserInfo.vendor}';
+    } else {
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return androidInfo.id;
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        return iosInfo.identifierForVendor;
+      }
+    }
+    return null;
+  }
+
+  void register() async {
+    if (!_formKey.currentState!.validate()) return;
+    final deviceName = await getDeviceName();
+    ref
+        .read(registerNotifierProvider.notifier)
+        .register(
+          RegisterRequest(
+            firstName: _firstNameController.text,
+            lastName: _lastNameController.text,
+            email: _emailController.text,
+            phone: _phoneController.text,
+            password: _passwordController.text,
+            deviceName: deviceName!,
+            passwordConfirmation: _passwordController.text,
+          ),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
-        double getHorizontalPadding(double width) {
-      if (width >= 1400) return 400; 
-      if (width >= 1024) return 200; 
-      if (width >= 768) return 50; 
+    double getHorizontalPadding(double width) {
+      if (width >= 1400) return 400;
+      if (width >= 1024) return 200;
+      if (width >= 768) return 50;
       return 15;
     }
 
     double screenWidth = MediaQuery.of(context).size.width;
-  
+
+    ref.watch(registerNotifierProvider);
+
+    ref.listen<AsyncValue<RegisterResponse?>>(registerNotifierProvider, (
+      previous,
+      next,
+    ) {
+      next.whenOrNull(
+        data: (response) async {
+          final deviceName = await getDeviceName();
+          if (!context.mounted) return;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyCodePage(
+                email: _emailController.text,
+                deviceName: deviceName,
+              ),
+            ),
+          );
+        },
+        error: (error, stack) {
+          final message = error is Map && error['message'] != null
+              ? error['message']
+              : 'Registration failed';
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[200],
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Text(
+                      message,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+    final registerAsync = ref.watch(registerNotifierProvider);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -51,16 +147,16 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
-                decoration: BoxDecoration( 
-                   gradient: LinearGradient(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors:  
-                   [
+                    colors: [
                       Colors.blue.shade900,
                       Colors.blue.shade500,
-                      Colors.blue.shade100
-                   ])
+                      Colors.blue.shade100,
+                    ],
+                  ),
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -74,10 +170,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Pico Shop', style: GoogleFonts.poppins( 
-                               fontSize: 24,
-                               color: Colors.white,
-                            )),
+                            Text(
+                              'Pico Shop',
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                color: Colors.white,
+                              ),
+                            ),
                             const SizedBox(width: 8.0),
                             Icon(
                               Icons.shopping_bag,
@@ -168,14 +267,23 @@ class _RegisterPageState extends State<RegisterPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {}
-                            },
+                            onPressed: registerAsync.isLoading
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      register();
+                                    }
+                                  },
                             color: Colors.blue.shade900,
-                            child: const Text(
-                              "Sign Up",
-                              style: TextStyle(fontSize: 14, color: Colors.white),
-                            ),
+                            child: registerAsync.isLoading
+                                ? SpinKitCircle(color: Colors.white, size: 27)
+                                : const Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 20),
