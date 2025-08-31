@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
+import 'package:picoshop_theme2/features/shipping/view/shipping_method_page.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -317,7 +318,9 @@ class _CartPageState extends ConsumerState<CartPage> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(context,MaterialPageRoute(builder: (contex)=> ShippingMethodPage()));
+                                },
                                 child: Text(
                                   'Next',
                                   style: GoogleFonts.poppins(
