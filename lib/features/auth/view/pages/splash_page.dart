@@ -72,11 +72,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
               ),
               const SizedBox(height: 8.0),
               Text(
-                'All your favourite is here',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
+                'Your trusted pharmacy online',
+                style: GoogleFonts.poppins(fontSize: 16, color: Colors.white70),
               ),
             ],
           ),

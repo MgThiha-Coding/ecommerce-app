@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
@@ -40,32 +41,44 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final loginAsync = ref.watch(loginNotifierProvider);
+ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (previous, next) {
+  next.when(
+    data: (data) {
+      if (data?.success == true && data?.data.accessToken != null) {
+        final storage = ref.read(secureStorageProvider);
 
-    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (previous, next) {
-      next.when(
-        data: (data) async {
-          if (data?.success == true && data?.data.accessToken != null) {
-            final storage = ref.read(secureStorageProvider);
-            await storage.saveAuthData(
-              accessToken: data!.data.accessToken,
-              refreshToken: data.data.refreshToken,
-              userId: data.data.user.id.toString(),
-            );
-           
-            
-            await storage.isLoggedIn();
-            if (!mounted) return;
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WrapperPage()));
-          }
-        },
-        error: (err, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor: Colors.grey[300], content: Text(err.toString(), style: TextStyle(color: Colors.grey[800]))),
-          );
-        },
-        loading: () {},
+        // Save tokens asynchronously but do not block the listener
+        storage.saveAuthData(
+          accessToken: data!.data.accessToken,
+          refreshToken: data.data.refreshToken,
+          userId: data.data.user.id.toString(),
+        );
+
+        AppConfig.updateAccessToken(data.data.accessToken);
+
+        // Navigate safely
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const WrapperPage()),
+        );
+      }
+    },
+    error: (err, _) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.grey[300],
+          content: Text(
+            err.toString(),
+            style: TextStyle(color: Colors.grey[800]),
+          ),
+        ),
       );
-    });
+    },
+    loading: () {},
+  );
+});
 
     double getHorizontalPadding(double width) {
       if (width >= 1400) return 400; 

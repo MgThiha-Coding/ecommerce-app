@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -72,6 +71,7 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
       super(const AsyncValue.data(null));
 
   Future<void> logOut() async {
+    state = AsyncValue.loading();
     try {
       final response = await _dio.post(
         'https://beta.picosbs.com/api/v1/logout',
@@ -83,7 +83,8 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
           },
         ),
       );
-      print('log out test......${response.data}');
+
+   
       final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&
@@ -91,7 +92,7 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
       if (isSuccess) {
         
         final responseData = LogOutResponse.fromJson(response.data);
-        print('log out test ${response.data}');
+       
         state = AsyncValue.data(responseData);
       }
     } on DioException catch (e, st) {

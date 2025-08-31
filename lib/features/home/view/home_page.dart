@@ -121,7 +121,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       data: (brandListData) {
                         final brandList = brandListData?.data.data ?? [];
                         if (brandList.isEmpty) {
-                          return Text('No Brand Aviailable');
+                          return SizedBox.shrink();
                         }
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
@@ -247,7 +247,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       data: (categoryListData) {
                         final categoryList = categoryListData?.data.data ?? [];
                         if (categoryList.isEmpty) {
-                          return Text('No Category Available');
+                          return SizedBox.shrink();
                         }
                         return ListView.builder(
                           scrollDirection: Axis.horizontal,
@@ -375,10 +375,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                         if (productList.isEmpty) {
                           return Center(
-                            child: Text(
-                              "No products available",
-                              style: GoogleFonts.poppins(),
-                            ),
+                            child: SizedBox.shrink()
                           );
                         }
 
@@ -493,67 +490,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                 ),
 
-                /*
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.circular(12),
-                  ),
-                  child: Container(
-                    height: responsiveBrandListHeight() + 190,
-                    padding: EdgeInsets.all(2),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: productListAsync.when(
-                      data: (productListData) {
-                        final productList = productListData!.data?.data ?? [];
-
-                        if(productList.isEmpty){
-                          return Text("No product Available");
-                        }
-
-                        return ListView.builder(
-                          
-                          itemCount: productList.length,
-                          itemBuilder: (context, index) {
-                            final productName = productList[index].name?? "";
-                            final productImage = productList[index].productImage?? "";
-                            final productType = productList[index].productType??"";
-                            return ListTile(
-                              leading: CircleAvatar( 
-                                backgroundImage: NetworkImage(productImage)
-                              ),
-                              title: Text(productName,style: GoogleFonts.poppins( 
-                                fontSize: responsiveTextSize(),
-                                
-                              ),),
-                              subtitle: Text(productType,style: GoogleFonts.poppins( 
-                                fontSize: responsiveTextSize(),
-                                color: Colors.red
-                                
-                              ),),
-                              trailing: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_forward_ios,size: responsiveTextSize(),color: Colors.green,)),
-                            );
-                          },
-                        );
-                      },
-                      error: (error, _) {
-                        return Center(child: Text('Something went wrong\n Please try again later.'));
-                      },
-                      loading: () {
-                        return Center(
-                           child: SpinKitCircle( 
-                             size: 60,
-                             color: Colors.white,
-                           ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                */
+              
               ],
             ),
           ),

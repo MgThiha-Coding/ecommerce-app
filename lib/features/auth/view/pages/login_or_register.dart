@@ -10,7 +10,8 @@ class LoginOrRegister extends StatefulWidget {
 }
 
 class _LoginOrRegisterState extends State<LoginOrRegister> {
-  bool isLogin = false;
+  // Show Login page first
+  bool isLogin = true;
 
   void toggle() {
     setState(() {
@@ -20,10 +21,8 @@ class _LoginOrRegisterState extends State<LoginOrRegister> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLogin) {
-      return LoginPage(toggle: toggle);
-    } else {
-      return RegisterPage(toggle: toggle);
-    }
+    return isLogin
+        ? LoginPage(toggle: toggle)
+        : RegisterPage(toggle: toggle);
   }
 }

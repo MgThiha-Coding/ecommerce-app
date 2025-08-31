@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
+import 'package:picoshop_theme2/core/storage/storage.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -13,6 +16,31 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final loginOutAsync = ref.watch(logOutNotifierProvider);
+
+    // Listen inside build to respond to state changes
+    ref.listen<AsyncValue<dynamic>>(logOutNotifierProvider, (previous, next) {
+      next.when(
+        data: (data) async {
+          if (data != null) {
+       
+            final storage = ref.read(secureStorageProvider);
+            await storage.clear();
+
+            if (mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginOrRegister()),
+                (route) => false,
+              );
+            }
+          }
+        },
+        loading: () {},
+        error: (_, __) {},
+      );
+    });
+
     return Scaffold(
       body: Container(
         height: double.infinity,
@@ -36,16 +64,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Container(
                   height: 350,
                   width: double.infinity,
-
                   color: Colors.blue.shade200,
                 ),
-
                 Positioned(
                   bottom: -40,
                   left: 20,
                   child: CircleAvatar(
                     radius: 70,
-
                     backgroundImage: AssetImage('assets/images/picocare.png'),
                   ),
                 ),
@@ -54,26 +79,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             const SizedBox(height: 100),
             Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Container(
+              child: SizedBox(
                 height: 45,
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade800,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                     ref.read(logOutNotifierProvider.notifier).logOut();
-                  },
-                  child: Text(
-                    'Log Out',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
+                  onPressed: loginOutAsync.isLoading
+                      ? null
+                      : () {
+                          ref.read(logOutNotifierProvider.notifier).logOut();
+                        },
+                  child: loginOutAsync.isLoading
+                      ? SpinKitCircle(size: 20, color: Colors.white)
+                      : Text(
+                          'Log Out',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 17,
+                          ),
+                        ),
                 ),
               ),
             ),
