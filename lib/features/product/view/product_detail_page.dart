@@ -19,29 +19,24 @@ class ProductDetailPage extends ConsumerStatefulWidget {
 
 class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   int quantity = 1;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.productId != null) {
-        ref
-            .read(productDetailNotifierProvider.notifier)
-            .getProductDetail(widget.productId!);
+        ref.read(productDetailNotifierProvider.notifier).getProductDetail(widget.productId!);
       }
     });
   }
 
   void increment() {
-    setState(() {
-      quantity++;
-    });
+    setState(() => quantity++);
   }
 
   void decrement() {
     setState(() {
-      if (quantity > 0) {
-        quantity--;
-      }
+      if (quantity > 1) quantity--;
     });
   }
 
@@ -49,20 +44,17 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   Widget build(BuildContext context) {
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
 
-    ref.listen<AsyncValue<AddToCartResponse?>>(addToCartNotifierProvider, (
-      previous,
-      next,
-    ) {
+    // Snackbar listener for AddToCart
+    ref.listen<AsyncValue<AddToCartResponse?>>(addToCartNotifierProvider, (prev, next) {
       next.when(
         data: (response) {
           if (response != null && response.success == true) {
-            final productName =
-                response.data?.cartItem?.productFullName ?? 'Product';
-            final count = response.data!.itemsCount;
+            final productName = response.data?.cartItem?.productFullName ?? 'Product';
+            final itemCount = response.data?.itemsCount;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '($count) $productName added to cart',
+                  '$itemCount $productName added to cart',
                   style: TextStyle(color: Colors.blue.shade900),
                 ),
                 backgroundColor: Colors.white,
@@ -72,14 +64,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
           }
         },
         loading: () {},
-        error: (err, stack) {
+        error: (err, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 err.toString(),
                 style: const TextStyle(color: Colors.white),
               ),
-              backgroundColor: Colors.grey[700],
+              backgroundColor: Colors.red.shade600,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -89,7 +81,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue.shade900,
         title: Text(
           'Product Details',
@@ -97,8 +89,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         ),
       ),
       body: Container(
-        height: double.infinity,
         width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -110,234 +102,136 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             ],
           ),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Expanded(
-                    child: productDetailAsync.when(
-                      data: (productDetailData) {
-                        if (productDetailData?.data != null) {
-                          final productDetailImage =
-                              productDetailData!.data!.productImage ?? "";
-                          final description = productDetailData
-                              .data
-                              ?.productVariations
-                              ?.first
-                              .product
-                              ?.productDescription;
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: productDetailAsync.when(
+            data: (productDetailData) {
+              final product = productDetailData?.data;
+              if (product == null) {
+                return const Center(child: Text("No data available"));
+              }
 
-                          final variationId = productDetailData
-                              .data!
-                              .productVariations
-                              ?.first
-                              .variationId;
+              final productDetailImage = product.productImage ?? "";
+              final description = product.productVariations?.first.product?.productDescription;
+              final variationId = product.productVariations?.first.variationId;
 
-                          return SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
-                                  ),
-                                  child: productDetailImage.isNotEmpty
-                                      ? Image.network(
-                                          productDetailImage,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    height: 300,
-                                                    color: Colors.grey.shade300,
-                                                    alignment: Alignment.center,
-                                                    child: const Text(
-                                                      'Image not provided',
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                      ),
-                                                    ),
-                                                  ),
-                                        )
-                                      : Container(
-                                          height: 300,
-                                          color: Colors.grey.shade300,
-                                          alignment: Alignment.center,
-                                          child: const Text(
-                                            'Image not provided',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ),
+              return SingleChildScrollView(
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                        child: productDetailImage.isNotEmpty
+                            ? Image.network(
+                                productDetailImage,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, _, __) => Container(
+                                  height: 300,
+                                  color: Colors.grey.shade300,
+                                  alignment: Alignment.center,
+                                  child: const Text("Image not provided"),
                                 ),
-                                const SizedBox(height: 16),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              IconButton(
-                                                style: IconButton.styleFrom(
-                                                  backgroundColor:
-                                                      Colors.blue.shade100,
-                                                  shape: const CircleBorder(),
-                                                  padding: const EdgeInsets.all(
-                                                    4,
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  decrement();
-                                                },
-                                                icon: Icon(
-                                                  Icons.remove,
-                                                  color: Colors.blue.shade700,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                              // Quantity Display
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 7,
-                                                    ),
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                    color: Colors.blue.shade300,
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  quantity.toString(),
-                                                  style: GoogleFonts.poppins(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.blue.shade900,
-                                                  ),
-                                                ),
-                                              ),
-
-                                              IconButton(
-                                                style: IconButton.styleFrom(
-                                                  backgroundColor:
-                                                      Colors.blue.shade100,
-                                                  shape: const CircleBorder(),
-                                                  padding: const EdgeInsets.all(
-                                                    4,
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  increment();
-                                                },
-                                                icon: Icon(
-                                                  Icons.add,
-                                                  color: Colors.blue.shade700,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.blue.shade700,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 20,
-                                                    vertical: 10,
-                                                  ),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                            ),
-                                            onPressed: () {
-                                              ref
-                                                  .read(
-                                                    addToCartNotifierProvider
-                                                        .notifier,
-                                                  )
-                                                  .addtoCart(
-                                                    AddToCartRequest(
-                                                      productId:
-                                                          widget.productId!,
-                                                      purchaseQty: quantity,
-                                                      variationId: variationId!,
-                                                    ),
-                                                  );
-
-                                              ref.read(getTotalCartItemNotifierProvider.notifier).getTotalCartItem();
-                                            },
-                                            child: Text(
-                                              'Add to Cart',
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                              )
+                            : Container(
+                                height: 300,
+                                color: Colors.grey.shade300,
+                                alignment: Alignment.center,
+                                child: const Text("Image not provided"),
+                              ),
+                      ),
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: decrement,
+                                      icon: const Icon(Icons.remove, size: 20),
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: Colors.blue.shade100,
+                                        shape: const CircleBorder(),
                                       ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        productDetailData.data!.name ??
-                                            "No Name",
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.blue.shade300),
+                                      ),
+                                      child: Text(
+                                        quantity.toString(),
                                         style: GoogleFonts.poppins(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey[800],
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue.shade900,
                                         ),
                                       ),
-                                      const SizedBox(height: 8),
-                                      ProductDescriptionWidget(
-                                        htmlDescription: description,
+                                    ),
+                                    IconButton(
+                                      onPressed: increment,
+                                      icon: const Icon(Icons.add, size: 20),
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: Colors.blue.shade100,
+                                        shape: const CircleBorder(),
                                       ),
-                                      const SizedBox(height: 16),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue.shade700,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  ),
+                                  onPressed: variationId == null
+                                      ? null
+                                      : () {
+                                          ref.read(addToCartNotifierProvider.notifier).addtoCart(
+                                                AddToCartRequest(
+                                                  productId: widget.productId!,
+                                                  purchaseQty: quantity,
+                                                  variationId: variationId,
+                                                ),
+                                              );
+                                          ref.read(getTotalCartItemNotifierProvider.notifier).getTotalCartItem();
+                                        },
+                                  child: Text(
+                                    "Add to Cart",
+                                    style: GoogleFonts.poppins(color: Colors.white, fontSize: 13),
                                   ),
                                 ),
                               ],
                             ),
-                          );
-                        } else {
-                          return const Center(child: Text('No data available'));
-                        }
-                      },
-                      loading: () => const Center(
-                        child: SpinKitCircle(size: 50, color: Colors.white),
-                      ),
-                      error: (error, _) => const Center(
-                        child: Center(
-                          child: Text('Something went wrong\nPlease try again'),
+                            const SizedBox(height: 10),
+                            Text(
+                              product.name ?? "No Name",
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ProductDescriptionWidget(htmlDescription: description),
+                            const SizedBox(height: 16),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
+            loading: () => const Center(child: SpinKitCircle(size: 50, color: Colors.white)),
+            error: (_, __) => const Center(child: Text("Something went wrong\nPlease try again")),
           ),
         ),
       ),

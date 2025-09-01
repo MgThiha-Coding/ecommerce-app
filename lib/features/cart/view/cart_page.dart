@@ -16,7 +16,8 @@ class _CartPageState extends ConsumerState<CartPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    // Safer than microtask, ensures widgets are ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(getCartItemNotifierProvider.notifier).getCartItem();
       ref.read(getTotalCartItemNotifierProvider.notifier).getTotalCartItem();
     });
@@ -28,8 +29,8 @@ class _CartPageState extends ConsumerState<CartPage> {
 
     return Scaffold(
       body: Container(
-        height: double.infinity,
         width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -51,7 +52,6 @@ class _CartPageState extends ConsumerState<CartPage> {
                   data: (cartListData) {
                     final cartList = cartListData?.data ?? [];
 
-                    // Always show Card
                     return Card(
                       color: Colors.white,
                       shape: RoundedRectangleBorder(
@@ -73,27 +73,21 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 : ListView.builder(
                                     itemCount: cartList.length,
                                     itemBuilder: (context, index) {
-                                      final cartItemname =
-                                          cartList[index].productName;
-                                      final cartItemCount =
-                                          cartList[index].quantity;
-                                      final uomPrice = cartList[index].uomPrice;
-                                      final id = cartList[index].id;
+                                      final item = cartList[index];
+                                      final cartItemname = item.productName;
+                                      final cartItemCount = item.quantity;
+                                      final uomPrice = item.uomPrice;
+                                      final id = item.id;
+
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 4,
-                                          vertical: 4,
-                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                                         child: Card(
                                           child: ListTile(
                                             leading: CircleAvatar(
-                                              backgroundColor:
-                                                  Colors.blue.shade500,
+                                              backgroundColor: Colors.blue.shade500,
                                               child: Text(
                                                 '${index + 1}',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                ),
+                                                style: const TextStyle(color: Colors.white),
                                               ),
                                             ),
                                             title: Text(
@@ -104,184 +98,94 @@ class _CartPageState extends ConsumerState<CartPage> {
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            subtitle: Row(
-                                              children: [
-                                                Text(
-                                                  '${uomPrice.toStringAsFixed(0)} × ${cartItemCount.toInt()} = ${(uomPrice * cartItemCount).toStringAsFixed(0)}',
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.red,
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-
-                                            trailing: IconButton(
-                                              style: IconButton.styleFrom(
-                                                backgroundColor: Colors.grey
-                                                    // ignore: deprecated_member_use
-                                                    .withOpacity(0.3),
-                                                shape: CircleBorder(),
+                                            subtitle: Text(
+                                              '${uomPrice.toStringAsFixed(0)} × ${cartItemCount.toInt()} = ${(uomPrice * cartItemCount).toStringAsFixed(0)}',
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.red,
+                                                fontSize: 10,
                                               ),
+                                            ),
+                                            trailing: IconButton(
                                               onPressed: () {
                                                 showDialog(
                                                   context: context,
                                                   builder: (context) {
                                                     return AlertDialog(
-                                                      backgroundColor:
-                                                          Colors.white,
+                                                      backgroundColor: Colors.white,
                                                       shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              12,
-                                                            ),
+                                                        borderRadius: BorderRadius.circular(12),
                                                       ),
                                                       title: Text(
                                                         'Delete Item',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                              color: Colors
-                                                                  .red
-                                                                  .shade700,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 16,
-                                                            ),
+                                                        style: GoogleFonts.poppins(
+                                                          color: Colors.red.shade700,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 16,
+                                                        ),
                                                       ),
                                                       content: Text(
                                                         'Are you sure you want to delete this item from your cart?',
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                              color: Colors
-                                                                  .black87,
-                                                              fontSize: 14,
-                                                            ),
+                                                        style: GoogleFonts.poppins(
+                                                          color: Colors.black87,
+                                                          fontSize: 14,
+                                                        ),
                                                       ),
-                                                      actionsAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
+                                                      actionsAlignment: MainAxisAlignment.center,
                                                       actions: [
                                                         TextButton(
                                                           style: TextButton.styleFrom(
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .grey
-                                                                    .shade200,
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  horizontal:
-                                                                      20,
-                                                                  vertical: 10,
-                                                                ),
+                                                            backgroundColor: Colors.grey.shade200,
+                                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                                             shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    8,
-                                                                  ),
+                                                              borderRadius: BorderRadius.circular(8),
                                                             ),
                                                           ),
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                          },
+                                                          onPressed: () => Navigator.pop(context),
                                                           child: Text(
                                                             'Cancel',
-                                                            style:
-                                                                GoogleFonts.poppins(
-                                                                  color: Colors
-                                                                      .black87,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
+                                                            style: GoogleFonts.poppins(
+                                                              color: Colors.black87,
+                                                              fontWeight: FontWeight.w500,
+                                                            ),
                                                           ),
                                                         ),
                                                         Consumer(
                                                           builder: (context, ref, _) {
-                                                            final removeState =
-                                                                ref.watch(
-                                                                  removeCartItemNotifierProvider,
-                                                                );
-                                                            final isLoading =
-                                                                removeState
-                                                                    .isLoading;
+                                                            final removeState = ref.watch(removeCartItemNotifierProvider);
+                                                            final isLoading = removeState.isLoading;
 
                                                             return TextButton(
                                                               style: TextButton.styleFrom(
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .red
-                                                                        .shade600,
-                                                                padding:
-                                                                    const EdgeInsets.symmetric(
-                                                                      horizontal:
-                                                                          20,
-                                                                      vertical:
-                                                                          10,
-                                                                    ),
+                                                                backgroundColor: Colors.red.shade600,
+                                                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                                                 shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                        8,
-                                                                      ),
+                                                                  borderRadius: BorderRadius.circular(8),
                                                                 ),
                                                               ),
-                                                              onPressed:
-                                                                  isLoading
+                                                              onPressed: isLoading
                                                                   ? null
                                                                   : () async {
-                                                                      final notifier = ref.read(
-                                                                        removeCartItemNotifierProvider
-                                                                            .notifier,
-                                                                      );
-                                                                      await notifier
-                                                                          .removeCartItem(
-                                                                            id,
-                                                                          );
+                                                                      final notifier = ref.read(removeCartItemNotifierProvider.notifier);
+                                                                      await notifier.removeCartItem(id);
 
-                                                                      await ref
-                                                                          .read(
-                                                                            getCartItemNotifierProvider.notifier,
-                                                                          )
-                                                                          .getCartItem();
-                                                                      await ref
-                                                                          .read(
-                                                                            getTotalCartItemNotifierProvider.notifier,
-                                                                          )
-                                                                          .getTotalCartItem();
+                                                                      await ref.read(getCartItemNotifierProvider.notifier).getCartItem();
+                                                                      await ref.read(getTotalCartItemNotifierProvider.notifier).getTotalCartItem();
 
-                                                                      if (!ref
-                                                                          .watch(
-                                                                            removeCartItemNotifierProvider,
-                                                                          )
-                                                                          .isLoading) {
-                                                                        Navigator.pop(
-                                                                          context,
-                                                                        );
+                                                                      if (!ref.watch(removeCartItemNotifierProvider).isLoading) {
+                                                                        Navigator.pop(context);
                                                                       }
                                                                     },
-
                                                               child: isLoading
                                                                   ? const SizedBox(
-                                                                      height:
-                                                                          16,
+                                                                      height: 16,
                                                                       width: 16,
-                                                                      child: SpinKitCircle(
-                                                                        size:
-                                                                            15,
-                                                                        color: Colors
-                                                                            .white,
-                                                                      ),
+                                                                      child: SpinKitCircle(size: 15, color: Colors.white),
                                                                     )
                                                                   : Text(
                                                                       'Yes',
                                                                       style: GoogleFonts.poppins(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
+                                                                        color: Colors.white,
+                                                                        fontWeight: FontWeight.w600,
                                                                       ),
                                                                     ),
                                                             );
@@ -292,11 +196,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                                   },
                                                 );
                                               },
-                                              icon: Icon(
-                                                Icons.delete,
-                                                color: Colors.red,
-                                                size: 16,
-                                              ),
+                                              icon: const Icon(Icons.delete, color: Colors.red, size: 16),
                                             ),
                                           ),
                                         ),
@@ -304,8 +204,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                     },
                                   ),
                           ),
-
-                          CartSummaryWidget(),
+                          const CartSummaryWidget(),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
@@ -319,13 +218,14 @@ class _CartPageState extends ConsumerState<CartPage> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  Navigator.push(context,MaterialPageRoute(builder: (contex)=> ShippingMethodPage()));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const ShippingMethodPage()),
+                                  );
                                 },
                                 child: Text(
                                   'Next',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                  ),
+                                  style: GoogleFonts.poppins(color: Colors.white),
                                 ),
                               ),
                             ),
@@ -335,9 +235,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                     );
                   },
                   error: (error, _) => Center(child: Text(error.toString())),
-                  loading: () => const Center(
-                    child: SpinKitCircle(size: 50, color: Colors.white),
-                  ),
+                  loading: () => const Center(child: SpinKitCircle(size: 50, color: Colors.white)),
                 ),
               ),
             ],
@@ -357,27 +255,20 @@ class AppBarWidget extends ConsumerWidget {
     final cartItemCountAsync = ref.watch(getTotalCartItemNotifierProvider);
 
     double responsiveTitle() {
-      if (screenWidth < 600) {
-        return 18;
-      } else if (screenWidth >= 600 && screenWidth <= 1100) {
-        return 20;
-      }
+      if (screenWidth < 600) return 18;
+      if (screenWidth <= 1100) return 20;
       return 25;
     }
 
     double responsiveAppBarHeight() {
-      if (screenWidth < 600) {
-        return 60;
-      } else if (screenWidth >= 600 && screenWidth <= 1100) {
-        return 70;
-      }
+      if (screenWidth < 600) return 60;
+      if (screenWidth <= 1100) return 70;
       return 80;
     }
 
     return Container(
       margin: const EdgeInsets.only(top: 18),
       height: responsiveAppBarHeight(),
-      width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -393,19 +284,8 @@ class AppBarWidget extends ConsumerWidget {
           Stack(
             children: [
               IconButton(
-                style: IconButton.styleFrom(
-                  // ignore: deprecated_member_use
-                  backgroundColor: Colors.grey.withOpacity(0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
                 onPressed: () {},
-                icon: Icon(
-                  Icons.shopping_cart,
-                  color: Colors.white,
-                  size: responsiveTitle(),
-                ),
+                icon: Icon(Icons.shopping_cart, color: Colors.white, size: responsiveTitle()),
               ),
               Positioned(
                 top: 1,
@@ -420,13 +300,8 @@ class AppBarWidget extends ConsumerWidget {
                     ),
                     child: Center(
                       child: Text(
-                      
-                       count!.data.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        (count?.data ?? 0).toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -442,7 +317,6 @@ class AppBarWidget extends ConsumerWidget {
   }
 }
 
-
 class CartSummaryWidget extends ConsumerWidget {
   const CartSummaryWidget({super.key});
 
@@ -453,16 +327,13 @@ class CartSummaryWidget extends ConsumerWidget {
 
     return Card(
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Item count (API 2)
             cartItemCountAsync.when(
               data: (count) => Text(
                 "Items: ${count?.data ?? 0}",
@@ -475,8 +346,6 @@ class CartSummaryWidget extends ConsumerWidget {
               loading: () => const Text("Items: ..."),
               error: (_, __) => const Text("Items: error"),
             ),
-
-            // Total price (API 1, calculated)
             cartItemsAsync.when(
               data: (cartListData) {
                 final cartList = cartListData?.data ?? [];
@@ -484,7 +353,6 @@ class CartSummaryWidget extends ConsumerWidget {
                   0.0,
                   (sum, item) => sum + (item.quantity * item.uomPrice),
                 );
-
                 return Text(
                   "Total: ${totalPrice.toStringAsFixed(0)}",
                   style: GoogleFonts.poppins(

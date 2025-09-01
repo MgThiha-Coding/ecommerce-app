@@ -80,6 +80,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                           final productId = product.id;
 
                           return Card(
+                            margin: EdgeInsets.all(8),
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundImage: productImage.isNotEmpty
