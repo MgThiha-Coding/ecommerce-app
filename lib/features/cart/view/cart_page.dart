@@ -246,8 +246,8 @@ class _CartPageState extends ConsumerState<CartPage> {
   }
 }
 
-class AppBarWidget extends ConsumerWidget {
-  const AppBarWidget({super.key});
+class CartAppBarWidget extends ConsumerWidget {
+  const CartAppBarWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -6,30 +6,33 @@ import 'package:picoshop_theme2/features/brands/model/response/brand_list_respon
 
 class BrandListNotifier extends StateNotifier<AsyncValue<BrandListResponse?>> {
   final Dio _dio;
+
   BrandListNotifier([Dio? dio])
     : _dio = dio ?? Dio(),
       super(const AsyncValue.data(null));
 
   Future<void> getBrandList() async {
-    final response = await _dio.get(
-      'https://beta.picosbs.com/api/v1/ecommerce/brands',
-      options: Options(
-        headers: {
-          'Accept': 'application/json',
-          'X-API-Token': AppConfig.xApiToken,
-        },
-      ),
-    );
+    try {
+      final response = await _dio.get(
+        'https://beta.picosbs.com/api/v1/ecommerce/brands',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
 
-    final isSuccess =
-        response.data != null &&
-        response.data['success'] == true &&
-        response.statusCode == 200;
-    if (isSuccess) {
-      final responseData = BrandListResponse.fromJson(response.data);
-      state = AsyncValue.data(responseData);
-    }
-    try {} on DioException catch (e, st) {
+      final isSuccess =
+          response.data != null &&
+          response.data['success'] == true &&
+          response.statusCode == 200;
+
+      if (isSuccess) {
+        final responseData = BrandListResponse.fromJson(response.data);
+        state = AsyncValue.data(responseData);
+      }
+    } on DioException catch (e, st) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
@@ -47,9 +50,8 @@ final brandListNotifierProvider =
       (ref) => BrandListNotifier(),
     );
 
-
-
-class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
+class BrandDetailNotifier
+    extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
   final Dio _dio;
   BrandDetailNotifier([Dio? dio])
     : _dio = dio ?? Dio(),
@@ -88,6 +90,7 @@ class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>
 }
 
 final brandDetailNotifierProvider =
-    StateNotifierProvider<BrandDetailNotifier, AsyncValue<BrandDetailResponse?>>(
-      (ref) => BrandDetailNotifier(),
-    );
+    StateNotifierProvider<
+      BrandDetailNotifier,
+      AsyncValue<BrandDetailResponse?>
+    >((ref) => BrandDetailNotifier());

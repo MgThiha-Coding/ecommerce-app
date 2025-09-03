@@ -28,7 +28,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final password = _passwordController.text;
     final rememberMe = true;
     final deviceName = 'Pico User';
-    ref.read(loginNotifierProvider.notifier).login(
+    ref
+        .read(loginNotifierProvider.notifier)
+        .login(
           LoginRequest(
             emailOrPhoneOrUserName: email,
             password: password,
@@ -41,49 +43,51 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final loginAsync = ref.watch(loginNotifierProvider);
-ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (previous, next) {
-  next.when(
-    data: (data) {
-      if (data?.success == true && data?.data.accessToken != null) {
-        final storage = ref.read(secureStorageProvider);
+    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (
+      previous,
+      next,
+    ) {
+      next.when(
+        data: (data) {
+          if (data?.success == true && data?.data.accessToken != null) {
+            final storage = ref.read(secureStorageProvider);
 
-        // Save tokens asynchronously but do not block the listener
-        storage.saveAuthData(
-          accessToken: data!.data.accessToken,
-          refreshToken: data.data.refreshToken,
-          userId: data.data.user.id.toString(),
-        );
+            storage.saveAuthData(
+              accessToken: data!.data.accessToken,
+              refreshToken: data.data.refreshToken,
+              userId: data.data.user.id.toString(),
+            );
 
-        AppConfig.updateAccessToken(data.data.accessToken);
+            AppConfig.updateAccessToken(data.data.accessToken);
 
-        // Navigate safely
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const WrapperPage()),
-        );
-      }
-    },
-    error: (err, _) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.grey[300],
-          content: Text(
-            err.toString(),
-            style: TextStyle(color: Colors.grey[800]),
-          ),
-        ),
+            // Navigate safely
+            if (!mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const WrapperPage()),
+            );
+          }
+        },
+        error: (err, _) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[300],
+              content: Text(
+                err.toString(),
+                style: TextStyle(color: Colors.grey[800]),
+              ),
+            ),
+          );
+        },
+        loading: () {},
       );
-    },
-    loading: () {},
-  );
-});
+    });
 
     double getHorizontalPadding(double width) {
-      if (width >= 1400) return 400; 
-      if (width >= 1024) return 200; 
-      if (width >= 768) return 50; 
+      if (width >= 1400) return 400;
+      if (width >= 1024) return 200;
+      if (width >= 768) return 50;
       return 15;
     }
 
@@ -96,44 +100,66 @@ ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (previous, next) {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade900, Colors.blue.shade500, Colors.blue.shade100],
+            colors: [
+              Colors.blue.shade900,
+              Colors.blue.shade500,
+              Colors.blue.shade100,
+            ],
           ),
         ),
         child: SingleChildScrollView(
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
             child: IntrinsicHeight(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: getHorizontalPadding(screenWidth), vertical: 50),
+                padding: EdgeInsets.symmetric(
+                  horizontal: getHorizontalPadding(screenWidth),
+                  vertical: 50,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                     
-                       Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Pico Shop', style: GoogleFonts.poppins( 
-                               fontSize: 24,
-                               color: Colors.white,
-                            )),
-                            const SizedBox(width: 8.0),
-                            Icon(
-                              Icons.shopping_bag,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Pico Shop',
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
                               color: Colors.white,
-                              size: 30,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8.0),
+                          Icon(
+                            Icons.shopping_bag,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 20),
-                      AppTextFormField(controller: _emailController, hintText: "Email", validator: (value) => value!.isEmpty ? "Email required" : null),
+                      AppTextFormField(
+                        controller: _emailController,
+                        hintText: "Email",
+                        validator: (value) =>
+                            value!.isEmpty ? "Email required" : null,
+                      ),
                       const SizedBox(height: 8.0),
-                      AppTextFormField(controller: _passwordController, hintText: "Password", addObscure: true, validator: (value) {
-                        if (value!.isEmpty) return "Password required";
-                        if (value.length < 6) return "Password must be at least 6 characters";
-                        return null;
-                      }),
+                      AppTextFormField(
+                        controller: _passwordController,
+                        hintText: "Password",
+                        addObscure: true,
+                        validator: (value) {
+                          if (value!.isEmpty) return "Password required";
+                          if (value.length < 6)
+                            return "Password must be at least 6 characters";
+                          return null;
+                        },
+                      ),
                       const SizedBox(height: 16.0),
                       SizedBox(
                         height: 46,
@@ -143,19 +169,38 @@ ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (previous, next) {
                             if (_formKey.currentState!.validate()) login();
                           },
                           color: Colors.blue.shade900,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-                          child: loginAsync.isLoading ? SpinKitCircle(color: Colors.white, size: 27) : const Text("Log In", style: TextStyle(fontSize: 14, color: Colors.white)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: loginAsync.isLoading
+                              ? SpinKitCircle(color: Colors.white, size: 27)
+                              : const Text(
+                                  "Log In",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Don't have an account?", style: TextStyle(color: Colors.white)),
+                          Text(
+                            "Don't have an account?",
+                            style: TextStyle(color: Colors.white),
+                          ),
                           const SizedBox(width: 4.0),
                           GestureDetector(
                             onTap: widget.toggle,
-                            child: Text('Register', style: TextStyle(color: Colors.blue.shade800, fontWeight: FontWeight.bold)),
+                            child: Text(
+                              'Register',
+                              style: TextStyle(
+                                color: Colors.blue.shade800,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
