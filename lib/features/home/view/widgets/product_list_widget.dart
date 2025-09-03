@@ -44,13 +44,13 @@ class _BrandListWidgetState extends ConsumerState<ProductListWidget> {
                 return Card(
                   child: Container(
                     margin: EdgeInsets.all(3),
-                    /*
+
                     height: responsive.value(
                       mobile: 120,
                       tablet: 90,
                       desktop: 110,
                     ),
-                    */
+
                     width: responsive.value(
                       mobile: 110,
                       tablet: 120,

@@ -12,7 +12,7 @@ class AppBarSection extends StatelessWidget {
 
     return Container(  
       margin: EdgeInsets.only(top: 18),
-      height: responsive.value(mobile: 50, tablet: 60, desktop: 70),
+      height: responsive.value(mobile: 40, tablet: 50, desktop: 70),
       width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

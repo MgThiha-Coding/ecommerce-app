@@ -32,46 +32,48 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
 
-    return Scaffold(
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade500,
-              Colors.blue.shade200,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: responsive.value(mobile: 10, tablet: 30, desktop: 50),
-            ),
-            child: Column(
-              children: [
-                const AppBarSection(),
-                ResponsiveGap(responsive: responsive),
-                SectionBlock(
-                  title: "Brands",
-                  responsive: responsive,
-                  child: const BrandListWidget(),
-                ),
-                SectionBlock(
-                  title: "Categories",
-                  responsive: responsive,
-                  child: const CategoriesListWidget(),
-                ),
-                SectionBlock(
-                  title: "Products",
-                  responsive: responsive,
-                  child: const ProductListWidget(),
-                ),
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          height: double.infinity,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.blue.shade900,
+                Colors.blue.shade500,
+                Colors.blue.shade200,
               ],
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: responsive.value(mobile: 10, tablet: 30, desktop: 50),
+              ),
+              child: Column(
+                children: [
+                  const AppBarSection(),
+                  ResponsiveGap(responsive: responsive),
+                  SectionBlock(
+                    title: "Brands",
+                    responsive: responsive,
+                    child: const BrandListWidget(),
+                  ),
+                  SectionBlock(
+                    title: "Categories",
+                    responsive: responsive,
+                    child: const CategoriesListWidget(),
+                  ),
+                  SectionBlock(
+                    title: "Products",
+                    responsive: responsive,
+                    child: const ProductListWidget(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/cart_page.dart';
 import 'package:picoshop_theme2/features/home/view/pages/home_page.dart';
-import 'package:picoshop_theme2/features/product/view/product_list_page.dart';
+import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/profile/view/profile_page.dart';
 
 class WrapperPage extends StatefulWidget {
@@ -64,28 +64,30 @@ class _WrapperPageState extends State<WrapperPage> {
         ),
       );
     } else {
-      return Scaffold(
-        body: Row(
-          children: [
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Image.asset('assets/images/picocare.png',height: 50,width: 50,),
-                ),
-                Expanded(
-                  child: NavigationRail(
-                    selectedIndex: _currentIndex,
-                    onDestinationSelected: _onTabTapped,
-                    labelType: NavigationRailLabelType.all,
-                    destinations: _railDestinations,
+      return SafeArea(
+        child: Scaffold(
+          body: Row(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Image.asset('assets/images/picocare.png',height: 50,width: 50,),
                   ),
-                ),
-              ],
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: _pages[_currentIndex]),
-          ],
+                  Expanded(
+                    child: NavigationRail(
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: _onTabTapped,
+                      labelType: NavigationRailLabelType.all,
+                      destinations: _railDestinations,
+                    ),
+                  ),
+                ],
+              ),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(child: _pages[_currentIndex]),
+            ],
+          ),
         ),
       );
     }
