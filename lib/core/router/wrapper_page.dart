@@ -1,7 +1,7 @@
 // wrapper_page.dart
 import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/cart/view/cart_page.dart';
+import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/home/view/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/profile/view/profile_page.dart';

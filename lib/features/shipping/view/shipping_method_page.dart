@@ -182,14 +182,14 @@ class AppBarWidget extends StatelessWidget {
             ),
           ),
           Text(
-            'Delivery',
+            'Cart',
             style: GoogleFonts.poppins(
               fontSize: responsiveTitle(),
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 48), // keep alignment balance
+          const SizedBox(width: 48), 
         ],
       ),
     );

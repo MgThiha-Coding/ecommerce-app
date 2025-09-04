@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:shimmer/shimmer.dart';
 
-class ProductListLoading extends StatelessWidget {
-  const ProductListLoading({super.key});
+class ProductGridLoading extends StatelessWidget {
+  const ProductGridLoading({super.key});
 
   @override
   Widget build(BuildContext context) {

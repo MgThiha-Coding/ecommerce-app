@@ -6,7 +6,7 @@ import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.da
 import 'package:picoshop_theme2/features/home/view/widgets/app_bar_widget.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/brand_list_widget.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/categories_list_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_list_widget.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/product_grid_loading.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/section_header_widget.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
