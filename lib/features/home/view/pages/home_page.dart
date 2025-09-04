@@ -6,7 +6,8 @@ import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.da
 import 'package:picoshop_theme2/features/home/view/widgets/app_bar_widget.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/brand_list_widget.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/categories_list_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_grid_loading.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/product_list_slider.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/product_list_widget.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/section_header_widget.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
@@ -18,13 +19,18 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  bool _apiCalled = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(brandListNotifierProvider.notifier).getBrandList();
-      ref.read(categoriesListNotifierProvider.notifier).getCagetoryList();
-      ref.read(productNotifierProvider.notifier).getProductList();
+      if (!_apiCalled) {
+        _apiCalled = true;
+        ref.read(brandListNotifierProvider.notifier).getBrandList();
+        ref.read(categoriesListNotifierProvider.notifier).getCagetoryList();
+        ref.read(productNotifierProvider.notifier).getProductList();
+      }
     });
   }
 
@@ -34,48 +40,58 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return SafeArea(
       child: Scaffold(
-        body: Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade500,
-                Colors.blue.shade200,
-              ],
-            ),
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: responsive.value(mobile: 10, tablet: 30, desktop: 50),
+        body: Stack(
+          children: [
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.blue.shade900,
+                    Colors.blue.shade500,
+                    Colors.blue.shade50,
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  const AppBarSection(),
-                  ResponsiveGap(responsive: responsive),
-                  SectionBlock(
-                    title: "Brands",
-                    responsive: responsive,
-                    child: const BrandListWidget(),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: responsive.value(
+                      mobile: 10,
+                      tablet: 30,
+                      desktop: 50,
+                    ),
                   ),
-                  SectionBlock(
-                    title: "Categories",
-                    responsive: responsive,
-                    child: const CategoriesListWidget(),
+                  child: Column(
+                    children: [
+                      const AppBarSection(),
+                      ResponsiveGap(responsive: responsive),
+                      const ProductListSlider(),
+                      ResponsiveGap(responsive: responsive),
+                      SectionBlock(
+                        title: "Brands",
+                        responsive: responsive,
+                        child: const BrandListWidget(),
+                      ),
+                      SectionBlock(
+                        title: "Categories",
+                        responsive: responsive,
+                        child: const CategoriesListWidget(),
+                      ),
+                      SectionBlock(
+                        title: "Products",
+                        responsive: responsive,
+                        child: const ProductListWidget(),
+                      ),
+                    ],
                   ),
-                  SectionBlock(
-                    title: "Products",
-                    responsive: responsive,
-                    child: const ProductListWidget(),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -96,9 +112,7 @@ class ResponsiveGap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: responsive.isMobile ? mobile : nonMobile,
-    );
+    return SizedBox(height: responsive.isMobile ? mobile : nonMobile);
   }
 }
 

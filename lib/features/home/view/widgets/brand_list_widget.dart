@@ -21,7 +21,7 @@ class _BrandListWidgetState extends ConsumerState<BrandListWidget> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        height: responsive.value(mobile: 90, tablet: 90, desktop: 120),
+        height: responsive.value(mobile: 80, tablet: 90, desktop: 120),
         padding: EdgeInsets.all(2),
         width: double.infinity,
         decoration: BoxDecoration(
@@ -66,7 +66,7 @@ class _BrandListWidgetState extends ConsumerState<BrandListWidget> {
                                 color: Colors.black,
                                 fontWeight: FontWeight.w400,
                                 fontSize: responsive.value(
-                                  mobile: 12,
+                                  mobile: 10,
                                   tablet: 12,
                                   desktop: 15,
                                 ),

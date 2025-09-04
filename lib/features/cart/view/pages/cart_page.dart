@@ -34,7 +34,7 @@ class _CartPageState extends ConsumerState<CartPage> {
               colors: [
                 Colors.blue.shade900,
                 Colors.blue.shade500,
-                Colors.blue.shade100,
+                Colors.blue.shade50,
               ],
             ),
           ),

@@ -43,7 +43,7 @@ class _WrapperPageState extends State<WrapperPage> {
       return Scaffold(
         body: _pages[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.grey[200],
+          backgroundColor: Colors.blue.shade50,
           elevation: 4,
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
@@ -53,8 +53,8 @@ class _WrapperPageState extends State<WrapperPage> {
           showSelectedLabels: true,
           showUnselectedLabels: true,
           selectedLabelStyle:
-              const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: const TextStyle(fontSize: 10),
+              const TextStyle(fontSize: 7, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontSize: 8),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Products'),

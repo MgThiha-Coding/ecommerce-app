@@ -162,12 +162,12 @@ class CategoriesListLoading extends StatelessWidget {
                     child: Text(
                       'Category',
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
+                      maxLines: 4,
                       style: GoogleFonts.poppins(
                         color: Colors.grey.shade400,
                         fontWeight: FontWeight.w600,
                         fontSize: responsive.value(
-                          mobile: 10,
+                          mobile: 9,
                           tablet: 13,
                           desktop: 15,
                         ),

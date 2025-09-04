@@ -30,15 +30,15 @@ class AppBarSection extends StatelessWidget {
             icon: Icon(
               Icons.menu,
               color: Colors.white,
-              size: responsive.value(mobile: 20, tablet: 25, desktop: 30),
+              size: responsive.value(mobile: 15, tablet: 25, desktop: 30),
             ),
           ): SizedBox( width: 48,),
           Text(
             'Pico Care',
             style: GoogleFonts.poppins(
-              fontSize: responsive.value(mobile: 19, tablet: 23, desktop: 25),
+              fontSize: responsive.value(mobile: 15, tablet: 23, desktop: 25),
               color: Colors.white,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400,
             ),
           ),
           IconButton(
@@ -53,7 +53,7 @@ class AppBarSection extends StatelessWidget {
             icon: Icon(
               Icons.notifications,
               color: Colors.white,
-              size: responsive.value(mobile: 20, tablet: 25, desktop: 30),
+              size: responsive.value(mobile: 15, tablet: 25, desktop: 30),
             ),
           ),
         ],

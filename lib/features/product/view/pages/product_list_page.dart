@@ -28,7 +28,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
               colors: [
                 Colors.blue.shade900,
                 Colors.blue.shade500,
-                Colors.blue.shade100,
+                Colors.blue.shade50,
               ],
             ),
           ),

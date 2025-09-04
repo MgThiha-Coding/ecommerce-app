@@ -57,10 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               refreshToken: data.data.refreshToken,
               userId: data.data.user.id.toString(),
             );
-
             AppConfig.updateAccessToken(data.data.accessToken);
-
-            // Navigate safely
             if (!mounted) return;
             Navigator.pushReplacement(
               context,
