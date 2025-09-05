@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 
-class SectionHeaderWidget extends StatelessWidget {
+class SectionHeader extends StatelessWidget {
   final String header;
   final VoidCallback onTap;
-  const SectionHeaderWidget({super.key,required this.header,required this.onTap});
+  const SectionHeader({super.key,required this.header,required this.onTap});
 
   @override
   Widget build(BuildContext context) {

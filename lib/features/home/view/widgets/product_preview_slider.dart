@@ -6,15 +6,15 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
-class ProductListSlider extends ConsumerStatefulWidget {
-  const ProductListSlider({super.key});
+class ProductPreviewSlider extends ConsumerStatefulWidget {
+  const ProductPreviewSlider({super.key});
 
   @override
-  ConsumerState<ProductListSlider> createState() =>
+  ConsumerState<ProductPreviewSlider> createState() =>
       _ProductListSliderState();
 }
 
-class _ProductListSliderState extends ConsumerState<ProductListSlider> {
+class _ProductListSliderState extends ConsumerState<ProductPreviewSlider> {
   int _currentIndex = 0;
 
   @override
@@ -23,7 +23,7 @@ class _ProductListSliderState extends ConsumerState<ProductListSlider> {
     final productListAsync = ref.watch(productNotifierProvider);
 
     return SizedBox(
-      height: responsive.value(mobile: 130, tablet: 200, desktop: 210),
+      height: responsive.value(mobile: 130, tablet: 140, desktop: 210),
       width: double.infinity,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),

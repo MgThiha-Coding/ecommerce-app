@@ -5,15 +5,15 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CategoriesListWidget extends ConsumerStatefulWidget {
-  const CategoriesListWidget({super.key});
+class CategorySection extends ConsumerStatefulWidget {
+  const CategorySection({super.key});
 
   @override
-  ConsumerState<CategoriesListWidget> createState() =>
+  ConsumerState<CategorySection> createState() =>
       _CategoriesListWidgetState();
 }
 
-class _CategoriesListWidgetState extends ConsumerState<CategoriesListWidget> {
+class _CategoriesListWidgetState extends ConsumerState<CategorySection> {
   @override
   Widget build(BuildContext context) {
     final categoriesListAsync = ref.watch(categoriesListNotifierProvider);
@@ -25,7 +25,7 @@ class _CategoriesListWidgetState extends ConsumerState<CategoriesListWidget> {
       child: Container(
         height: responsive.value(mobile: 130, tablet: 120, desktop: 130),
         width: double.infinity,
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(2),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -64,7 +64,7 @@ class _CategoriesListWidgetState extends ConsumerState<CategoriesListWidget> {
                         Text(
                           categoryName,
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                          maxLines: 3,
                           style: GoogleFonts.poppins(
                             color: Colors.black,
                             fontWeight: FontWeight.w600,

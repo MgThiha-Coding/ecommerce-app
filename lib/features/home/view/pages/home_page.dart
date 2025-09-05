@@ -4,11 +4,11 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/app_bar_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/brand_list_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/categories_list_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_list_slider.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_list_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/section_header_widget.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/brand_section.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/category_section.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/product_preview_slider.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/product_preview_section.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/section_header.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -69,22 +69,50 @@ class _HomePageState extends ConsumerState<HomePage> {
                     children: [
                       const AppBarSection(),
                       ResponsiveGap(responsive: responsive),
-                      const ProductListSlider(),
+                      const ProductPreviewSlider(),
                       ResponsiveGap(responsive: responsive),
-                      SectionBlock(
-                        title: "Brands",
-                        responsive: responsive,
-                        child: const BrandListWidget(),
-                      ),
-                      SectionBlock(
-                        title: "Categories",
-                        responsive: responsive,
-                        child: const CategoriesListWidget(),
-                      ),
+                      responsive.isMobile
+                          ? Column(
+                              children: [
+                                SectionBlock(
+                                  title: "Brands",
+                                  responsive: responsive,
+                                  child: const BrandSection(),
+                                ),
+                                SectionBlock(
+                                  title: "Categories",
+                                  responsive: responsive,
+                                  child: const CategorySection(),
+                                ),
+                              ],
+                            )
+                          : Row(children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SectionBlock(
+                                      title: "Brands",
+                                      responsive: responsive,
+                                      child: const BrandSection(),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SectionBlock(
+                                      title: "Categories",
+                                      responsive: responsive,
+                                      child: const CategorySection(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                       SectionBlock(
                         title: "Products",
                         responsive: responsive,
-                        child: const ProductListWidget(),
+                        child: const ProductPreviewSection(),
                       ),
                     ],
                   ),
@@ -132,7 +160,7 @@ class SectionBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SectionHeaderWidget(header: title, onTap: () {}),
+        SectionHeader(header: title, onTap: () {}),
         ResponsiveGap(responsive: responsive, mobile: 12, nonMobile: 6),
         child,
         ResponsiveGap(responsive: responsive),

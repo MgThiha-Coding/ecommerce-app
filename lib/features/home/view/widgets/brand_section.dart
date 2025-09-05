@@ -5,14 +5,14 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
-class BrandListWidget extends ConsumerStatefulWidget {
-  const BrandListWidget({super.key});
+class BrandSection extends ConsumerStatefulWidget {
+  const BrandSection({super.key});
 
   @override
-  ConsumerState<BrandListWidget> createState() => _BrandListWidgetState();
+  ConsumerState<BrandSection> createState() => _BrandListWidgetState();
 }
 
-class _BrandListWidgetState extends ConsumerState<BrandListWidget> {
+class _BrandListWidgetState extends ConsumerState<BrandSection> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
@@ -21,7 +21,7 @@ class _BrandListWidgetState extends ConsumerState<BrandListWidget> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        height: responsive.value(mobile: 80, tablet: 90, desktop: 120),
+        height: responsive.value(mobile: 80, tablet: 120, desktop: 120),
         padding: EdgeInsets.all(2),
         width: double.infinity,
         decoration: BoxDecoration(
@@ -44,7 +44,7 @@ class _BrandListWidgetState extends ConsumerState<BrandListWidget> {
                   margin: EdgeInsets.all(3),
                   height: responsive.value(
                     mobile: 70,
-                    tablet: 90,
+                    tablet: 110,
                     desktop: 110,
                   ),
                   width: responsive.value(mobile: 70, tablet: 90, desktop: 110),

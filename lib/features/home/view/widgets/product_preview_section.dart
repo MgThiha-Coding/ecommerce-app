@@ -5,14 +5,14 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/view/widgets/product_grid_loading.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
-class ProductListWidget extends ConsumerStatefulWidget {
-  const ProductListWidget({super.key});
+class ProductPreviewSection extends ConsumerStatefulWidget {
+  const ProductPreviewSection({super.key});
 
   @override
-  ConsumerState<ProductListWidget> createState() => _BrandListWidgetState();
+  ConsumerState<ProductPreviewSection> createState() => _BrandListWidgetState();
 }
 
-class _BrandListWidgetState extends ConsumerState<ProductListWidget> {
+class _BrandListWidgetState extends ConsumerState<ProductPreviewSection> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
