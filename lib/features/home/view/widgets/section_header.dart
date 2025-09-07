@@ -18,7 +18,7 @@ class SectionHeader extends StatelessWidget {
           style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.w500,
-            fontSize: responsive.value(mobile: 13, tablet: 14, desktop:15),
+            fontSize: responsive.value(mobile: 10, tablet: 13, desktop:15),
           ),
         ),
         GestureDetector(
@@ -28,7 +28,7 @@ class SectionHeader extends StatelessWidget {
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontWeight: FontWeight.w500,
-              fontSize: responsive.value(mobile: 13, tablet: 14, desktop: 15),
+              fontSize: responsive.value(mobile: 10, tablet: 13, desktop: 15),
             ),
           ),
         ),

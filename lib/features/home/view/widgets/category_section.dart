@@ -34,7 +34,7 @@ class _CategoriesListWidgetState extends ConsumerState<CategorySection> {
           data: (categoryListData) {
             final categoryList = categoryListData?.data.data ?? [];
             if (categoryList.isEmpty) {
-              return SizedBox.shrink();
+              return CategoriesListLoading();
             }
             return ListView.builder(
               scrollDirection: Axis.horizontal,

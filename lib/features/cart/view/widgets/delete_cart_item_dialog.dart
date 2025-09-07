@@ -70,7 +70,7 @@ class DeleteCartItemDialog extends ConsumerWidget {
                   final notifier =
                       ref.read(removeCartItemNotifierProvider.notifier);
                   await notifier.removeCartItem(itemId);
-
+                  
                   await ref
                       .read(getCartItemNotifierProvider.notifier)
                       .getCartItem();
@@ -78,7 +78,7 @@ class DeleteCartItemDialog extends ConsumerWidget {
                   await ref
                       .read(getTotalCartItemNotifierProvider.notifier)
                       .getTotalCartItem();
-
+                  
                   if (!ref.watch(removeCartItemNotifierProvider).isLoading) {
                     Navigator.pop(context);
                   }

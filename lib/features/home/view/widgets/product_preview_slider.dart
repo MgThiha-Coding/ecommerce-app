@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +32,7 @@ class _ProductListSliderState extends ConsumerState<ProductPreviewSlider> {
         child: productListAsync.when(
           data: (productListData) {
             final productList = productListData?.data?.data ?? [];
-            if (productList.isEmpty) return const SizedBox.shrink();
+            if (productList.isEmpty) return ProductSliderLoading();
 
             return Stack(
               children: [
@@ -150,3 +152,4 @@ class ProductSliderLoading extends StatelessWidget {
     );
   }
 }
+*/

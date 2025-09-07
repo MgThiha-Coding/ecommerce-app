@@ -1,9 +1,10 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
-import 'package:picoshop_theme2/features/product/view/widgets/product_grid_loading.dart';
+import 'package:picoshop_theme2/features/product/view/widgets/loadings/product_loading.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
 class ProductList extends ConsumerStatefulWidget {
@@ -14,13 +15,6 @@ class ProductList extends ConsumerStatefulWidget {
 }
 
 class _ProductListState extends ConsumerState<ProductList> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(productNotifierProvider.notifier).getProductList();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +24,9 @@ class _ProductListState extends ConsumerState<ProductList> {
       fit: FlexFit.loose,
       child: productListAsync.when(
         data: (productListData) {
-          final productList = productListData?.data?.data ?? [];
+          final productList = productListData.data ?? [];
           if (productList.isEmpty) {
-            return const Center(child: ProductGridLoading());
+            return const Center(child: ProductLoading());
           }
           return GridView.builder(
             padding: EdgeInsets.zero,
@@ -151,11 +145,12 @@ class _ProductListState extends ConsumerState<ProductList> {
             },
           );
         },
-        error: (error, _) => ProductGridLoading(),
-        loading: () => ProductGridLoading(),
+        error: (error, _) => ProductLoading(),
+        loading: () => ProductLoading(),
       ),
     );
   }
 }
 
 
+*/

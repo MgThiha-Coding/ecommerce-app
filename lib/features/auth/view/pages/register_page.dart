@@ -29,6 +29,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // Get Device Info
   Future<String?> getDeviceName() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (kIsWeb) {
@@ -46,6 +47,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return null;
   }
 
+  // Register Account
   void register() async {
     if (!_formKey.currentState!.validate()) return;
     final deviceName = await getDeviceName();
@@ -74,9 +76,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
 
     double screenWidth = MediaQuery.of(context).size.width;
-
     ref.watch(registerNotifierProvider);
-
+    // Listen to registerNotifier Response , and route ot next verify code page if ( success )
     ref.listen<AsyncValue<RegisterResponse?>>(registerNotifierProvider, (
       previous,
       next,
@@ -167,6 +168,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // App Title
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -186,6 +188,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ],
                         ),
                         const SizedBox(height: 20),
+
+                        // First Name
                         AppTextFormField(
                           controller: _firstNameController,
                           hintText: "First Name",
@@ -197,6 +201,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 8.0),
+
+                        // Last Name
                         AppTextFormField(
                           controller: _lastNameController,
                           hintText: "Last Name",
@@ -208,6 +214,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 8.0),
+
+                        // Email
                         AppTextFormField(
                           controller: _emailController,
                           hintText: "Email",
@@ -219,6 +227,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 8.0),
+
+                        // Phone
                         AppTextFormField(
                           controller: _phoneController,
                           hintText: "Phone",
@@ -230,6 +240,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 8.0),
+
+                        // Password
                         AppTextFormField(
                           controller: _passwordController,
                           hintText: "Password",
@@ -245,6 +257,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 8.0),
+
+                        // Confirm Password
                         AppTextFormField(
                           controller: _confirmController,
                           hintText: "Confirm Password",
@@ -260,6 +274,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           },
                         ),
                         const SizedBox(height: 16.0),
+
+                        // Register Button
                         SizedBox(
                           height: 46,
                           width: double.infinity,
@@ -287,6 +303,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
+
+                        //
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

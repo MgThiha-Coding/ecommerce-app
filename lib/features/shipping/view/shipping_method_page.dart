@@ -6,7 +6,8 @@ import 'package:picoshop_theme2/features/payment/view/payment_method_page.dart';
 import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_notifier.dart';
 
 class ShippingMethodPage extends ConsumerStatefulWidget {
-  const ShippingMethodPage({super.key});
+  final int addressId;
+  const ShippingMethodPage(this.addressId, {super.key});
 
   @override
   ConsumerState<ShippingMethodPage> createState() => _ShippingMethodPageState();
@@ -16,7 +17,6 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch shipping methods when the page loads
     Future.microtask(() {
       ref.read(shippingMethodNotifierProvider.notifier).getShippingMethod();
     });
@@ -53,14 +53,10 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
                       final shippingList = shippingMethodData?.data ?? [];
                       if (shippingList.isEmpty) {
                         return Center(
-                          child: Text(
-                            "No shipping methods available",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                          child: SpinKitCircle(
+                            size: 27,
+                            color: Colors.white,
+                          )
                         );
                       }
 
@@ -107,13 +103,11 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
                                 color: Colors.grey.shade500,
                               ),
                               onTap: () {
-                                // Navigate to PaymentMethodPage
+                              
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => PaymentMethodPage(
-                                      shippingMethod: method.name,
-                                    ),
+                                    builder: (context) => PaymentMethodPage(widget.addressId, shippingMethod: method.name)
                                   ),
                                 );
                               },

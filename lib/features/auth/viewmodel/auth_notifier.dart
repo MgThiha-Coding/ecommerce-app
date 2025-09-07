@@ -143,7 +143,7 @@ class RegisterNotifier extends StateNotifier<AsyncValue<RegisterResponse?>> {
         final registerResponse = RegisterResponse.fromJson(response.data);
 
         state = AsyncValue.data(registerResponse);
-        print(registerResponse);
+    
       } else {
         state = AsyncValue.error(response.data, StackTrace.current);
       }

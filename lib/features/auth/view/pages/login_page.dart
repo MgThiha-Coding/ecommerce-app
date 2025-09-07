@@ -120,6 +120,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // App Title
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -139,6 +140,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ],
                       ),
                       const SizedBox(height: 20),
+
+                      // Email
                       AppTextFormField(
                         controller: _emailController,
                         hintText: "Email",
@@ -146,6 +149,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             value!.isEmpty ? "Email required" : null,
                       ),
                       const SizedBox(height: 8.0),
+
+                      // Password
                       AppTextFormField(
                         controller: _passwordController,
                         hintText: "Password",
@@ -158,6 +163,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         },
                       ),
                       const SizedBox(height: 16.0),
+
+                      // Login Button
                       SizedBox(
                         height: 46,
                         width: double.infinity,
@@ -180,7 +187,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
+
+                      //
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

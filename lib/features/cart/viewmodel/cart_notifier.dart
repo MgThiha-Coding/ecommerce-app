@@ -41,7 +41,7 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
 
       if (isSuccess) {
         final responseData = AddToCartResponse.fromJson(response.data);
-
+       
         state = AsyncValue.data(responseData);
       } else {
         final msg = response.data['message'];
@@ -93,6 +93,7 @@ class GetCartItemNotifier extends StateNotifier<AsyncValue<CartItemResponse?>> {
           (response.data['success'] == true ||
               response.data['success'] == "true");
       if (isSuccess) {
+  
         final responseData = CartItemResponse.fromJson(response.data);
         state = AsyncValue.data(responseData);
       } else {

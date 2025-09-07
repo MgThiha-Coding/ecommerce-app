@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/create_order/view/pages/create_order_page.dart';
 import 'package:picoshop_theme2/features/payment/viewmodel/payment_notifier.dart';
-
 
 class PaymentMethodPage extends ConsumerStatefulWidget {
   final String shippingMethod;
-  const PaymentMethodPage({super.key,required this.shippingMethod});
+  final int addressId;
+  const PaymentMethodPage(
+    this.addressId, {
+    super.key,
+    required this.shippingMethod,
+  });
 
   @override
   ConsumerState<PaymentMethodPage> createState() => _PaymentMethodPageState();
@@ -48,21 +53,24 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8
+                  vertical: 8,
                 ),
                 child: Container(
                   height: 40,
                   width: double.infinity,
-                  decoration: BoxDecoration( 
-                     color: Colors.white,
-                     borderRadius: BorderRadius.circular(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Text(widget.shippingMethod,style: GoogleFonts.poppins( 
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold
-                    ),),
+                    child: Text(
+                      widget.shippingMethod,
+                      style: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -118,14 +126,23 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                                   color: Colors.grey.shade900,
                                 ),
                               ),
-                             
+
                               trailing: Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
                                 color: Colors.grey.shade500,
                               ),
                               onTap: () {
-                                // select payment
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CreateOrderPage(
+                                      method.name,
+                                      widget.shippingMethod,
+                                      widget.addressId,
+                                    ),
+                                  ),
+                                );
                               },
                             ),
                           );
@@ -157,9 +174,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () {
-                      
-                    },
+                    onPressed: () {},
                     child: Text(
                       'Checkout',
                       style: GoogleFonts.poppins(color: Colors.white),

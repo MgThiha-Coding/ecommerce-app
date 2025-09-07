@@ -5,7 +5,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await appInit();
   runApp(const ProviderScope(child: MyApp()));
@@ -30,8 +30,8 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pico Shop Theme2',
-      home: const SplashPage(),
+      title: 'Pico Pharmacy',
+      home: SplashPage(),
     );
   }
 }

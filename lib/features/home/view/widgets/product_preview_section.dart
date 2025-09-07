@@ -1,8 +1,9 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/product/view/widgets/product_grid_loading.dart';
+
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
 class ProductPreviewSection extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class _BrandListWidgetState extends ConsumerState<ProductPreviewSection> {
             final productList = productListData?.data?.data ?? [];
 
             if (productList.isEmpty) {
-              return SizedBox.shrink();
+              return Text('loading......');
             }
             return ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -144,10 +145,11 @@ class _BrandListWidgetState extends ConsumerState<ProductPreviewSection> {
               },
             );
           },
-          error: (error, _) => const ProductGridLoading(),
-          loading: () => const ProductGridLoading(),
+          error: (error, _) => Center(child: const CircularProgressIndicator()),
+          loading: () => Center(child: const CircularProgressIndicator())
         ),
       ),
     );
   }
 }
+*/

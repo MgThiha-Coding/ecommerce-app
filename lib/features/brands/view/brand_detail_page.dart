@@ -11,6 +11,7 @@ class BrandDetailPage extends ConsumerStatefulWidget {
 }
 
 class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
+  // call brandDetail api by id ( initState )
   @override
   void initState() {
     super.initState();
@@ -18,9 +19,6 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
       ref
           .read(brandDetailNotifierProvider.notifier)
           .getBrandDetail(widget.brandId!);
-    });
-    setState(() {
-      
     });
   }
 
@@ -48,12 +46,11 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
         data: (brandDetail) {
           if (brandDetail?.data != null) {
             final brand = brandDetail!.data.name;
-            final description = brandDetail.data.description ?? "No description available";
-
+            final description =
+                brandDetail.data.description ?? "No description available";
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  // Decorative header
                   Container(
                     height: screenHeight * 0.25,
                     width: double.infinity,
@@ -106,11 +103,13 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Extra info (from created_at maybe)
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today,
-                                size: 18, color: Colors.grey),
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               "Since ${brandDetail.data.createdAt.toString()}",

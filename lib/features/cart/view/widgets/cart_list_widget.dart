@@ -5,7 +5,7 @@ import 'package:picoshop_theme2/features/cart/view/widgets/cart_list_loading.dar
 import 'package:picoshop_theme2/features/cart/view/widgets/cart_summary_widget.dart';
 import 'package:picoshop_theme2/features/cart/view/widgets/delete_cart_item_dialog.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/shipping/view/shipping_method_page.dart';
+import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
 
 class CartListWidget extends ConsumerStatefulWidget {
   const CartListWidget({super.key});
@@ -79,7 +79,14 @@ class _CartListWidgetState extends ConsumerState<CartListWidget> {
                                   ),
                                   trailing: IconButton(
                                     onPressed: () {
-                                      DeleteCartItemDialog(itemId: id);
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return DeleteCartItemDialog(
+                                            itemId: id,
+                                          );
+                                        },
+                                      );
                                     },
                                     icon: const Icon(
                                       Icons.delete,
@@ -107,12 +114,15 @@ class _CartListWidgetState extends ConsumerState<CartListWidget> {
                         ),
                       ),
                       onPressed: () {
+                       
+                        
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ShippingMethodPage(),
+                            builder: (context) => const CreateAddressPage()
                           ),
                         );
+                        
                       },
                       child: Text(
                         'Next',
@@ -126,8 +136,7 @@ class _CartListWidgetState extends ConsumerState<CartListWidget> {
           );
         },
         error: (error, _) => CartListLoading(),
-        loading: () =>
-            CartListLoading()
+        loading: () => CartListLoading(),
       ),
     );
   }

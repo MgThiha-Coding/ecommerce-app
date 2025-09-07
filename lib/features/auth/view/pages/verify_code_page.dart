@@ -28,6 +28,7 @@ class VerifyCodePage extends ConsumerStatefulWidget {
 class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
   String code = '';
 
+  // Get Device Info
   Future<String?> getDeviceName() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
@@ -46,11 +47,12 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     return null;
   }
 
+  // Verify code
   void verifyCode() {
     if (widget.email == null || widget.deviceName == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email is required')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Email is required')));
       return;
     }
     if (code.length != 6) {
@@ -76,40 +78,39 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     final verifyState = ref.watch(verifyCodeNotifierProvider);
     final storage = ref.watch(secureStorageProvider);
 
-    ref.listen<AsyncValue<VerifyCodeResponse?>>(
-      verifyCodeNotifierProvider,
-      (_, state) {
-        state.when(
-          data: (data) async {
-            if (data != null && data.success) {
-              final accessToken = data.data.auth.accessToken;
-              final refreshToken = data.data.auth.refreshToken;
-              final userId = data.data.user.id.toString();
+    // listen to the VerifycodeNotifier response , save auth data in local stroage and route to wrapperpage
+    ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider, (
+      _,
+      state,
+    ) {
+      state.when(
+        data: (data) async {
+          if (data != null && data.success) {
+            final accessToken = data.data.auth.accessToken;
+            final refreshToken = data.data.auth.refreshToken;
+            final userId = data.data.user.id.toString();
 
-              await storage.saveAuthData(
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-                userId: userId,
-              );
+            await storage.saveAuthData(
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              userId: userId,
+            );
 
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(data.message)));
-
-              // Navigate to WrapperPage
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => WrapperPage()),
-              );
-            }
-          },
-          error: (error, _) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(error.toString())));
-          },
-          loading: () {},
-        );
-      },
-    );
+            // Navigate to WrapperPage
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => WrapperPage()),
+            );
+          }
+        },
+        error: (error, _) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
+        },
+        loading: () {},
+      );
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -138,8 +139,8 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 30),
-                    // Image.asset(AppImage.otpVerify, scale: 4),
+                
+                  
                     const SizedBox(height: 20),
                     Text(
                       'OTP Verification',
@@ -157,6 +158,8 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Otp pin code field 
                     PinCodeTextField(
                       appContext: context,
                       length: 6,
@@ -181,16 +184,17 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     ),
                     const SizedBox(height: 8.0),
+                    // Resent code Button
                     Align(
                       alignment: Alignment.topRight,
                       child: Text(
                         'Resend Code',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                        ),
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                     ),
                     const SizedBox(height: 10.0),
+
+                    // Verify Code Button 
                     SizedBox(
                       height: 45,
                       width: double.infinity,
@@ -218,7 +222,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 14,),
+
+                    const SizedBox(height: 14),
+
+                    //
                     SizedBox(
                       height: 45,
                       width: double.infinity,
@@ -231,13 +238,21 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> LoginOrRegister()));
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginOrRegister(),
+                            ),
+                          );
                         },
-                        child: Text('Back',style: GoogleFonts.poppins( 
-                           color: Colors.white,
-                           fontSize: 15
-                        ),)
+                        child: Text(
+                          'Back',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
                     ),
                   ],

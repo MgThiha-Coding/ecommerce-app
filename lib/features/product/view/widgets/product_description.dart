@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-class ProductDescriptionWidget extends StatelessWidget {
+class ProductDescription extends StatelessWidget {
   final String? htmlDescription;
 
-  const ProductDescriptionWidget({super.key, this.htmlDescription});
+  const ProductDescription({super.key, this.htmlDescription});
 
   @override
   Widget build(BuildContext context) {

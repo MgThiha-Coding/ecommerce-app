@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
-import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/app_bar_widget.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/brand_section.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/category_section.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_preview_slider.dart';
-import 'package:picoshop_theme2/features/home/view/widgets/product_preview_section.dart';
+import 'package:picoshop_theme2/core/service/pagination_provider.dart';
+import 'package:picoshop_theme2/features/home/view/widgets/home_appbar.dart';
 import 'package:picoshop_theme2/features/home/view/widgets/section_header.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
@@ -19,24 +14,45 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  bool _apiCalled = false;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_apiCalled) {
-        _apiCalled = true;
-        ref.read(brandListNotifierProvider.notifier).getBrandList();
-        ref.read(categoriesListNotifierProvider.notifier).getCagetoryList();
-        ref.read(productNotifierProvider.notifier).getProductList();
+      getFirstProductList();
+    });
+  }
+
+  Future<void> getProductList() async {
+    Future.microtask(() {
+      final state = ref.watch(productNotifierProvider);
+      if (!state.isLoading) {
+        ref
+            .read(productNotifierProvider.notifier)
+            .getProductList(ref.watch(pageProvider));
       }
+    });
+  }
+
+  Future<void> getFirstProductList() async {
+    Future.microtask(() {
+      ref
+          .read(productNotifierProvider.notifier)
+          .getProductList(ref.watch(pageProvider));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
+    ref.listen(productNotifierProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          ref.read(pageProvider.notifier).update((state) => state + 1);
+        },
+        error: (error, _) {},
+        loading: () {},
+      );
+    });
 
     return SafeArea(
       child: Scaffold(
@@ -56,65 +72,80 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ],
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: responsive.value(
-                      mobile: 10,
-                      tablet: 30,
-                      desktop: 50,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const AppBarSection(),
-                      ResponsiveGap(responsive: responsive),
-                      const ProductPreviewSlider(),
-                      ResponsiveGap(responsive: responsive),
-                      responsive.isMobile
-                          ? Column(
-                              children: [
-                                SectionBlock(
-                                  title: "Brands",
-                                  responsive: responsive,
-                                  child: const BrandSection(),
-                                ),
-                                SectionBlock(
-                                  title: "Categories",
-                                  responsive: responsive,
-                                  child: const CategorySection(),
-                                ),
-                              ],
-                            )
-                          : Row(children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SectionBlock(
+              child: RefreshIndicator(
+                onRefresh: getProductList,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    final metrics = notification.metrics;
+                    if (metrics.pixels >= metrics.maxScrollExtent - 100) {
+                      getProductList();
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: responsive.value(
+                          mobile: 10,
+                          tablet: 30,
+                          desktop: 50,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          const HomeAppBar(),
+                          /*
+                          ResponsiveGap(responsive: responsive),
+                          const ProductPreviewSlider(),
+                          ResponsiveGap(responsive: responsive),
+                          responsive.isMobile
+                              ? Column(
+                                  children: [
+                                    SectionBlock(
                                       title: "Brands",
                                       responsive: responsive,
                                       child: const BrandSection(),
                                     ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SectionBlock(
+                                    SectionBlock(
                                       title: "Categories",
                                       responsive: responsive,
                                       child: const CategorySection(),
                                     ),
-                                  ),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SectionBlock(
+                                          title: "Brands",
+                                          responsive: responsive,
+                                          child: const BrandSection(),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SectionBlock(
+                                          title: "Categories",
+                                          responsive: responsive,
+                                          child: const CategorySection(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                      SectionBlock(
-                        title: "Products",
-                        responsive: responsive,
-                        child: const ProductPreviewSection(),
+                          SectionBlock(
+                            title: "Products",
+                            responsive: responsive,
+                            child: const ProductPreviewSection(),
+                          ),
+                          */
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

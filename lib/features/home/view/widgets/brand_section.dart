@@ -32,7 +32,7 @@ class _BrandListWidgetState extends ConsumerState<BrandSection> {
           data: (brandListData) {
             final brandList = brandListData?.data.data ?? [];
             if (brandList.isEmpty) {
-              return SizedBox.shrink();
+              return BrandListLoading();
             }
             return ListView.builder(
               scrollDirection: Axis.horizontal,

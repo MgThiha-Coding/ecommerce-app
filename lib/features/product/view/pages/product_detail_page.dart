@@ -5,8 +5,8 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/response/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/product/view/widgets/product_description_widget.dart';
-import 'package:picoshop_theme2/features/product/view/widgets/product_detail_loading.dart';
+import 'package:picoshop_theme2/features/product/view/widgets/product_description.dart';
+import 'package:picoshop_theme2/features/product/view/widgets/loadings/product_detail_loading.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
 class ProductDetailPage extends ConsumerStatefulWidget {
@@ -281,7 +281,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  ProductDescriptionWidget(
+                                  ProductDescription(
                                     htmlDescription: description,
                                   ),
                                   const SizedBox(height: 16),
@@ -350,7 +350,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    ProductDescriptionWidget(
+                                    ProductDescription(
                                       htmlDescription: description,
                                     ),
                                     const SizedBox(height: 8),
