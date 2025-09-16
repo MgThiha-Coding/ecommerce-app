@@ -1,4 +1,3 @@
-// wrapper_page.dart
 import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
@@ -31,8 +30,14 @@ class _WrapperPageState extends State<WrapperPage> {
 
   final List<NavigationRailDestination> _railDestinations = const [
     NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-    NavigationRailDestination(icon: Icon(Icons.grid_view), label: Text('Products')),
-    NavigationRailDestination(icon: Icon(Icons.shopping_cart), label: Text('Cart')),
+    NavigationRailDestination(
+      icon: Icon(Icons.grid_view),
+      label: Text('Products'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.shopping_cart),
+      label: Text('Cart'),
+    ),
     NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
   ];
 
@@ -52,13 +57,21 @@ class _WrapperPageState extends State<WrapperPage> {
           unselectedItemColor: Colors.grey.shade800,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          selectedLabelStyle:
-              const TextStyle(fontSize: 7, fontWeight: FontWeight.bold),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 7,
+            fontWeight: FontWeight.bold,
+          ),
           unselectedLabelStyle: const TextStyle(fontSize: 8),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Products'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view),
+              label: 'Products',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: 'Cart',
+            ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
@@ -72,7 +85,11 @@ class _WrapperPageState extends State<WrapperPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(5.0),
-                    child: Image.asset('assets/images/picocare.png',height: 50,width: 50,),
+                    child: Image.asset(
+                      'assets/images/picocare.png',
+                      height: 50,
+                      width: 50,
+                    ),
                   ),
                   Expanded(
                     child: NavigationRail(

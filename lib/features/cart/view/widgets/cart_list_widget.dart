@@ -114,15 +114,12 @@ class _CartListWidgetState extends ConsumerState<CartListWidget> {
                         ),
                       ),
                       onPressed: () {
-                       
-                        
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CreateAddressPage()
+                            builder: (context) => const CreateAddressPage(),
                           ),
                         );
-                        
                       },
                       child: Text(
                         'Next',

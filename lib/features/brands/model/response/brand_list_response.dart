@@ -24,7 +24,7 @@
 
   class Data {
     final int currentPage;
-    final List<Datum> data;
+    final List<BrandDataModel> data;
     final String firstPageUrl;
     final int from;
     final int lastPage;
@@ -55,7 +55,7 @@
 
     factory Data.fromJson(Map<String, dynamic> json) => Data(
           currentPage: json['current_page'] ?? 0,
-          data: (json['data'] as List<dynamic>? ?? []).map((e) => Datum.fromJson(e)).toList(),
+          data: (json['data'] as List<dynamic>? ?? []).map((e) => BrandDataModel.fromJson(e)).toList(),
           firstPageUrl: json['first_page_url'] ?? '',
           from: json['from'] ?? 0,
           lastPage: json['last_page'] ?? 0,
@@ -86,7 +86,7 @@
         };
   }
 
-  class Datum {
+  class BrandDataModel {
     final int id;
     final String name;
     final String? description;
@@ -97,7 +97,7 @@
     final DateTime createdAt;
     final DateTime updatedAt;
 
-    Datum({
+    BrandDataModel({
       required this.id,
       required this.name,
       this.description,
@@ -109,7 +109,7 @@
       required this.updatedAt,
     });
 
-    factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+    factory BrandDataModel.fromJson(Map<String, dynamic> json) => BrandDataModel(
           id: json['id'] ?? 0,
           name: json['name'] ?? '',
           description: json['description'],

@@ -11,7 +11,7 @@ import 'package:picoshop_theme2/features/cart/model/response/total_cart_item_res
 class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
   final Dio _dio;
 
-  AddToCartNotifier( [Dio? dio])
+  AddToCartNotifier([Dio? dio])
     : _dio = dio ?? Dio(),
       super(const AsyncValue.data(null));
 
@@ -40,8 +40,9 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
           response.statusCode == 200;
 
       if (isSuccess) {
+        print('cart issue check ${response.data}');
         final responseData = AddToCartResponse.fromJson(response.data);
-       
+
         state = AsyncValue.data(responseData);
       } else {
         final msg = response.data['message'];
@@ -93,7 +94,6 @@ class GetCartItemNotifier extends StateNotifier<AsyncValue<CartItemResponse?>> {
           (response.data['success'] == true ||
               response.data['success'] == "true");
       if (isSuccess) {
-  
         final responseData = CartItemResponse.fromJson(response.data);
         state = AsyncValue.data(responseData);
       } else {

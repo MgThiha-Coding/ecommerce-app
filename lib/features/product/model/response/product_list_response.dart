@@ -1,7 +1,7 @@
 class ProductListResponse {
   final bool? success;
   final String? message;
-  final ParentData? data;
+  final ProductPageData? data;
 
   ProductListResponse({
     required this.success,
@@ -13,7 +13,7 @@ class ProductListResponse {
     return ProductListResponse(
       success: json['success'] as bool?,
       message: json['message'] as String?,
-      data: json['data'] != null ? ParentData.fromJson(json['data']) : null,
+      data: json['data'] != null ? ProductPageData.fromJson(json['data']) : null,
     );
   }
 
@@ -24,14 +24,14 @@ class ProductListResponse {
       };
 }
 
-class ParentData {
+class ProductPageData {
   final int? currentPage;
-  final List<ChildData>? data;
+  final List<ProductDataModel>? data;
   final String? firstPageUrl;
   final int? from;
   final int? lastPage;
   final String? lastPageUrl;
-  final List<Link>? links;
+  final List<PageLink>? links;
   final String? nextPageUrl;
   final String? path;
   final int? perPage;
@@ -39,7 +39,7 @@ class ParentData {
   final int? to;
   final int? total;
 
-  ParentData({
+  ProductPageData({
     required this.currentPage,
     required this.data,
     required this.firstPageUrl,
@@ -55,18 +55,18 @@ class ParentData {
     required this.total,
   });
 
-  factory ParentData.fromJson(Map<String, dynamic> json) {
-    return ParentData(
+  factory ProductPageData.fromJson(Map<String, dynamic> json) {
+    return ProductPageData(
       currentPage: json['current_page'] as int?,
       data: json['data'] != null
-          ? (json['data'] as List).map((e) => ChildData.fromJson(e)).toList()
+          ? (json['data'] as List).map((e) => ProductDataModel.fromJson(e)).toList()
           : null,
       firstPageUrl: json['first_page_url'] as String?,
       from: json['from'] as int?,
       lastPage: json['last_page'] as int?,
       lastPageUrl: json['last_page_url'] as String?,
       links: json['links'] != null
-          ? (json['links'] as List).map((e) => Link.fromJson(e)).toList()
+          ? (json['links'] as List).map((e) => PageLink.fromJson(e)).toList()
           : null,
       nextPageUrl: json['next_page_url'] as String?,
       path: json['path'] as String?,
@@ -94,15 +94,19 @@ class ParentData {
       };
 }
 
-class Link {
+class PageLink {
   final String? url;
   final String? label;
   final bool? active;
 
-  Link({required this.url, required this.label, required this.active});
+  PageLink({
+    required this.url,
+    required this.label,
+    required this.active,
+  });
 
-  factory Link.fromJson(Map<String, dynamic> json) {
-    return Link(
+  factory PageLink.fromJson(Map<String, dynamic> json) {
+    return PageLink(
       url: json['url'] as String?,
       label: json['label'] as String?,
       active: json['active'] as bool?,
@@ -130,7 +134,7 @@ class Variation {
   Map<String, dynamic> toJson() => {'id': id};
 }
 
-class ChildData {
+class ProductDataModel {
   final int? id;
   final String? name;
   final String? productType;
@@ -155,7 +159,7 @@ class ChildData {
   final PurchaseUom? purchaseUom;
   final List<Variation>? variations;
 
-  ChildData({
+  ProductDataModel({
     required this.id,
     required this.name,
     required this.productType,
@@ -181,8 +185,8 @@ class ChildData {
     required this.variations,
   });
 
-  factory ChildData.fromJson(Map<String, dynamic> json) {
-    return ChildData(
+  factory ProductDataModel.fromJson(Map<String, dynamic> json) {
+    return ProductDataModel(
       id: json['id'] as int?,
       name: json['name'] as String?,
       productType: json['product_type'] as String?,

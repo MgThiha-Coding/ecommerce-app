@@ -20,7 +20,7 @@ class CategoriesListResponse {
 
 class Data {
   final int currentPage;
-  final List<Datum> data;
+  final List<CategoryDataModel> data;
   final String firstPageUrl;
   final int from;
   final int lastPage;
@@ -53,7 +53,7 @@ class Data {
     return Data(
       currentPage: json['current_page'] ?? 0,
       data: (json['data'] as List<dynamic>? ?? [])
-          .map((e) => Datum.fromJson(e))
+          .map((e) => CategoryDataModel.fromJson(e))
           .toList(),
       firstPageUrl: json['first_page_url'] ?? '',
       from: json['from'] ?? 0,
@@ -74,7 +74,8 @@ class Data {
   }
 }
 
-class Datum {
+// Renamed Datum to CategoryDataModel
+class CategoryDataModel {
   final int id;
   final String name;
   final dynamic shortCode;
@@ -85,10 +86,10 @@ class Datum {
   final dynamic deletedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final Datum? parentCategory;
-  final List<Datum> childCategory;
+  final CategoryDataModel? parentCategory;
+  final List<CategoryDataModel> childCategory;
 
-  Datum({
+  CategoryDataModel({
     required this.id,
     required this.name,
     required this.shortCode,
@@ -103,8 +104,8 @@ class Datum {
     required this.childCategory,
   });
 
-  factory Datum.fromJson(Map<String, dynamic> json) {
-    return Datum(
+  factory CategoryDataModel.fromJson(Map<String, dynamic> json) {
+    return CategoryDataModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       shortCode: json['short_code'],
@@ -116,10 +117,10 @@ class Datum {
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now(),
       parentCategory: json['parent_category'] != null
-          ? Datum.fromJson(json['parent_category'])
+          ? CategoryDataModel.fromJson(json['parent_category'])
           : null,
       childCategory: (json['child_category'] as List<dynamic>? ?? [])
-          .map((e) => Datum.fromJson(e))
+          .map((e) => CategoryDataModel.fromJson(e))
           .toList(),
     );
   }

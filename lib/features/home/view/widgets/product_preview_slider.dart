@@ -1,155 +1,104 @@
-/*
-
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
-import 'package:shimmer/shimmer.dart';
 
-class ProductPreviewSlider extends ConsumerStatefulWidget {
+class ProductPreviewSlider extends ConsumerWidget {
   const ProductPreviewSlider({super.key});
 
   @override
-  ConsumerState<ProductPreviewSlider> createState() =>
-      _ProductListSliderState();
-}
-
-class _ProductListSliderState extends ConsumerState<ProductPreviewSlider> {
-  int _currentIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = Responsive(context);
+  Widget build(BuildContext context, WidgetRef ref) {
     final productListAsync = ref.watch(productNotifierProvider);
 
     return SizedBox(
-      height: responsive.value(mobile: 130, tablet: 140, desktop: 210),
+      height: 80,
       width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: productListAsync.when(
-          data: (productListData) {
-            final productList = productListData?.data?.data ?? [];
-            if (productList.isEmpty) return ProductSliderLoading();
+      child: productListAsync.when(
+        data: (productList) {
+          if (productList.isEmpty) return const SizedBox.shrink();
 
-            return Stack(
-              children: [
-                CarouselSlider.builder(
-                  itemCount: productList.length,
-                  itemBuilder: (context, index, realIndex) {
-                    final product = productList[index];
-                    final productName = product.name ?? '';
-                    final productImage = product.productImage ?? '';
+          return CarouselSlider.builder(
+            itemCount: productList.length,
+            itemBuilder: (context, index, realIndex) {
+              final product = productList[index];
+              final productName = product?.name ?? '';
+              final productImage = product?.productImage ?? '';
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          color: Colors.grey[100],
-                          child: Column(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: productImage.isEmpty
-                                    ? Container(color: Colors.grey[300])
-                                    : Image.network(
-                                        productImage,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            Container(color: Colors.grey[300]),
-                                      ),
-                              ),
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    productName.isEmpty
-                                        ? 'No Product'
-                                        : productName,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: responsive.value(
-                                          mobile: 9, tablet: 13, desktop: 15),
-                                    ),
-                                  ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: productImage.isEmpty
+                            ? Image.asset(
+                                AppImage.emptyContainer,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                productImage,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset(
+                                  AppImage.emptyContainer,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ],
+                      ),
+                      if (productName.isNotEmpty)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            color: Colors.black.withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              productName,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                  options: CarouselOptions(
-                    height: double.infinity,
-                    viewportFraction: 1.0,
-                    enableInfiniteScroll: true,
-                    autoPlay: true,
-                    autoPlayInterval: const Duration(seconds: 3),
-                    autoPlayAnimationDuration:
-                        const Duration(milliseconds: 800),
-                    scrollPhysics: const BouncingScrollPhysics(),
-                    onPageChanged: (index, reason) {
-                      setState(() => _currentIndex = index);
-                    },
+                    ],
                   ),
                 ),
-                Positioned(
-                  bottom: 6,
-                  left: 0,
-                  right: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      productList.length,
-                      (index) => Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentIndex == index
-                              ? Colors.blue.shade500
-                              : Colors.grey.shade400,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-          loading: () => const ProductSliderLoading(),
-          error: (error, _) => const ProductSliderLoading(),
+              );
+            },
+            options: CarouselOptions(
+              height: 80,
+              viewportFraction: 1.0,
+              enableInfiniteScroll: true,
+              autoPlay: true,
+              autoPlayInterval: const Duration(seconds: 3),
+              autoPlayAnimationDuration: const Duration(milliseconds: 800),
+              scrollPhysics: const BouncingScrollPhysics(),
+            ),
+          );
+        },
+        loading: () => ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: double.infinity,
+            height: 80,
+            color: Colors.grey.shade300,
+          ),
+        ),
+        error: (error, _) => ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: double.infinity,
+            height: 80,
+            color: Colors.grey.shade300,
+          ),
         ),
       ),
     );
   }
 }
-
-class ProductSliderLoading extends StatelessWidget {
-  const ProductSliderLoading({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = Responsive(context);
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: responsive.value(mobile: 130, tablet: 200, desktop: 210),
-          width: double.infinity,
-          color: Colors.grey.shade300,
-        ),
-      ),
-    );
-  }
-}
-*/
