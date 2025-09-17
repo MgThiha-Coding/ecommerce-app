@@ -3,28 +3,25 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/category/data/category_api_service.dart';
+import 'package:picoshop_theme2/features/category/data/category_local_service.dart';
+import 'package:picoshop_theme2/features/category/data/category_repository.dart';
 import 'package:picoshop_theme2/features/category/model/response/categories_detail_response.dart';
 import 'package:picoshop_theme2/features/category/model/response/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/model/response/category_data_hive.dart';
 
 class CategoryListNotifier
     extends StateNotifier<AsyncValue<List<CategoryDataModel?>>> {
-  final Dio _dio;
-  final Box<CategoryHiveModel> _box;
-  late final StreamSubscription _hiveSub;
+  final CategoryRepository _repo;
 
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
+  final List<CategoryDataModel> _onlineCategories = [];
 
-  CategoryListNotifier(this._box, [Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.loading()) {
-    _hiveSub = _box.watch().listen((_) {
-      state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
-    });
-
-    state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
+  CategoryListNotifier(this._repo) : super(const AsyncValue.loading()) {
+    final cached = _repo.loadCached();
+    if (cached.isNotEmpty) state = AsyncValue.data(cached);
     getNextPage();
   }
 
@@ -33,6 +30,7 @@ class CategoryListNotifier
   Future<void> reset() async {
     _currentPage = 1;
     _isNoMore = false;
+    _onlineCategories.clear();
     await getNextPage();
   }
 
@@ -41,56 +39,31 @@ class CategoryListNotifier
     _isLoading = true;
 
     try {
-      final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/categories?page=$_currentPage',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+      final categories = await _repo.fetchCategories(_currentPage);
+      if (categories.isEmpty) _isNoMore = true;
 
-      final isSuccess =
-          response.statusCode == 200 && response.data?['success'] == true;
-
-      if (isSuccess) {
-        final responseData = CategoriesListResponse.fromJson(response.data);
-        final newCategories = responseData.data.data;
-
-        _isNoMore = newCategories.isEmpty;
-
-        for (var c in newCategories) {
-          _box.put(c.id, CategoryHiveModel.fromDataModel(c));
-        }
-
-        if (!_isNoMore) _currentPage++;
-      }
-    } on DioException catch (e, st) {
-      final cached = _box.values.map((e) => e.toDataModel()).toList();
-      if (cached.isNotEmpty) {
-        state = AsyncValue.data(cached);
-      } else {
-        state = AsyncValue.error(e, st);
-      }
+      _onlineCategories.addAll(categories);
+      state = AsyncValue.data(List.from(_onlineCategories));
+      _currentPage++;
     } finally {
       _isLoading = false;
     }
   }
-
-  @override
-  void dispose() {
-    _hiveSub.cancel();
-    super.dispose();
-  }
 }
-
 
 final categoryListNotifierProvider =
     StateNotifierProvider<
       CategoryListNotifier,
       AsyncValue<List<CategoryDataModel?>>
-    >((ref) => CategoryListNotifier(Hive.box<CategoryHiveModel>('category')));
+    >((ref) {
+      final dio = Dio();
+      final api = CategoryApiService(dio);
+      final local = CategoryLocalService(
+        Hive.box<CategoryHiveModel>('category'),
+      );
+      final repo = CategoryRepository(api, local);
+      return CategoryListNotifier(repo);
+    });
 
 class CategoryDetailNotifier
     extends StateNotifier<AsyncValue<CategoryDetailResponse?>> {

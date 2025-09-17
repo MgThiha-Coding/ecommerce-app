@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive_adapatar.dart';
@@ -14,6 +15,7 @@ import 'package:toastification/toastification.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await appInit();
+  await AppConfig.loadAccessToken();
   runApp(ProviderScope(child: ToastificationWrapper(child: MyApp())));
 }
 

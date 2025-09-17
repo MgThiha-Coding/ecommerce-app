@@ -1,7 +1,7 @@
 class CartItemResponse {
   final bool success;
   final String message;
-  final List<CartItem> data;
+  final List<CartItemModel> data;
 
   CartItemResponse({
     required this.success,
@@ -14,7 +14,7 @@ class CartItemResponse {
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
       data: (json['data'] as List<dynamic>? ?? [])
-          .map((item) => CartItem.fromJson(item))
+          .map((item) => CartItemModel.fromJson(item))
           .toList(),
     );
   }
@@ -26,8 +26,7 @@ class CartItemResponse {
       };
 }
 
-
-class CartItem {
+class CartItemModel {
   final int id;
   final String productName;
   final int cartId;
@@ -38,7 +37,7 @@ class CartItem {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  CartItem({
+  CartItemModel({
     required this.id,
     required this.productName,
     required this.cartId,
@@ -50,10 +49,10 @@ class CartItem {
     required this.updatedAt,
   });
 
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
+  factory CartItemModel.fromJson(Map<String, dynamic> json) {
+    return CartItemModel(
       id: json['id'] as int? ?? 0,
-      productName: json['product_full_name'] ?? "",
+      productName: json['product_full_name'] as String? ?? '',
       cartId: json['cart_id'] as int? ?? 0,
       productId: json['product_id'] as int? ?? 0,
       productVariantId: json['product_variant_id'] as int? ?? 0,
@@ -63,15 +62,16 @@ class CartItem {
       uomPrice: (json['uom_price'] is String)
           ? double.tryParse(json['uom_price']) ?? 0
           : (json['uom_price'] as num?)?.toDouble() ?? 0,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
-          DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
-          DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'product_full_name': productName,
         'cart_id': cartId,
         'product_id': productId,
         'product_variant_id': productVariantId,

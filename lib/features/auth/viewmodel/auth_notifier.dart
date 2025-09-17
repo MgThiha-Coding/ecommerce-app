@@ -90,7 +90,7 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
           response.statusCode == 200 &&
           response.data['success'] == true;
       if (isSuccess) {
-        
+        print('Log out Response ${response.data}');
         final responseData = LogOutResponse.fromJson(response.data);
        
         state = AsyncValue.data(responseData);

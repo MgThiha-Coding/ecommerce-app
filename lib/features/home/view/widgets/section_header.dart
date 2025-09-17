@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
 
-class SectionHeader extends StatelessWidget {
-  final String header;
-  final VoidCallback onTap;
-  const SectionHeader({super.key,required this.header,required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = Responsive(context);
-    return Row(
+Widget SectionHeader(String title, VoidCallback onTap) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          header,
+          title,
           style: GoogleFonts.poppins(
             color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: responsive.value(mobile: 10, tablet: 13, desktop:15),
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
           ),
         ),
         GestureDetector(
@@ -27,12 +21,13 @@ class SectionHeader extends StatelessWidget {
             'See All',
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: responsive.value(mobile: 10, tablet: 13, desktop: 15),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
 }
+

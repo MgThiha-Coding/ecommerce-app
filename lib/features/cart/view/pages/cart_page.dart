@@ -1,51 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picoshop_theme2/features/cart/view/widgets/cart_appbar_widget.dart';
-import 'package:picoshop_theme2/features/cart/view/widgets/cart_list_widget.dart';
-import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 
-class CartPage extends ConsumerStatefulWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
   @override
-  ConsumerState<CartPage> createState() => _CartPageState();
+  State<CartPage> createState() => _CartPageState();
 }
 
-class _CartPageState extends ConsumerState<CartPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(getTotalCartItemNotifierProvider.notifier).getTotalCartItem();
-    });
-  }
-
+class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade500,
-                Colors.blue.shade50,
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              children: [const CartAppBarWidget(), const CartListWidget()],
-            ),
-          ),
-        ),
-      ),
-    );
+    return Scaffold();
   }
 }

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/brands/data/brand_api_service.dart';
+import 'package:picoshop_theme2/features/brands/data/brand_local_service.dart';
+import 'package:picoshop_theme2/features/brands/data/brand_repository.dart';
 import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/model/response/brand_detail_response.dart';
 import 'package:hive/hive.dart';
@@ -10,74 +13,54 @@ import 'package:picoshop_theme2/features/brands/model/response/brand_list_respon
 
 class BrandListNotifier
     extends StateNotifier<AsyncValue<List<BrandDataModel?>>> {
-  final Dio _dio;
-  final Box<BrandHiveModel> _box;
-  late final StreamSubscription _hiveSub;
+  final BrandRepository _repo;
+
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
-  BrandListNotifier(this._box, [Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.loading()) {
-    _hiveSub = _box.watch().listen((_) {
-      state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
-    });
-    state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
+  final List<BrandDataModel> _onlineBrands = [];
+
+  BrandListNotifier(this._repo) : super(const AsyncValue.loading()) {
+    final cached = _repo.loadCached();
+    if (cached.isNotEmpty) state = AsyncValue.data(cached);
     getNextPage();
   }
+
   bool get isNoMore => _isNoMore;
+
   Future<void> reset() async {
     _currentPage = 1;
     _isNoMore = false;
+    _onlineBrands.clear();
     await getNextPage();
   }
 
   Future<void> getNextPage() async {
     if (_isNoMore || _isLoading) return;
     _isLoading = true;
+
     try {
-      final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/brands?page=$_currentPage',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
-      final isSuccess =
-          response.statusCode == 200 && response.data?['success'] == true;
-      if (isSuccess) {
-        final responseData = BrandListResponse.fromJson(response.data);
-        final newBrands = responseData.data.data;
-        _isNoMore = newBrands.isEmpty;
-        for (var b in newBrands) {
-          _box.put(b.id, BrandHiveModel.fromDataModel(b));
-        }
-        if (!_isNoMore) _currentPage++;
-      }
-    } on DioException catch (e, st) {
-      final cached = _box.values.map((e) => e.toDataModel()).toList();
-      if (cached.isNotEmpty) {
-        state = AsyncValue.data(cached);
-      } else {
-        state = AsyncValue.error(e, st);
-      }
+      final brands = await _repo.fetchBrands(_currentPage);
+      if (brands.isEmpty) _isNoMore = true;
+
+      _onlineBrands.addAll(brands);
+      state = AsyncValue.data(List.from(_onlineBrands));
+      _currentPage++;
     } finally {
       _isLoading = false;
     }
-  }
-
-  @override
-  void dispose() {
-    _hiveSub.cancel();
-    super.dispose();
   }
 }
 
 final brandListNotifierProvider =
     StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel?>>>(
-      (ref) => BrandListNotifier(Hive.box<BrandHiveModel>('brands')),
+      (ref) {
+        final dio = Dio();
+        final api = BrandApiService(dio);
+        final local = BrandLocalService(Hive.box<BrandHiveModel>('brands'));
+        final repo = BrandRepository(api, local);
+        return BrandListNotifier(repo);
+      },
     );
 
 class BrandDetailNotifier

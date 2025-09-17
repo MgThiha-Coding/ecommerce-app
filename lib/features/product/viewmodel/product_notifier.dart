@@ -4,29 +4,28 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/product/data/product_api_service.dart';
+import 'package:picoshop_theme2/features/product/data/product_local_service.dart';
+import 'package:picoshop_theme2/features/product/data/product_repository.dart';
 import 'package:picoshop_theme2/features/product/model/response/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/model/response/product_detail_response.dart';
 import 'package:picoshop_theme2/features/product/model/response/product_list_response.dart';
 
 class ProductListNotifier
     extends StateNotifier<AsyncValue<List<ProductDataModel?>>> {
-  final Dio _dio;
-  final Box<ProductHiveModel> _box;
-  late final StreamSubscription _hiveSub;
+  final ProductRepository _repo;
 
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
+  final List<ProductDataModel> _onlineProducts = [];
 
-  ProductListNotifier(this._box, [Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.loading()) {
-    _hiveSub = _box.watch().listen((_) {
-      state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
-    });
-    state = AsyncValue.data(_box.values.map((e) => e.toDataModel()).toList());
+  ProductListNotifier(this._repo) : super(const AsyncValue.loading()) {
+    final cached = _repo.loadCached();
+    if (cached.isNotEmpty) {
+      state = AsyncValue.data(cached);
+    }
     getNextPage();
-
   }
 
   bool get isNoMore => _isNoMore;
@@ -34,6 +33,7 @@ class ProductListNotifier
   Future<void> reset() async {
     _currentPage = 1;
     _isNoMore = false;
+    _onlineProducts.clear();
     await getNextPage();
   }
 
@@ -42,48 +42,19 @@ class ProductListNotifier
     _isLoading = true;
 
     try {
-      final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/products?page=$_currentPage',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
-
-      final isSuccess =
-          response.statusCode == 200 && response.data?['success'] == true;
-
-      if (isSuccess) {
-        final responseData = ProductListResponse.fromJson(response.data);
-        final newProducts = responseData.data?.data ?? [];
-
-        _isNoMore = newProducts.isEmpty;
-
-        for (var p in newProducts) {
-          _box.put(p.id, ProductHiveModel.fromDataModel(p));
-        }
-
-        print('Pagination $_currentPage');
-        if (!_isNoMore) _currentPage++;
-      }
-    } on DioException catch (e, st) {
-      final cached = _box.values.map((e) => e.toDataModel()).toList();
-      if (cached.isNotEmpty) {
-        state = AsyncValue.data(cached);
+      final products = await _repo.fetchProducts(_currentPage);
+      if (products.isEmpty) {
+        _isNoMore = true;
       } else {
-        state = AsyncValue.error(e, st);
+        _onlineProducts.addAll(products);
+        state = AsyncValue.data(List.from(_onlineProducts));
+        _currentPage++;
       }
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     } finally {
       _isLoading = false;
     }
-  }
-
-  @override
-  void dispose() {
-    _hiveSub.cancel();
-    super.dispose();
   }
 }
 
@@ -91,7 +62,13 @@ final productNotifierProvider =
     StateNotifierProvider<
       ProductListNotifier,
       AsyncValue<List<ProductDataModel?>>
-    >((ref) => ProductListNotifier(Hive.box<ProductHiveModel>('products')));
+    >((ref) {
+      final dio = Dio();
+      final api = ProductApiService(dio);
+      final local = ProductLocalService(Hive.box<ProductHiveModel>('products'));
+      final repo = ProductRepository(api, local);
+      return ProductListNotifier(repo);
+    });
 
 // Product Detail Notifier
 class ProductDetailNotifier
