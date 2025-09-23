@@ -1,37 +1,46 @@
 import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/brands/data/brand_api_service.dart';
-import 'package:picoshop_theme2/features/brands/data/brand_local_service.dart';
-import 'package:picoshop_theme2/features/brands/data/brand_repository.dart';
-import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive.dart';
-import 'package:picoshop_theme2/features/brands/model/response/brand_detail_response.dart';
+import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
+import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:picoshop_theme2/features/brands/model/response/brand_list_response.dart';
+import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
+// Brand List Notifier Provider
 class BrandListNotifier
-    extends StateNotifier<AsyncValue<List<BrandDataModel?>>> {
-  final BrandRepository _repo;
+    extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
+  final Box<BrandHiveModel> _localCache;
+  final Dio _dio;
 
+  final List<BrandDataModel> _onlineBrands = [];
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
-  final List<BrandDataModel> _onlineBrands = [];
 
-  BrandListNotifier(this._repo) : super(const AsyncValue.loading()) {
-    final cached = _repo.loadCached();
-    if (cached.isNotEmpty) state = AsyncValue.data(cached);
-    getNextPage();
+  BrandListNotifier(this._localCache)
+    : _dio = Dio(),
+      super(const AsyncValue.loading()) {
+    _init();
   }
 
   bool get isNoMore => _isNoMore;
 
+  Future<void> _init() async {
+    final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+    if (cached.isNotEmpty) {
+      state = AsyncValue.data(cached);
+    } else {
+      await getNextPage();
+    }
+  }
+
   Future<void> reset() async {
+    _onlineBrands.clear();
     _currentPage = 1;
     _isNoMore = false;
-    _onlineBrands.clear();
     await getNextPage();
   }
 
@@ -40,28 +49,77 @@ class BrandListNotifier
     _isLoading = true;
 
     try {
-      final brands = await _repo.fetchBrands(_currentPage);
-      if (brands.isEmpty) _isNoMore = true;
+      final response = await _dio.get(
+        '${AppConfig.baseUrl}/ecommerce/brands',
+        queryParameters: {'page': _currentPage},
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
 
-      _onlineBrands.addAll(brands);
-      state = AsyncValue.data(List.from(_onlineBrands));
-      _currentPage++;
+      final isSuccess =
+          response.statusCode == 200 && response.data['success'] == true;
+
+      if (!isSuccess) {
+        final message =
+            response.data['message'] ??
+            "Something went wrong\nPlease try again";
+        state = AsyncValue.error(message, StackTrace.current);
+        return;
+      }
+
+      final parsed = BrandListResponse.fromJson(response.data);
+      final brands = parsed.data.data;
+
+      if (brands.isEmpty) {
+        _isNoMore = true;
+      } else {
+        _onlineBrands.addAll(brands);
+        final limitedItems = brands.take(20).toList();
+        for (var brand in limitedItems) {
+          if (_localCache.length >= 20) {
+            _localCache.delete(_localCache.keys.first);
+          }
+        _localCache.put(brand.id, BrandHiveModel.fromDataModel(brand));
+                }
+        _currentPage++;
+      }
+
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOnline = connectivityResult != ConnectivityResult.none;
+
+      if (isOnline) {
+        state = AsyncValue.data(List.from(_onlineBrands));
+      } else {
+        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+        state = AsyncValue.data(cached);
+      }
+    } on DioException catch (e, st) {
+      final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+      state = AsyncValue.data(cached);
+      _isNoMore = true;
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error('Check Internet', st);
+      }
     } finally {
       _isLoading = false;
     }
   }
 }
 
+// Brand Details Notifier Provider
 final brandListNotifierProvider =
-    StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel?>>>(
-      (ref) {
-        final dio = Dio();
-        final api = BrandApiService(dio);
-        final local = BrandLocalService(Hive.box<BrandHiveModel>('brands'));
-        final repo = BrandRepository(api, local);
-        return BrandListNotifier(repo);
-      },
-    );
+    StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel>>>((
+      ref,
+    ) {
+      final offlineBrands = Hive.box<BrandHiveModel>('brands');
+      return BrandListNotifier(offlineBrands);
+    });
 
 class BrandDetailNotifier
     extends StateNotifier<AsyncValue<BrandDetailResponse?>> {

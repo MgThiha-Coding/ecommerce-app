@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/features/create_order/view/pages/create_order_page.dart';
 import 'package:picoshop_theme2/features/payment/viewmodel/payment_notifier.dart';
 
 class PaymentMethodPage extends ConsumerStatefulWidget {
@@ -133,16 +132,7 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
                                 color: Colors.grey.shade500,
                               ),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CreateOrderPage(
-                                      method.name,
-                                      widget.shippingMethod,
-                                      widget.addressId,
-                                    ),
-                                  ),
-                                );
+                               
                               },
                             ),
                           );

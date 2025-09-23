@@ -1,95 +1,197 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
-import 'package:picoshop_theme2/features/cart/model/response/add_to_cart_response.dart';
-import 'package:picoshop_theme2/features/cart/model/response/remove_cart_item_response.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:picoshop_theme2/features/cart/data/cart_api_service.dart';
-import 'package:picoshop_theme2/features/cart/data/cart_local_service.dart';
-import 'package:picoshop_theme2/features/cart/data/cart_repository.dart';
-import 'package:picoshop_theme2/features/cart/data/total_cart_api_service.dart';
-import 'package:picoshop_theme2/features/cart/data/total_cart_local_service.dart';
-import 'package:picoshop_theme2/features/cart/data/total_cart_repository.dart';
-import 'package:picoshop_theme2/features/cart/model/response/cart_item_hive_model.dart';
-import 'package:picoshop_theme2/features/cart/model/response/total_cart_item_model.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
+import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
+import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
+import 'package:picoshop_theme2/features/cart/model/remove_cart_item_response.dart';
+import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
-class CartNotifier extends StateNotifier<AsyncValue<List<CartItemHiveModel>>> {
-  final CartRepository _repo;
+class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
+  final Box<CartItemModel> _localCache;
+  final Dio _dio;
 
-  CartNotifier(this._repo) : super(const AsyncValue.loading()) {
-    final cached = _repo.loadCached();
+  final List<CartItemModel> _onlineItems = [];
+  bool _isLoading = false;
+
+  CartNotifier(this._localCache)
+    : _dio = Dio(),
+      super(const AsyncValue.loading()) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    final cached = _localCache.values.toList();
     if (cached.isNotEmpty) {
       state = AsyncValue.data(cached);
+    } else {
+      await fetchCart();
     }
-    fetchCart();
   }
 
   Future<void> fetchCart() async {
-    state = AsyncValue.loading();
+    if (_isLoading) return;
+    _isLoading = true;
     try {
-      final items = await _repo.fetchCartItems();
-      state = AsyncValue.data(items);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      final response = await _dio.get(
+        '${AppConfig.baseUrl}/ecommerce/cart',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
+
+      final isSuccess =
+          response.statusCode == 200 && response.data['success'] == true;
+
+      if (!isSuccess) {
+        final message =
+            response.data['message'] ??
+            "Something went wrong\nPlease try again";
+        state = AsyncValue.error(message, StackTrace.current);
+        return;
+      }
+
+      final parsed = CartItemResponse.fromJson(response.data);
+      final items = parsed.data;
+
+      _onlineItems
+        ..clear()
+        ..addAll(items);
+
+      // overwrite cache
+      _localCache.clear();
+      for (var item in items) {
+        _localCache.put(item.id, item);
+      }
+
+      state = AsyncValue.data(List.from(_onlineItems));
+    } on DioException catch (e, st) {
+      // fallback to cache if error
+      final cached = _localCache.values.toList();
+      state = AsyncValue.data(cached);
+
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error('Check Internet', st);
+      } else {
+        state = AsyncValue.error(e, st);
+      }
+    } finally {
+      _isLoading = false;
     }
   }
 
   Future<void> refreshCart() async {
     await fetchCart();
   }
+
+  void clearLocalCart() {
+    _localCache.clear();
+    state = const AsyncValue.data([]);
+  }
 }
 
 final cartNotifierProvider =
-    StateNotifierProvider<CartNotifier, AsyncValue<List<CartItemHiveModel>>>((
-      ref,
-    ) {
-      final dio = Dio();
-      final api = CartApiService(dio);
-      final local = CartLocalService(Hive.box<CartItemHiveModel>('cart'));
-      final repo = CartRepository(api, local);
-      return CartNotifier(repo);
+    StateNotifierProvider<CartNotifier, AsyncValue<List<CartItemModel>>>((ref) {
+      final offlineCart = Hive.box<CartItemModel>('cart');
+      return CartNotifier(offlineCart);
     });
 
-class TotalCartNotifier
-    extends StateNotifier<AsyncValue<TotalCartItemHiveModel?>> {
-  final TotalCartRepository _repo;
+class TotalCartNotifier extends StateNotifier<AsyncValue<int>> {
+  final Box<int> _localCache;
+  final Dio _dio;
 
-  TotalCartNotifier(this._repo) : super(const AsyncValue.data(null)) {
-    final cached = _repo.loadCached();
-    if (cached != null) state = AsyncValue.data(cached);
-    fetchTotalCart();
+  int? _onlineTotal;
+  bool _isLoading = false;
+
+  TotalCartNotifier(this._localCache)
+    : _dio = Dio(),
+      super(const AsyncValue.loading()) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    if (_localCache.isNotEmpty) {
+      state = AsyncValue.data(_localCache.get('total') ?? 0);
+    } else {
+      await fetchTotalCart();
+    }
   }
 
   Future<void> fetchTotalCart() async {
-    state = const AsyncValue.loading();
+    if (_isLoading) return;
+    _isLoading = true;
+
     try {
-      final total = await _repo.fetchTotalCart();
-      state = AsyncValue.data(total);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      final response = await _dio.get(
+        '${AppConfig.baseUrl}/ecommerce/cart/total',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
+
+      final isSuccess =
+          response.statusCode == 200 && response.data['success'] == true;
+
+      if (!isSuccess) {
+        final message =
+            response.data['message'] ??
+            "Something went wrong\nPlease try again";
+        state = AsyncValue.error(message, StackTrace.current);
+        return;
+      }
+
+      final parsed = TotalCartItemResponse.fromJson(response.data);
+      _onlineTotal = parsed.data;
+
+      // overwrite cache
+      _localCache.put('total', _onlineTotal!);
+
+      state = AsyncValue.data(_onlineTotal!);
+    } on DioException catch (e, st) {
+      // fallback to cache
+      final cached = _localCache.get('total');
+      if (cached != null) {
+        state = AsyncValue.data(cached);
+      }
+
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error('Check Internet', st);
+      } else {
+        state = AsyncValue.error(e, st);
+      }
+    } finally {
+      _isLoading = false;
     }
   }
 
   Future<void> refreshTotalCart() async {
     await fetchTotalCart();
   }
+
+  void clearLocalTotal() {
+    _localCache.clear();
+    state = const AsyncValue.data(0);
+  }
 }
 
 final totalCartNotifierProvider =
-    StateNotifierProvider<
-      TotalCartNotifier,
-      AsyncValue<TotalCartItemHiveModel?>
-    >((ref) {
-      final dio = Dio();
-      final api = TotalCartApiService(dio);
-      final local = TotalCartLocalService(
-        Hive.box<TotalCartItemHiveModel>('total_cart'),
-      );
-      final repo = TotalCartRepository(api, local);
-      return TotalCartNotifier(repo);
+    StateNotifierProvider<TotalCartNotifier, AsyncValue<int>>((ref) {
+      final offlineTotal = Hive.box<int>('total_cart');
+      return TotalCartNotifier(offlineTotal);
     });
 
+// ADD TO CART AND REMOVE FROM CART NOTIFIER
 class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
   final Dio _dio;
 

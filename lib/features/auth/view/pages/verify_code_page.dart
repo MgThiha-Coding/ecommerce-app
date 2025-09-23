@@ -1,19 +1,19 @@
-// lib/features/auth/ui/verify_code_page.dart
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/auth/model/request/verify_code_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:toastification/toastification.dart';
 
 class VerifyCodePage extends ConsumerStatefulWidget {
   final String? email;
@@ -49,19 +49,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
   // Verify code
   void verifyCode() {
-    if (widget.email == null || widget.deviceName == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Email is required')));
-      return;
-    }
-    if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-digit code')),
-      );
-      return;
-    }
-
+    if (code.length != 6) return;
     ref
         .read(verifyCodeNotifierProvider.notifier)
         .verifyCode(
@@ -75,10 +63,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
   @override
   Widget build(BuildContext context) {
-    final verifyState = ref.watch(verifyCodeNotifierProvider);
+    final verifyAsync = ref.watch(verifyCodeNotifierProvider);
     final storage = ref.watch(secureStorageProvider);
+    final responsive = Responsive(context);
 
-    // listen to the VerifycodeNotifier response , save auth data in local stroage and route to wrapperpage
     ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider, (
       _,
       state,
@@ -96,7 +84,15 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
               userId: userId,
             );
 
-            // Navigate to WrapperPage
+            AppConfig.updateAccessToken(accessToken);
+
+            final message = data.message;
+            toastification.show(
+              title: Text(message, style: TextStyle(color: Colors.white)),
+              animationDuration: Duration(milliseconds: 300),
+              autoCloseDuration: Duration(seconds: 2),
+            );
+
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => WrapperPage()),
@@ -104,158 +100,178 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           }
         },
         error: (error, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[200],
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Text(
+                      error.toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
         },
         loading: () {},
       );
     });
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: IntrinsicHeight(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.blue.shade900,
-                    Colors.blue.shade500,
-                    Colors.blue.shade100,
-                  ],
+    return Container(
+      color: Colors.blue.shade400,
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.blue.shade900,
+            leading: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.grey.withOpacity(0.3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                
-                  
-                    const SizedBox(height: 20),
-                    Text(
-                      'OTP Verification',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: responsive.value(mobile: 15, tablet: 20, desktop: 30),
+              ),
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: IntrinsicHeight(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.blue.shade900,
+                        Colors.blue.shade500,
+                        Colors.blue.shade100,
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'OTP sent to your Mail ${widget.email ?? ""}',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Otp pin code field 
-                    PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      onChanged: (value) => code = value,
-                      onCompleted: (value) => code = value,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(4),
-                        fieldHeight: 50,
-                        fieldWidth: 36,
-                        activeFillColor: Colors.white,
-                        selectedFillColor: Colors.grey.shade200,
-                        inactiveFillColor: Colors.grey.shade100,
-                        activeColor: Colors.blue,
-                        selectedColor: Colors.blue,
-                        inactiveColor: Colors.grey,
-                      ),
-                      keyboardType: TextInputType.number,
-                      animationType: AnimationType.fade,
-                      animationDuration: const Duration(milliseconds: 300),
-                      enableActiveFill: true,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    ),
-                    const SizedBox(height: 8.0),
-                    // Resent code Button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'Resend Code',
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 10.0),
-
-                    // Verify Code Button 
-                    SizedBox(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          disabledBackgroundColor: Colors.blue,
-                          disabledForegroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: verifyState.isLoading ? null : verifyCode,
-                        child: verifyState.isLoading
-                            ? const SpinKitFadingCircle(
-                                size: 30,
-                                color: Colors.white,
-                              )
-                            : Text(
-                                'Verify Code',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    //
-                    SizedBox(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          disabledBackgroundColor: Colors.blue,
-                          disabledForegroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginOrRegister(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Back',
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'OTP Verification',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
-                            fontSize: 15,
+                            fontSize: 20,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'OTP sent to your Mail ${widget.email ?? ""}',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Otp pin code field
+                        PinCodeTextField(
+                          appContext: context,
+                          length: 6,
+                          onChanged: (value) => code = value,
+                          onCompleted: (value) => code = value,
+                          pinTheme: PinTheme(
+                            shape: PinCodeFieldShape.box,
+                            borderRadius: BorderRadius.circular(6),
+                            fieldHeight: 52,
+                            fieldWidth: 40,
+                            activeFillColor: Colors.transparent,
+                            selectedFillColor: Colors.transparent,
+                            inactiveFillColor: Colors.grey.withOpacity(0.1),
+                            activeColor: Colors.grey.shade300,
+                            selectedColor: Colors.blue,
+                            inactiveColor: Colors.grey.shade300,
+                          ),
+                          keyboardType: TextInputType.number,
+                          animationType: AnimationType.fade,
+                          animationDuration: const Duration(milliseconds: 250),
+                          enableActiveFill: true,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(0, 1),
+                                blurRadius: 2,
+                                color: Colors.black.withOpacity(0.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8.0),
+                        // Resent code Button
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () {
+                              ref
+                                  .read(verifyCodeNotifierProvider.notifier)
+                                  .resentVerifyCode(widget.email!);
+                            },
+                            child: Text(
+                              'Resend Code',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: responsive.body,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 46,
+                          width: double.infinity,
+                          child: MaterialButton(
+                            onPressed: verifyAsync.isLoading
+                                ? null
+                                : verifyCode,
+                            color: Colors.blue.shade900,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: verifyAsync.isLoading
+                                ? SpinKitCircle(color: Colors.white, size: 27)
+                                : Text(
+                                    "Verify Code",
+                                    style: TextStyle(
+                                      fontSize: responsive.subHeading,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
+                        // Verify Code Button
+                        const SizedBox(height: 10.0),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

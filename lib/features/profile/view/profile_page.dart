@@ -6,6 +6,7 @@ import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart'
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 
+
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -18,12 +19,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final loginOutAsync = ref.watch(logOutNotifierProvider);
 
-    // Listen inside build to respond to state changes
     ref.listen<AsyncValue<dynamic>>(logOutNotifierProvider, (previous, next) {
       next.when(
         data: (data) async {
           if (data != null) {
-       
             final storage = ref.read(secureStorageProvider);
             await storage.clear();
 
@@ -37,7 +36,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           }
         },
         loading: () {},
-        error: (_, __) {},
+        error: (error, __) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[200],
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Text(
+                      error.toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     });
 

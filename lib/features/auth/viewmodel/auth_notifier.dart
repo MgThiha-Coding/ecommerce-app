@@ -12,47 +12,67 @@ import 'package:picoshop_theme2/features/auth/model/response/login_response.dart
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 
+// login API requests and state
 class LoginNotifier extends StateNotifier<AsyncValue<LoginResponse?>> {
   final Dio _dio;
+
   LoginNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 5),
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+              receiveDataWhenStatusError: true,
+            ),
+          ),
       super(const AsyncValue.data(null));
 
   Future<void> login(LoginRequest params) async {
-    state = AsyncValue.loading();
+    state = const AsyncValue.loading();
 
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/v1/central/login',
+        '${AppConfig.baseUrl}/central/login',
         data: {
           "email_or_phone_or_username": params.emailOrPhoneOrUserName,
           "password": params.password,
-          "remember_me": params.rememberMe,
+          "remember_me": false,
           "device_name": params.deviceName,
         },
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
       );
+
       final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&
           response.data['success'] == true;
+
       if (isSuccess) {
-        final responseData = LoginResponse.fromJson(response.data);
-        state = AsyncValue.data(responseData);
+        state = AsyncValue.data(LoginResponse.fromJson(response.data));
+      } else {
+        state = AsyncValue.error(
+          response.data?['message'] ?? 'Login failed',
+          StackTrace.current,
+        );
       }
     } on DioException catch (e, st) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', StackTrace.current);
+        state = AsyncValue.error(
+          'Request timed out. Please check internet.',
+          st,
+        );
       } else {
-        final errorData = e.response?.data['message'];
+        final errorData = e.response?.data?['message'] ?? 'Unexpected error';
         state = AsyncValue.error(errorData, st);
       }
     }
@@ -66,42 +86,60 @@ final loginNotifierProvider =
 
 class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
   final Dio _dio;
+
   LogOutNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 5),
+              receiveDataWhenStatusError: true,
+            ),
+          ),
       super(const AsyncValue.data(null));
 
   Future<void> logOut() async {
-    state = AsyncValue.loading();
+    state = const AsyncValue.loading();
+
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/v1/logout',
+        '${AppConfig.baseUrl}/logout',
         options: Options(
           headers: {
-            'Accept': 'application/json',
             'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'Accept': 'application/json',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
 
-   
       final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&
           response.data['success'] == true;
+
       if (isSuccess) {
-        print('Log out Response ${response.data}');
-        final responseData = LogOutResponse.fromJson(response.data);
-       
-        state = AsyncValue.data(responseData);
+        state = AsyncValue.data(LogOutResponse.fromJson(response.data));
+      } else {
+        state = AsyncValue.error(
+          response.data?['message'] ?? 'Logout failed',
+          StackTrace.current,
+        );
       }
     } on DioException catch (e, st) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+        state = AsyncValue.error(
+          'Request timed out. Please check internet.',
+          st,
+        );
       } else {
-        final errorData = e.response?.data['message'];
+        final errorData = e.response?.data?['message'] ?? 'Unexpected error';
         state = AsyncValue.error(errorData, st);
       }
     }
@@ -113,44 +151,64 @@ final logOutNotifierProvider =
       (ref) => LogOutNotifier(),
     );
 
-
-
+// registration API requests and state
 class RegisterNotifier extends StateNotifier<AsyncValue<RegisterResponse?>> {
-  RegisterNotifier() : super(const AsyncValue.data(null));
+  final Dio _dio;
+
+  RegisterNotifier([Dio? dio])
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 5),
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+              receiveDataWhenStatusError: true,
+            ),
+          ),
+      super(const AsyncValue.data(null));
 
   Future<void> register(RegisterRequest params) async {
-    state = AsyncValue.loading();
-    final dio = Dio();
+    state = const AsyncValue.loading();
 
     try {
-      final response = await dio.post(
-        'https://beta.picosbs.com/api/v1/register',
+      final response = await _dio.post(
+        '${AppConfig.baseUrl}/register',
         data: params.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-          validateStatus: (status) => status != null,
-        ),
       );
 
-      if (response.statusCode != null &&
-          response.statusCode! >= 200 &&
-          response.statusCode! < 300 &&
-          response.data['success'] == true) {
-        final registerResponse = RegisterResponse.fromJson(response.data);
+      final isSuccess =
+          response.data != null &&
+          response.statusCode == 201 &&
+          response.data['success'] == true;
 
-        state = AsyncValue.data(registerResponse);
-    
+      if (isSuccess) {
+        state = AsyncValue.data(RegisterResponse.fromJson(response.data));
       } else {
-        state = AsyncValue.error(response.data, StackTrace.current);
+        state = AsyncValue.error(
+          response.data?['message'] ?? 'Registration failed',
+          StackTrace.current,
+        );
       }
-    } on DioException catch (e) {
-      final errorData =
-          e.response?.data['message'];
-      state = AsyncValue.error(errorData, StackTrace.current);
+    } on DioException catch (e, st) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error(
+          'Request timed out. Please check internet.',
+          st,
+        );
+      } else {
+        final errorData = e.response?.data?['message'] ?? 'Unexpected error';
+        state = AsyncValue.error(errorData, st);
+      }
     }
   }
 }
@@ -160,16 +218,30 @@ final registerNotifierProvider =
       (ref) => RegisterNotifier(),
     );
 
-
-
-class VerifyCodeNotifier extends StateNotifier<AsyncValue<VerifyCodeResponse?>> {
+// verification code API requests and state
+class VerifyCodeNotifier
+    extends StateNotifier<AsyncValue<VerifyCodeResponse?>> {
   final Dio _dio;
 
   VerifyCodeNotifier([Dio? dio])
-      : _dio = dio ?? Dio(),
-        super(const AsyncValue.data(null));
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 5),
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ${AppConfig.accessToken}',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+              receiveDataWhenStatusError: true,
+            ),
+          ),
+      super(const AsyncValue.data(null));
 
-  // Get device name
   Future<String?> getDeviceName() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
@@ -186,92 +258,90 @@ class VerifyCodeNotifier extends StateNotifier<AsyncValue<VerifyCodeResponse?>> 
     return null;
   }
 
-  // Verify code
   Future<void> verifyCode(VerifyCodeRequest params) async {
     state = const AsyncValue.loading();
 
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/v1/verify',
+        '${AppConfig.baseUrl}/verify',
         data: params.toJson(),
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
       );
 
-      final isSuccess = response.data != null &&
+      final isSuccess =
+          response.data != null &&
           response.data['success'] == true &&
           response.statusCode == 200;
 
       if (isSuccess) {
-        final verifyResponse = VerifyCodeResponse.fromJson(response.data);
-        state = AsyncValue.data(verifyResponse);
+        state = AsyncValue.data(VerifyCodeResponse.fromJson(response.data));
       } else {
-        final msg = response.data['message'] ?? 'Something went wrong';
-        state = AsyncValue.error(msg, StackTrace.current);
+        state = AsyncValue.error(
+          response.data['message'] ?? 'Something went wrong',
+          StackTrace.current,
+        );
       }
     } on DioException catch (e, st) {
-      final errorData = e.response?.data['message'] ??
-          (e.type == DioExceptionType.connectionError ||
-                  e.type == DioExceptionType.connectionTimeout ||
-                  e.type == DioExceptionType.unknown
-              ? 'Check Internet'
-              : "Something went wrong, Please try again later");
-      state = AsyncValue.error(errorData, st);
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error(
+          'Request timed out. Please check internet.',
+          st,
+        );
+      } else {
+        final errorData = e.response?.data?['message'] ?? 'Unexpected error';
+        state = AsyncValue.error(errorData, st);
+      }
     } catch (e, st) {
       state = AsyncValue.error(e.toString(), st);
     }
   }
 
-  // Resend verification code
   Future<void> resentVerifyCode(String emailOrPhone) async {
     state = const AsyncValue.loading();
 
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/v1/resend-verification',
+        '${AppConfig.baseUrl}/v1/resend-verification',
         data: {"email_or_phone": emailOrPhone},
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
       );
 
-      final isSuccess = response.data != null &&
+      final isSuccess =
+          response.data != null &&
           response.data['success'] == true &&
           response.statusCode == 200;
 
       if (isSuccess) {
-        final verifyResponse = VerifyCodeResponse.fromJson(response.data);
-        state = AsyncValue.data(verifyResponse);
+        state = AsyncValue.data(VerifyCodeResponse.fromJson(response.data));
       } else {
-        final msg = response.data['message'] ?? 'Something went wrong';
-        state = AsyncValue.error(msg, StackTrace.current);
+        state = AsyncValue.error(
+          response.data['message'] ?? 'Something went wrong',
+          StackTrace.current,
+        );
       }
     } on DioException catch (e, st) {
-      final errorData = e.response?.data['message'] ??
-          (e.type == DioExceptionType.connectionError ||
-                  e.type == DioExceptionType.connectionTimeout ||
-                  e.type == DioExceptionType.unknown
-              ? 'Check Internet'
-              : "Something went wrong, Please try again later");
-      state = AsyncValue.error(errorData, st);
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.unknown) {
+        state = AsyncValue.error(
+          'Request timed out. Please check internet.',
+          st,
+        );
+      } else {
+        final errorData = e.response?.data?['message'] ?? 'Unexpected error';
+        state = AsyncValue.error(errorData, st);
+      }
     } catch (e, st) {
       state = AsyncValue.error(e.toString(), st);
     }
   }
 }
 
-// Provider
 final verifyCodeNotifierProvider =
     StateNotifierProvider<VerifyCodeNotifier, AsyncValue<VerifyCodeResponse?>>(
-        (ref) => VerifyCodeNotifier());
+      (ref) => VerifyCodeNotifier(),
+    );

@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
@@ -27,6 +30,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
 
   // Get Device Info
@@ -68,40 +72,46 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    double getHorizontalPadding(double width) {
-      if (width >= 1400) return 400;
-      if (width >= 1024) return 200;
-      if (width >= 768) return 50;
-      return 15;
-    }
+    final responsive = Responsive(context);
+    final registerAsync = ref.watch(registerNotifierProvider);
 
-    double screenWidth = MediaQuery.of(context).size.width;
-    ref.watch(registerNotifierProvider);
-    // Listen to registerNotifier Response , and route ot next verify code page if ( success )
+    final storage = ref.watch(secureStorageProvider);
+
     ref.listen<AsyncValue<RegisterResponse?>>(registerNotifierProvider, (
       previous,
       next,
     ) {
       next.whenOrNull(
-        data: (response) async {
-          final deviceName = await getDeviceName();
-          if (!context.mounted) return;
+        data: (data) async {
+          if (data?.success == true) {
+            final accessToken = data!.data.auth.accessToken;
+            final refreshToken = data.data.auth.refreshToken;
+            final userId = data.data.user.toString();
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerifyCodePage(
-                email: _emailController.text,
-                deviceName: deviceName,
+            await storage.saveAuthData(
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              userId: userId,
+            );
+
+            AppConfig.updateAccessToken(accessToken);
+
+            final deviceName = await getDeviceName();
+            if (!context.mounted) return;
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerifyCodePage(
+                  email: _emailController.text,
+                  deviceName: deviceName,
+                ),
               ),
-            ),
-          );
+            );
+          }
         },
         error: (error, stack) {
-          final message = error is Map && error['message'] != null
-              ? error['message']
-              : 'Registration failed';
-
+          // Show snackbar on error
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
@@ -110,7 +120,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      message,
+                      error.toString(),
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         color: Colors.blueGrey,
@@ -126,9 +136,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
     });
 
-    final registerAsync = ref.watch(registerNotifierProvider);
-
     return Scaffold(
+      /*
+      appBar: AppBar( 
+         title: IconButton(onPressed: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> VerifyCodePage()));
+         }, icon: Icon(Icons.arrow_forward)),
+      ),
+      */
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -155,13 +170,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     colors: [
                       Colors.blue.shade900,
                       Colors.blue.shade500,
-                      Colors.blue.shade100,
+                      Colors.blue.shade200,
                     ],
                   ),
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: getHorizontalPadding(screenWidth),
+                    horizontal: responsive.authHorizontalPadding,
                   ),
                   child: Form(
                     key: _formKey,
@@ -175,15 +190,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             Text(
                               'Pico Shop',
                               style: GoogleFonts.poppins(
-                                fontSize: 24,
+                                fontSize: responsive.heading,
                                 color: Colors.white,
                               ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Icon(
-                              Icons.shopping_bag,
-                              color: Colors.white,
-                              size: 30,
                             ),
                           ],
                         ),
@@ -232,12 +241,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         AppTextFormField(
                           controller: _phoneController,
                           hintText: "Phone",
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Phone number required";
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 8.0),
 
@@ -275,33 +278,29 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                         const SizedBox(height: 16.0),
 
-                        // Register Button
                         SizedBox(
                           height: 46,
                           width: double.infinity,
                           child: MaterialButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            onPressed: registerAsync.isLoading
-                                ? null
-                                : () {
-                                    if (_formKey.currentState!.validate()) {
-                                      register();
-                                    }
-                                  },
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) register();
+                            },
                             color: Colors.blue.shade900,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
                             child: registerAsync.isLoading
                                 ? SpinKitCircle(color: Colors.white, size: 27)
-                                : const Text(
+                                : Text(
                                     "Sign Up",
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: responsive.subHeading,
                                       color: Colors.white,
                                     ),
                                   ),
                           ),
                         ),
+
                         const SizedBox(height: 20),
 
                         //

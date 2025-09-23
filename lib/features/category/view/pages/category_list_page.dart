@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/category/model/response/categories_list_response.dart';
+import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:toastification/toastification.dart';

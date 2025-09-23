@@ -1,15 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
-import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive.dart';
-import 'package:picoshop_theme2/features/brands/model/response/brand_data_hive_adapatar.dart';
-import 'package:picoshop_theme2/features/category/model/response/category_data_hive.dart';
-import 'package:picoshop_theme2/features/category/model/response/category_data_hive_adapatar.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_data_hive.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_data_hive_adapater.dart';
+import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
+import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
+import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
+import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
+import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/product/model/local/product_data_hive_adapater.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {

@@ -52,6 +52,8 @@ dependencies:
   build_runner: ^2.8.0
   image_picker: ^1.2.0
   toastification: ^3.0.3
+  shared_preferences: ^2.5.3
+  marquee: ^2.3.0
 
 
 dev_dependencies:

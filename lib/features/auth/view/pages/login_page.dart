@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
@@ -23,6 +24,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // Login
   void login() {
     final email = _emailController.text;
     final password = _passwordController.text;
@@ -42,17 +44,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive(context);
     final loginAsync = ref.watch(loginNotifierProvider);
-    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (
-      previous,
-      next,
-    ) {
-      next.when(
-        data: (data) {
+    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (prev, next) {
+      next.whenOrNull(
+        data: (data) async {
           if (data?.success == true && data?.data.accessToken != null) {
             final storage = ref.read(secureStorageProvider);
-
-            storage.saveAuthData(
+            await storage.saveAuthData(
               accessToken: data!.data.accessToken,
               refreshToken: data.data.refreshToken,
               userId: data.data.user.id.toString(),
@@ -65,30 +64,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             );
           }
         },
-        error: (err, _) {
+        error: (error, _) {
           if (!mounted) return;
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: Colors.grey[300],
-              content: Text(
-                err.toString(),
-                style: TextStyle(color: Colors.grey[800]),
+              backgroundColor: Colors.grey[200],
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Text(
+                      error.toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
         },
-        loading: () {},
       );
     });
 
-    double getHorizontalPadding(double width) {
-      if (width >= 1400) return 400;
-      if (width >= 1024) return 200;
-      if (width >= 768) return 50;
-      return 15;
-    }
-
-    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -100,7 +102,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             colors: [
               Colors.blue.shade900,
               Colors.blue.shade500,
-              Colors.blue.shade100,
+              Colors.blue.shade200,
             ],
           ),
         ),
@@ -112,7 +114,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             child: IntrinsicHeight(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: getHorizontalPadding(screenWidth),
+                  horizontal: responsive.authHorizontalPadding,
                   vertical: 50,
                 ),
                 child: Form(
@@ -127,15 +129,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           Text(
                             'Pico Shop',
                             style: GoogleFonts.poppins(
-                              fontSize: 24,
+                              fontSize: responsive.heading,
                               color: Colors.white,
                             ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Icon(
-                            Icons.shopping_bag,
-                            color: Colors.white,
-                            size: 30,
                           ),
                         ],
                       ),
@@ -178,10 +174,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           child: loginAsync.isLoading
                               ? SpinKitCircle(color: Colors.white, size: 27)
-                              : const Text(
+                              : Text(
                                   "Log In",
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: responsive.subHeading,
                                     color: Colors.white,
                                   ),
                                 ),
