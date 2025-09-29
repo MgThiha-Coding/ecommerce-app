@@ -13,6 +13,7 @@ import 'package:picoshop_theme2/features/auth/model/response/register_response.d
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 
 // login API requests and state
+
 class LoginNotifier extends StateNotifier<AsyncValue<LoginResponse?>> {
   final Dio _dio;
 
@@ -344,4 +345,51 @@ class VerifyCodeNotifier
 final verifyCodeNotifierProvider =
     StateNotifierProvider<VerifyCodeNotifier, AsyncValue<VerifyCodeResponse?>>(
       (ref) => VerifyCodeNotifier(),
+    );
+
+// test notifier
+class BaseUrlNotifier extends StateNotifier<AsyncValue<String?>> {
+  final Dio _dio;
+
+  BaseUrlNotifier([Dio? dio])
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 5),
+              receiveDataWhenStatusError: true,
+            ),
+          ),
+      super(const AsyncValue.data(null));
+
+  Future<void> handshake() async {
+    state = const AsyncValue.loading();
+    try {
+      final response = await _dio.get(AppConfig.baseUrl);
+      print('response baseUrl ${response.data}');
+
+      final url = response.requestOptions.uri.toString(); // capture URL
+
+      if (response.statusCode == 200) {
+        state = AsyncValue.data(url); // return URL
+      } else {
+        state = AsyncValue.error(
+          'Handshake failed: ${response.statusCode}',
+          StackTrace.current,
+        );
+      }
+    } on DioException catch (e, st) {
+      state = AsyncValue.error(
+        e.message ?? 'Unexpected error during handshake',
+        st,
+      );
+    }
+  }
+}
+
+final baseUrlNotifierProvider =
+    StateNotifierProvider<BaseUrlNotifier, AsyncValue<String?>>(
+      (ref) => BaseUrlNotifier(),
     );

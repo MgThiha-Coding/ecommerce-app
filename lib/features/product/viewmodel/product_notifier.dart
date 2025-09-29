@@ -53,6 +53,7 @@ class ProductListNotifier
           },
         ),
       );
+
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
       if (!isSuccess) {

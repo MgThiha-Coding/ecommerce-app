@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:toastification/toastification.dart';
 
 class CategoryListPage extends ConsumerStatefulWidget {
   const CategoryListPage({super.key});
@@ -20,7 +20,12 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(categoryListNotifierProvider.notifier).getNextPage();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() {
+        ref.read(categoryListNotifierProvider.notifier).getNextPage();
+      });
+    });
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -70,22 +75,10 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
                     child: categoryListAsync.when(
                       loading: () => categoryListShimmer(context),
                       error: (e, _) {
-                        toastification.show(
-                          title: Text(e.toString()),
-                          autoCloseDuration: const Duration(seconds: 3),
-                          backgroundColor: Colors.white,
-                        );
                         return const SizedBox.shrink();
                       },
                       data: (categories) {
                         if (categories.isEmpty) {
-                          toastification.show(
-                            title: const Text(
-                              'No Categories Available right now...',
-                            ),
-                            autoCloseDuration: const Duration(seconds: 3),
-                            backgroundColor: Colors.white,
-                          );
                           return const SizedBox.shrink();
                         }
                         return categoryListView(
@@ -121,24 +114,23 @@ class CategoryListAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          responsive.isMobile
-              ? IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.grey.withOpacity(0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: responsive.value(mobile: 15, tablet: 20, desktop: 30),
-                  ),
-                )
-              : SizedBox(width: 48),
+          IconButton(
+            style: IconButton.styleFrom(
+              // ignore: deprecated_member_use
+              backgroundColor: Colors.grey.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              context.go('/home');
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: responsive.value(mobile: 15, tablet: 20, desktop: 30),
+            ),
+          ),
           Text(
             'Categories',
             style: GoogleFonts.poppins(

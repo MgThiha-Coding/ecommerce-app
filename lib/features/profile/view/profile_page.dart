@@ -6,7 +6,6 @@ import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart'
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 
-
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -15,9 +14,34 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  String? userName;
+  String? userEmail;
+  String? userPhone;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final storage = ref.read(secureStorageProvider);
+    final name = await storage.getUserName();
+    final email = await storage.getUserEmail();
+    final phone = await storage.getUserPhone();
+
+    if (mounted) {
+      setState(() {
+        userName = name;
+        userEmail = email;
+        userPhone = phone;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loginOutAsync = ref.watch(logOutNotifierProvider);
+    final logOutAsync = ref.watch(logOutNotifierProvider);
 
     ref.listen<AsyncValue<dynamic>>(logOutNotifierProvider, (previous, next) {
       next.when(
@@ -40,20 +64,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Text(
-                      error.toString(),
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        color: Colors.blueGrey,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ],
+              content: Text(
+                error.toString(),
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.blueGrey,
+                  fontSize: 12,
+                ),
               ),
             ),
           );
@@ -61,74 +78,200 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       );
     });
 
-    return Scaffold(
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade500,
-              Colors.blue.shade100,
-            ],
-          ),
-        ),
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+        body: Column(
           children: [
+          
             Stack(
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  height: 350,
+                  height: 180,
                   width: double.infinity,
-                  color: Colors.blue.shade200,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blue.shade800,
+                        Colors.blue.shade500,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(5),
+                      bottomRight: Radius.circular(5),
+                    ),
+                  ),
                 ),
                 Positioned(
-                  bottom: -40,
-                  left: 20,
-                  child: CircleAvatar(
-                    radius: 70,
-                    backgroundImage: AssetImage('assets/images/picocare.png'),
+                  bottom: -50,
+                  left: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 10,
+                          spreadRadius: 3,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.person,
+                          size: 50, color: Colors.blue.shade600),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 120,
+                  bottom: -28,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                       "Pico Care User",
+                       overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        userEmail ?? "No email linked",
+                        style: GoogleFonts.poppins(
+                          color: Colors.black,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 100),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: SizedBox(
-                height: 45,
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade800,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+      
+            const SizedBox(height: 70),
+      
+        
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Card(
+                  elevation: 6,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  onPressed: loginOutAsync.isLoading
-                      ? null
-                      : () {
-                          ref.read(logOutNotifierProvider.notifier).logOut();
-                        },
-                  child: loginOutAsync.isLoading
-                      ? SpinKitCircle(size: 20, color: Colors.white)
-                      : Text(
-                          'Log Out',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 17,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: [
+                        _buildMenuTile(
+                          title: "Account Information",
+                          icon: Icons.person_outline,
+                          onTap: () {},
+                        ),
+                        _buildMenuTile(
+                          title: "Order History",
+                          icon: Icons.history,
+                          onTap: () {},
+                        ),
+                        _buildMenuTile(
+                          title: "Payment Information",
+                          icon: Icons.credit_card,
+                          onTap: () {},
+                        ),
+                        _buildMenuTile(
+                          title: "Settings",
+                          icon: Icons.settings,
+                          onTap: () {},
+                        ),
+      
+                        const Divider(),
+      
+                      
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 45,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: logOutAsync.isLoading
+                                  ? null
+                                  : () {
+                                      ref
+                                          .read(
+                                              logOutNotifierProvider.notifier)
+                                          .logOut();
+                                    },
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.blue.shade600,
+                                      Colors.blue.shade400,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: logOutAsync.isLoading
+                                      ? SpinKitCircle(
+                                          size: 20, color: Colors.white)
+                                      : Text(
+                                          "Log Out",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 15,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMenuTile({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, color: Colors.blue.shade600),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey.shade800,
+        ),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
     );
   }
 }

@@ -22,7 +22,7 @@ class PaymentMethodNotifier
           },
         ),
       );
-       final isSuccess =
+      final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&
           response.data['success'] == true;

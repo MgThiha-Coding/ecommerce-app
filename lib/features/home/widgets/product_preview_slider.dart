@@ -89,8 +89,8 @@ class ProductPreviewSlider extends ConsumerWidget {
               viewportFraction: 1.0,
               enableInfiniteScroll: true,
               autoPlay: true,
-              autoPlayInterval: const Duration(seconds: 3),
-              autoPlayAnimationDuration: const Duration(milliseconds: 800),
+              autoPlayInterval: const Duration(seconds: 1),
+              autoPlayAnimationDuration: const Duration(milliseconds: 300),
               scrollPhysics: const BouncingScrollPhysics(),
             ),
           );

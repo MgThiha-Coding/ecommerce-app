@@ -1,58 +1,55 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:picoshop_theme2/core/router/app_router.dart';
+import 'package:toastification/toastification.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/model/local/product_data_hive_adapater.dart';
-import 'package:toastification/toastification.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await appInit();
   await AppConfig.loadAccessToken();
-  runApp(ProviderScope(child: ToastificationWrapper(child: MyApp())));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const ProviderScope(child: ToastificationWrapper(child: MyApp())));
+  });
 }
 
 Future<void> appInit() async {
   await dotenv.load(fileName: '.env');
-
-  // Initialize Hive
   await Hive.initFlutter();
-
-  // Product Hive
   Hive.registerAdapter(ProductDataHiveAdapter());
-  await Hive.openBox<ProductHiveModel>('products');
-
-  // Brand Hive
   Hive.registerAdapter(BrandDataHiveAdapter());
-  await Hive.openBox<BrandHiveModel>('brands');
-
-  // Category Hive
   Hive.registerAdapter(CategoryDataHiveAdapter());
+  await Hive.openBox<ProductHiveModel>('products');
+  await Hive.openBox<BrandHiveModel>('brands');
   await Hive.openBox<CategoryHiveModel>('category');
 }
 
-class MyApp extends ConsumerStatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  ConsumerState<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
 
-class _MyAppState extends ConsumerState<MyApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Pico Pharmacy',
-      home: SplashPage(),
+      routeInformationParser: router.routeInformationParser,
+      routerDelegate: router.routerDelegate,
+      routeInformationProvider: router.routeInformationProvider,
+      title: 'Pico Shop',
     );
   }
 }

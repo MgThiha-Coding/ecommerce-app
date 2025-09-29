@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/login_request.dart';
@@ -51,17 +51,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         data: (data) async {
           if (data?.success == true && data?.data.accessToken != null) {
             final storage = ref.read(secureStorageProvider);
+            final user = data!.data.user;
+
             await storage.saveAuthData(
-              accessToken: data!.data.accessToken,
+              accessToken: data.data.accessToken,
               refreshToken: data.data.refreshToken,
-              userId: data.data.user.id.toString(),
+              userId: user.id.toString(),
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
             );
+
             AppConfig.updateAccessToken(data.data.accessToken);
+
             if (!mounted) return;
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const WrapperPage()),
-            );
+
+            context.go('/home');
           }
         },
         error: (error, _) {
@@ -91,27 +96,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
     });
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade500,
-              Colors.blue.shade200,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
+    return Container(
+      color: Colors.blue.shade400,
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.blue.shade900,
+                  Colors.blue.shade500,
+                  Colors.blue.shade200,
+                ],
+              ),
             ),
-            child: IntrinsicHeight(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: responsive.authHorizontalPadding,
@@ -122,14 +129,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Spacer(),
                       // App Title
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Pico Shop',
+                            'Pico Care',
                             style: GoogleFonts.poppins(
                               fontSize: responsive.heading,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.medical_information,
                               color: Colors.white,
                             ),
                           ),
@@ -144,8 +159,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         validator: (value) =>
                             value!.isEmpty ? "Email required" : null,
                       ),
-                      const SizedBox(height: 8.0),
 
+                      const SizedBox(height: 8.0),
                       // Password
                       AppTextFormField(
                         controller: _passwordController,
@@ -206,6 +221,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ],
+                      ),
+                      Spacer(),
+                      Text(
+                        '© 2025 Pico SBS',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

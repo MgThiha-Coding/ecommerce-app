@@ -33,9 +33,8 @@ class CreateAddressNotifier
           response.statusCode == 200;
 
       if (isSuccess) {
-      
         final responseData = CreateAddressResponse.fromJson(response.data);
-      
+
         state = AsyncValue.data(responseData);
       } else {
         final msg = response.data['message'];

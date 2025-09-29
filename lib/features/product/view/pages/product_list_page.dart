@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/home/widgets/home_app_bar.dart';
+import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:toastification/toastification.dart';
@@ -155,7 +156,15 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                 final productImage =
                                     products[index].productImage ?? '';
                                 return GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ProductDetailPage(),
+                                      ),
+                                    );
+                                  },
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -167,10 +176,13 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                           flex: 2,
                                           child: SizedBox.expand(
                                             child: ClipRRect(
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(7),
-                                                topRight: Radius.circular(7),
-                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                    topLeft: Radius.circular(7),
+                                                    topRight: Radius.circular(
+                                                      7,
+                                                    ),
+                                                  ),
                                               child: productImage.isEmpty
                                                   ? Image.asset(
                                                       AppImage.emptyContainer,
@@ -278,4 +290,3 @@ GridView productGridShimmer(BuildContext context, {int itemCount = 15}) {
     },
   );
 }
-

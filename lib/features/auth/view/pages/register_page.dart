@@ -136,195 +136,210 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
     });
 
-    return Scaffold(
-      /*
-      appBar: AppBar( 
-         title: IconButton(onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> VerifyCodePage()));
-         }, icon: Icon(Icons.arrow_forward)),
-      ),
-      */
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.grey.shade300, Colors.grey.shade300],
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
+    return Container(
+      color: Colors.blue.shade400,
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.grey.shade300, Colors.grey.shade300],
+              ),
             ),
-            child: IntrinsicHeight(
-              child: Container(
-                height: double.infinity,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.blue.shade900,
-                      Colors.blue.shade500,
-                      Colors.blue.shade200,
-                    ],
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: IntrinsicHeight(
+                child: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.blue.shade900,
+                        Colors.blue.shade500,
+                        Colors.blue.shade200,
+                      ],
+                    ),
                   ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: responsive.authHorizontalPadding,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // App Title
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Pico Shop',
-                              style: GoogleFonts.poppins(
-                                fontSize: responsive.heading,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-
-                        // First Name
-                        AppTextFormField(
-                          controller: _firstNameController,
-                          hintText: "First Name",
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "First Name required";
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 8.0),
-
-                        // Last Name
-                        AppTextFormField(
-                          controller: _lastNameController,
-                          hintText: "Last Name",
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Last Name required";
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 8.0),
-
-                        // Email
-                        AppTextFormField(
-                          controller: _emailController,
-                          hintText: "Email",
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Email required";
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 8.0),
-
-                        // Phone
-                        AppTextFormField(
-                          controller: _phoneController,
-                          hintText: "Phone",
-                        ),
-                        const SizedBox(height: 8.0),
-
-                        // Password
-                        AppTextFormField(
-                          controller: _passwordController,
-                          hintText: "Password",
-                          addObscure: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Password required";
-                            }
-                            if (value.length < 6) {
-                              return "Password must be at least 6 characters";
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 8.0),
-
-                        // Confirm Password
-                        AppTextFormField(
-                          controller: _confirmController,
-                          hintText: "Confirm Password",
-                          addObscure: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Confirm Password required";
-                            }
-                            if (value.length < 6) {
-                              return "Password must be at least 6 characters";
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16.0),
-
-                        SizedBox(
-                          height: 46,
-                          width: double.infinity,
-                          child: MaterialButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) register();
-                            },
-                            color: Colors.blue.shade900,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(13),
-                            ),
-                            child: registerAsync.isLoading
-                                ? SpinKitCircle(color: Colors.white, size: 27)
-                                : Text(
-                                    "Sign Up",
-                                    style: TextStyle(
-                                      fontSize: responsive.subHeading,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        //
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Already have an account?",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(width: 4.0),
-                            GestureDetector(
-                              onTap: widget.toggle,
-                              child: Text(
-                                'Log In',
-                                style: TextStyle(
-                                  color: Colors.blue.shade800,
-                                  fontWeight: FontWeight.bold,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: responsive.authHorizontalPadding,
+                      vertical: 50,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Spacer(),
+                          // App Title
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Pico Care',
+                                style: GoogleFonts.poppins(
+                                  fontSize: responsive.heading,
+                                  color: Colors.white,
                                 ),
                               ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.medical_information,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+
+                          // First Name
+                          AppTextFormField(
+                            controller: _firstNameController,
+                            hintText: "First Name",
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "First Name required";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Last Name
+                          AppTextFormField(
+                            controller: _lastNameController,
+                            hintText: "Last Name",
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Last Name required";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Email
+                          AppTextFormField(
+                            controller: _emailController,
+                            hintText: "Email",
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Email required";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Phone
+                          AppTextFormField(
+                            controller: _phoneController,
+                            hintText: "Phone",
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Password
+                          AppTextFormField(
+                            controller: _passwordController,
+                            hintText: "Password",
+                            addObscure: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Password required";
+                              }
+                              if (value.length < 6) {
+                                return "Password must be at least 6 characters";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 8.0),
+
+                          // Confirm Password
+                          AppTextFormField(
+                            controller: _confirmController,
+                            hintText: "Confirm Password",
+                            addObscure: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Confirm Password required";
+                              }
+                              if (value.length < 6) {
+                                return "Password must be at least 6 characters";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+
+                          SizedBox(
+                            height: 46,
+                            width: double.infinity,
+                            child: MaterialButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate())
+                                  register();
+                              },
+                              color: Colors.blue.shade900,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(13),
+                              ),
+                              child: registerAsync.isLoading
+                                  ? SpinKitCircle(color: Colors.white, size: 27)
+                                  : Text(
+                                      "Sign Up",
+                                      style: TextStyle(
+                                        fontSize: responsive.subHeading,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          //
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Already have an account?",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              const SizedBox(width: 4.0),
+                              GestureDetector(
+                                onTap: widget.toggle,
+                                child: Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                    color: Colors.blue.shade800,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Spacer(),
+                          Text(
+                            '© 2025 Pico SBS',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

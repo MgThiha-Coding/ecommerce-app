@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
-import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
-import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
@@ -94,7 +93,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final productListAsync = ref.watch(productNotifierProvider);
 
     return Container(
-      color: Colors.blue.shade500,
+      color: Colors.blue.shade400,
       child: SafeArea(
         child: Scaffold(
           body: Container(
@@ -106,9 +105,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.blue.shade900,
+                  Colors.blue.shade800,
                   Colors.blue.shade500,
-                  Colors.blue.shade100,
+                  Colors.blue.shade200,
                 ],
               ),
             ),
@@ -169,12 +168,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: Column(
                         children: [
                           SectionHeader("Brands", () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BrandListPage(),
-                              ),
-                            );
+                            context.go('/home/brandList');
                           }),
                           Container(
                             height: 80,
@@ -232,12 +226,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                           ),
                           SectionHeader("Categories", () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CategoryListPage(),
-                              ),
-                            );
+                            context.go('/home/categoryList');
                           }),
                           Container(
                             height: 110,

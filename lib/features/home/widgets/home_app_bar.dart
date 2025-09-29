@@ -10,7 +10,7 @@ class HomeAppBar extends StatelessWidget {
     final responsive = Responsive(context);
 
     return Container(
-      margin: EdgeInsets.only(top: 18, bottom: 9),
+      margin: EdgeInsets.only(top: 18, bottom: 10),
       height: responsive.value(mobile: 25, tablet: 50, desktop: 70),
       width: double.infinity,
       child: Row(
@@ -19,7 +19,7 @@ class HomeAppBar extends StatelessWidget {
           Text(
             'Pico Care',
             style: GoogleFonts.poppins(
-              fontSize: responsive.value(mobile: 12, tablet: 20, desktop: 25),
+              fontSize: responsive.value(mobile: 13, tablet: 20, desktop: 25),
               color: Colors.white,
               fontWeight: FontWeight.w400,
             ),

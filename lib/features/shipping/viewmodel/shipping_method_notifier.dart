@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/shipping/model/response/shipping_method_response.dart';
+import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
 
 class ShippingMethodNotifier
     extends StateNotifier<AsyncValue<ShippingMethodResponse?>> {

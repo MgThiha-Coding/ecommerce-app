@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -176,7 +177,7 @@ class AppBarWidget extends StatelessWidget {
             ),
           ),
           Text(
-            'Cart',
+            'Shipping',
             style: GoogleFonts.poppins(
               fontSize: responsiveTitle(),
               color: Colors.white,
@@ -189,3 +190,162 @@ class AppBarWidget extends StatelessWidget {
     );
   }
 }
+*/
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/payment/view/payment_method_page.dart';
+
+class ShippingMethodPage extends StatelessWidget {
+  const ShippingMethodPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Dummy data
+    final shippingList = [
+      {'name': 'Express Delivery', 'channel': 'Air', 'amount': 2000},
+      {'name': 'Standard Delivery', 'channel': 'Road', 'amount': 1000},
+      {'name': 'Economy Delivery', 'channel': 'Rail', 'amount': 500},
+    ];
+
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue.shade900,
+              Colors.blue.shade600,
+              Colors.blue.shade200,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Column(
+              children: [
+                const DemoAppBar(),
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: ListView.builder(
+                        itemCount: shippingList.length,
+                        itemBuilder: (context, index) {
+                          final method = shippingList[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 4,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.blue.shade100,
+                                child: Icon(
+                                  Icons.local_shipping,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                              title: Text(
+                                '${method['name']}',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Colors.grey.shade900,
+                                ),
+                              ),
+                              subtitle: Text(
+                                "${method['channel']} • ${method['amount']} Ks",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              trailing: Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.grey.shade500,
+                              ),
+                              onTap: () {
+                               Navigator.push(context, MaterialPageRoute(builder: (context)=> PaymentMethodPage(shippingMethod: '1')));
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DemoAppBar extends StatelessWidget {
+  const DemoAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    double responsiveTitle() {
+      if (screenWidth < 600) return 18;
+      if (screenWidth <= 1100) return 20;
+      return 25;
+    }
+
+    double responsiveHeight() {
+      if (screenWidth < 600) return 60;
+      if (screenWidth <= 1100) return 70;
+      return 80;
+    }
+
+    return Container(
+      height: responsiveHeight(),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: responsiveTitle(),
+            ),
+          ),
+          Text(
+            'Shipping',
+            style: GoogleFonts.poppins(
+              fontSize: responsiveTitle(),
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 48), // placeholder for spacing
+        ],
+      ),
+    );
+  }
+}
+

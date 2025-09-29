@@ -4,16 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/auth/model/request/verify_code_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:toastification/toastification.dart';
 
 class VerifyCodePage extends ConsumerStatefulWidget {
   final String? email;
@@ -76,27 +75,22 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           if (data != null && data.success) {
             final accessToken = data.data.auth.accessToken;
             final refreshToken = data.data.auth.refreshToken;
-            final userId = data.data.user.id.toString();
+            final user = data.data.user;
 
             await storage.saveAuthData(
               accessToken: accessToken,
               refreshToken: refreshToken,
-              userId: userId,
+              userId: user.id.toString(),
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
             );
 
             AppConfig.updateAccessToken(accessToken);
+           
+            context.go('/home');
 
-            final message = data.message;
-            toastification.show(
-              title: Text(message, style: TextStyle(color: Colors.white)),
-              animationDuration: Duration(milliseconds: 300),
-              autoCloseDuration: Duration(seconds: 2),
-            );
-
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => WrapperPage()),
-            );
+           
           }
         },
         error: (error, _) {

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -19,18 +18,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     Future.microtask(() async {
       final storage = ref.read(secureStorageProvider);
       final isLoggedIn = await storage.isLoggedIn();
-
       await Future.delayed(const Duration(seconds: 2));
-
       if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              isLoggedIn ? const WrapperPage() : const LoginOrRegister(),
-        ),
-      );
+      if (isLoggedIn) {
+        context.go('/home');
+      } else {
+        context.go('/loginOrRegister');
+      }
     });
   }
 
@@ -67,7 +61,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                     ),
                   ),
                   const SizedBox(width: 8.0),
-                  Icon(Icons.shopping_bag, color: Colors.white, size: 30),
+                  const Icon(Icons.shopping_bag, color: Colors.white, size: 30),
                 ],
               ),
               const SizedBox(height: 8.0),

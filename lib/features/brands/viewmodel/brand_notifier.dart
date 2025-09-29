@@ -55,10 +55,13 @@ class BrandListNotifier
         options: Options(
           headers: {
             'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
+
+      print('Brand List Response Testing result ${response.data}');
 
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
@@ -83,8 +86,8 @@ class BrandListNotifier
           if (_localCache.length >= 20) {
             _localCache.delete(_localCache.keys.first);
           }
-        _localCache.put(brand.id, BrandHiveModel.fromDataModel(brand));
-                }
+          _localCache.put(brand.id, BrandHiveModel.fromDataModel(brand));
+        }
         _currentPage++;
       }
 

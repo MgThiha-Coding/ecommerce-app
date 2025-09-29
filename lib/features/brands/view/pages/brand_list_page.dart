@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:toastification/toastification.dart';
 
 class BrandListPage extends ConsumerStatefulWidget {
   const BrandListPage({super.key});
@@ -20,7 +20,12 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(brandListNotifierProvider.notifier).getNextPage();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() {
+        ref.read(brandListNotifierProvider.notifier).getNextPage();
+      });
+    });
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -70,23 +75,11 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
                     child: brandListAsync.when(
                       loading: () => brandListShimmer(context),
                       error: (e, _) {
-                        toastification.show(
-                          title: Text(e.toString()),
-                          autoCloseDuration: const Duration(seconds: 3),
-                          backgroundColor: Colors.white,
-                        );
                         return const SizedBox.shrink();
                       },
                       data: (brands) {
                         if (brands.isEmpty) {
-                          toastification.show(
-                            title: const Text(
-                              'No Brands Available right now...',
-                            ),
-                            autoCloseDuration: const Duration(seconds: 3),
-                            backgroundColor: Colors.white,
-                          );
-                          return const SizedBox.shrink();
+                          return Center(child: Text('No brands'));
                         }
                         return brandListView(
                           context,
@@ -121,25 +114,23 @@ class BrandListAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          responsive.isMobile
-              ? IconButton(
-                  style: IconButton.styleFrom(
-                    // ignore: deprecated_member_use
-                    backgroundColor: Colors.grey.withOpacity(0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: responsive.value(mobile: 15, tablet: 20, desktop: 30),
-                  ),
-                )
-              : SizedBox(width: 48),
+          IconButton(
+            style: IconButton.styleFrom(
+              // ignore: deprecated_member_use
+              backgroundColor: Colors.grey.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              context.go('/home');
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: responsive.value(mobile: 15, tablet: 20, desktop: 30),
+            ),
+          ),
           Text(
             'Brands',
             style: GoogleFonts.poppins(
