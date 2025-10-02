@@ -50,18 +50,16 @@ class BrandListNotifier
 
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/brands',
+        'https://beta.picosbs.com/api/ecommerce/brands',
+        //'${AppConfig.baseUrl}/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
-
-      print('Brand List Response Testing result ${response.data}');
 
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;

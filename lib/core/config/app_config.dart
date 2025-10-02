@@ -5,7 +5,7 @@ class AppConfig {
   static String _accessToken = '';
 
   // Make baseUrl a private variable so it can be updated
-  static String _baseUrl = 'https://beta.picosbs.com/api/v1';
+  static String _baseUrl = 'https://beta.picosbs.com/api';
 
   // Public getters
   static String get accessToken => _accessToken;

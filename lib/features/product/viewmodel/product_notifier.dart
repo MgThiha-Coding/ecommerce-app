@@ -44,7 +44,8 @@ class ProductListNotifier
     _isLoading = true;
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/products',
+        'https://beta.picosbs.com/api/ecommerce/products',
+        // '${AppConfig.baseUrl}/ecommerce/products',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -63,6 +64,8 @@ class ProductListNotifier
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
+
+      print('Product List Response ${response.data}');
       final parsed = ProductListResponse.fromJson(response.data);
       final products = parsed.data?.data ?? [];
       if (products.isEmpty) {

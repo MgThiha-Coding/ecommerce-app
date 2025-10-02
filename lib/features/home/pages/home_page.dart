@@ -105,6 +105,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
+                  
                   Colors.blue.shade800,
                   Colors.blue.shade500,
                   Colors.blue.shade200,
@@ -118,6 +119,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 controller: _scrollController,
                 children: [
                   HomeAppBar(),
+                  /*
                   TextField(
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(
@@ -140,6 +142,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
+                  */
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Align(

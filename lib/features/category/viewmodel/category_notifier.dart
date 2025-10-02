@@ -49,7 +49,8 @@ class CategoryListNotifier
 
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/categories',
+        'https://beta.picosbs.com/api/ecommerce/categories',
+       // '${AppConfig.baseUrl}v1/ecommerce/categories',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -69,7 +70,7 @@ class CategoryListNotifier
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
-
+      print('Category Test Response ${response.data}');
       final parsed = CategoriesListResponse.fromJson(response.data);
       final categories = parsed.data.data;
 
@@ -86,7 +87,7 @@ class CategoryListNotifier
             category.id,
             CategoryHiveModel.fromDataModel(category),
           );
-                }
+        }
         _currentPage++;
       }
 

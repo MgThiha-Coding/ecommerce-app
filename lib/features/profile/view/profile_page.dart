@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 
@@ -42,7 +42,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final logOutAsync = ref.watch(logOutNotifierProvider);
-
     ref.listen<AsyncValue<dynamic>>(logOutNotifierProvider, (previous, next) {
       next.when(
         data: (data) async {
@@ -51,11 +50,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             await storage.clear();
 
             if (mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginOrRegister()),
-                (route) => false,
-              );
+              context.go('/loginOrRegister');
             }
           }
         },
@@ -83,7 +78,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         backgroundColor: Colors.grey.shade100,
         body: Column(
           children: [
-          
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -92,10 +86,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.blue.shade800,
-                        Colors.blue.shade500,
-                      ],
+                      colors: [Colors.blue.shade800, Colors.blue.shade500],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -113,6 +104,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.black.withOpacity(0.25),
                           blurRadius: 10,
                           spreadRadius: 3,
@@ -123,8 +115,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.person,
-                          size: 50, color: Colors.blue.shade600),
+                      child: Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.blue.shade600,
+                      ),
                     ),
                   ),
                 ),
@@ -135,8 +130,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                       "Pico Care User",
-                       overflow: TextOverflow.ellipsis,
+                        "Pico Care User",
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontSize: 18,
@@ -156,10 +151,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
             ),
-      
+
             const SizedBox(height: 70),
-      
-        
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -192,10 +186,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           icon: Icons.settings,
                           onTap: () {},
                         ),
-      
+
                         const Divider(),
-      
-                      
+
                         Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: SizedBox(
@@ -212,8 +205,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   ? null
                                   : () {
                                       ref
-                                          .read(
-                                              logOutNotifierProvider.notifier)
+                                          .read(logOutNotifierProvider.notifier)
                                           .logOut();
                                     },
                               child: Ink(
@@ -229,7 +221,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 child: Center(
                                   child: logOutAsync.isLoading
                                       ? SpinKitCircle(
-                                          size: 20, color: Colors.white)
+                                          size: 20,
+                                          color: Colors.white,
+                                        )
                                       : Text(
                                           "Log Out",
                                           style: GoogleFonts.poppins(

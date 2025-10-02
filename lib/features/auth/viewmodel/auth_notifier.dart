@@ -40,7 +40,8 @@ class LoginNotifier extends StateNotifier<AsyncValue<LoginResponse?>> {
 
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/central/login',
+        'https://beta.picosbs.com/api/v1/central/login',
+       // '${AppConfig.baseUrl}v1/central/login',
         data: {
           "email_or_phone_or_username": params.emailOrPhoneOrUserName,
           "password": params.password,
@@ -106,11 +107,13 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
 
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/logout',
+        'https://beta.picosbs.com/api/v1/logout',
+       // '${AppConfig.baseUrl}v1/logout',
         options: Options(
           headers: {
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'Content-Type': 'application/json',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
@@ -122,6 +125,7 @@ class LogOutNotifier extends StateNotifier<AsyncValue<LogOutResponse?>> {
           response.data['success'] == true;
 
       if (isSuccess) {
+        print('Logout Response ${response.data}');
         state = AsyncValue.data(LogOutResponse.fromJson(response.data));
       } else {
         state = AsyncValue.error(
@@ -179,7 +183,7 @@ class RegisterNotifier extends StateNotifier<AsyncValue<RegisterResponse?>> {
 
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/register',
+        '${AppConfig.baseUrl}v1/register',
         data: params.toJson(),
       );
 
@@ -264,7 +268,7 @@ class VerifyCodeNotifier
 
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/verify',
+        '${AppConfig.baseUrl}v1/verify',
         data: params.toJson(),
       );
 
@@ -370,10 +374,10 @@ class BaseUrlNotifier extends StateNotifier<AsyncValue<String?>> {
       final response = await _dio.get(AppConfig.baseUrl);
       print('response baseUrl ${response.data}');
 
-      final url = response.requestOptions.uri.toString(); // capture URL
+      final url = response.requestOptions.uri.toString();
 
       if (response.statusCode == 200) {
-        state = AsyncValue.data(url); // return URL
+        state = AsyncValue.data(url);
       } else {
         state = AsyncValue.error(
           'Handshake failed: ${response.statusCode}',

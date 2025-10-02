@@ -87,52 +87,65 @@
   }
 
   class BrandDataModel {
-    final int id;
-    final String name;
-    final String? description;
-    final int? deletedBy;
-    final int createdBy;
-    final int? updatedBy;
-    final DateTime? deletedAt;
-    final DateTime createdAt;
-    final DateTime updatedAt;
+  final int id;
+  final String name;
+  final String? description;
+  final int? deletedBy;
+  final int? createdBy;
+  final int? updatedBy;
+  final DateTime? deletedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
-    BrandDataModel({
-      required this.id,
-      required this.name,
-      this.description,
-      this.deletedBy,
-      required this.createdBy,
-      this.updatedBy,
-      this.deletedAt,
-      required this.createdAt,
-      required this.updatedAt,
-    });
+  BrandDataModel({
+    required this.id,
+    required this.name,
+    this.description,
+    this.deletedBy,
+    this.createdBy,
+    this.updatedBy,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
 
-    factory BrandDataModel.fromJson(Map<String, dynamic> json) => BrandDataModel(
-          id: json['id'] ?? 0,
-          name: json['name'] ?? '',
-          description: json['description'],
-          deletedBy: json['deleted_by'] != null ? int.tryParse(json['deleted_by'].toString()) : null,
-          createdBy: json['created_by'] ?? 0,
-          updatedBy: json['updated_by'] != null ? int.tryParse(json['updated_by'].toString()) : null,
-          deletedAt: json['deleted_at'] != null ? DateTime.tryParse(json['deleted_at']) : null,
-          createdAt: DateTime.parse(json['created_at']),
-          updatedAt: DateTime.parse(json['updated_at']),
-        );
+  factory BrandDataModel.fromJson(Map<String, dynamic> json) => BrandDataModel(
+        id: json['id'] ?? 0,
+        name: json['name'] ?? '',
+        description: json['description'],
+        deletedBy: json['deleted_by'] != null
+            ? int.tryParse(json['deleted_by'].toString())
+            : null,
+        createdBy: json['created_by'] != null
+            ? int.tryParse(json['created_by'].toString())
+            : null,
+        updatedBy: json['updated_by'] != null
+            ? int.tryParse(json['updated_by'].toString())
+            : null,
+        deletedAt: json['deleted_at'] != null
+            ? DateTime.tryParse(json['deleted_at'])
+            : null,
+        createdAt: json['created_at'] != null
+            ? DateTime.tryParse(json['created_at'])
+            : null,
+        updatedAt: json['updated_at'] != null
+            ? DateTime.tryParse(json['updated_at'])
+            : null,
+      );
 
-    Map<String, dynamic> toJson() => {
-          'id': id,
-          'name': name,
-          'description': description,
-          'deleted_by': deletedBy,
-          'created_by': createdBy,
-          'updated_by': updatedBy,
-          'deleted_at': deletedAt?.toIso8601String(),
-          'created_at': createdAt.toIso8601String(),
-          'updated_at': updatedAt.toIso8601String(),
-        };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'deleted_by': deletedBy,
+        'created_by': createdBy,
+        'updated_by': updatedBy,
+        'deleted_at': deletedAt?.toIso8601String(),
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
+}
+
 
   class Link {
     final String? url;

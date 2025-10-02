@@ -13,6 +13,7 @@ import 'package:picoshop_theme2/features/profile/view/profile_page.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
+
     routes: [
       GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
       GoRoute(
@@ -36,7 +37,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-
           GoRoute(
             path: '/products',
             builder: (context, state) => const ProductListPage(),
