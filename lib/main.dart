@@ -17,9 +17,15 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
   };
+
+  // Immediately show splash screen
+  runApp(const ProviderScope(child: MyAppSplash()));
+
+  // Run existing async initialization in background
   try {
     await appInit();
     await AppConfig.loadAccessToken();
@@ -27,11 +33,12 @@ Future<void> main() async {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    runApp(const ProviderScope(child: MyApp()));
   } catch (e, st) {
     print('Startup error: $e\n$st');
-    runApp(const ErrorApp());
   }
+
+  // Replace splash with actual app
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 Future<void> appInit() async {
@@ -64,6 +71,40 @@ Future<void> _openBoxSafe<T>(String boxName) async {
   }
 }
 
+// Minimal splash widget for immediate display
+class MyAppSplash extends StatelessWidget {
+  const MyAppSplash({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFFFC107), Color(0xFFA5D6A7)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: const Center(
+            child: Text(
+              'Pico Shop',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Actual app after initialization
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 

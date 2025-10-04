@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
@@ -121,9 +122,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     const SizedBox(width: 8),
                     CircleAvatar(
                       radius: 18,
-                      // ignore: deprecated_member_use
-                      backgroundColor: Colors.white.withOpacity(0.8),
-                      child: Icon(Icons.person, color: Colors.amber.shade700),
+                      child: Image.asset(AppImage.person, fit: BoxFit.cover),
                     ),
                     const SizedBox(width: 12),
                     Column(
@@ -137,6 +136,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Colors.green,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             Icon(

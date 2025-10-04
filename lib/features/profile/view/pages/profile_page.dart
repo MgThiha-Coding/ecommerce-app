@@ -109,7 +109,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         Text(
                           displayEmail,
                           style: GoogleFonts.poppins(
-                            color: Colors.black,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
                             fontSize: 12,
                           ),
                         ),
@@ -143,6 +144,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               return Consumer(
                                 builder: (context, ref, _) {
                                   final user = ref.watch(userProvider);
+                                  final displayName =
+                                      (user?.name.isNotEmpty ?? false)
+                                      ? user!.name
+                                      : "Pico Shop User";
+                                  final displayEmail =
+                                      (user?.email.isNotEmpty ?? false)
+                                      ? user!.email
+                                      : "Unknown";
+                                  final displayPhone =
+                                      (user?.phone.isNotEmpty ?? false)
+                                      ? user!.phone
+                                      : "Unknown";
 
                                   return Dialog(
                                     shape: RoundedRectangleBorder(
@@ -169,7 +182,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                user?.name ?? 'Pico Care User',
+                                                displayName,
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,
@@ -177,7 +190,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
-                                                user?.email ?? 'Guest',
+                                                displayEmail,
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 13,
                                                   color: Colors.grey[700],
@@ -185,7 +198,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
-                                                user?.phone ?? 'N/A',
+                                                displayPhone,
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 13,
                                                   color: Colors.grey[700],
@@ -223,6 +236,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         icon: Icons.history,
                         onTap: () {},
                       ),
+                      _buildMenuTile(
+                        title: "Shipping Methods",
+                        icon: Icons.local_shipping,
+                        onTap: () {},
+                      ),
+                      _buildMenuTile(
+                        title: "Payment Methods",
+                        icon: Icons.payment,
+                        onTap: () {},
+                      ),
+
                       _buildMenuTile(
                         title: "Payment Information",
                         icon: Icons.credit_card,

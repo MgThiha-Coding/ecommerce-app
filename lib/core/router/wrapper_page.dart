@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -67,7 +66,7 @@ class _WrapperPageState extends State<WrapperPage> {
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue.shade400,
+          selectedItemColor: Color(0xFF4CAF50),
           unselectedItemColor: Colors.grey.shade800,
           showSelectedLabels: true,
           showUnselectedLabels: true,
