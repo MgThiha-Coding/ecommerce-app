@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
+import 'package:picoshop_theme2/features/category/view/pages/category_detail_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -157,6 +158,7 @@ ListView categoryListView(
     itemBuilder: (context, index) {
       final categoryName = categories[index]?.name ?? '';
       final description = categories[index]?.description ?? '';
+      final categoryId=  categories[index]?.id;
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -195,7 +197,9 @@ ListView categoryListView(
             ),
             const SizedBox(width: 12),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context,MaterialPageRoute(builder: (context)=> CategoryDetailPage(categoryId)));
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF212121),
                 shape: RoundedRectangleBorder(
