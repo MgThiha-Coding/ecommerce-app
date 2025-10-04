@@ -5,7 +5,7 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/profile_page.dart';
+import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key, required Widget child});

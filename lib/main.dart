@@ -12,8 +12,8 @@ import 'package:picoshop_theme2/features/cart/local/cart_item_hive_adapater.dart
 import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
-import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
-import 'package:picoshop_theme2/features/product/model/local/product_data_hive_adapater.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive_adapater.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

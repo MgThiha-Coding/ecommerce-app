@@ -8,6 +8,7 @@ class SecureStorage {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
+
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
@@ -17,6 +18,24 @@ class SecureStorage {
     await _storage.write(key: 'refresh_token', value: refreshToken);
     await _storage.write(key: 'user_id', value: userId);
   }
+
+  Future<void> saveUserInfo({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    await _storage.write(key: 'user_name', value: name);
+    await _storage.write(key: 'user_email', value: email);
+    await _storage.write(key: 'user_phone', value: phone);
+  }
+
+  Future<Map<String, String?>> getUserInfo() async {
+    final name = await _storage.read(key: 'user_name');
+    final email = await _storage.read(key: 'user_email');
+    return {'name': name, 'email': email};
+  }
+
+  Future<void> clear() async => await _storage.deleteAll();
 
   Future<bool> isLoggedIn() async {
     final token = await _storage.read(key: 'access_token');
@@ -30,6 +49,4 @@ class SecureStorage {
       await _storage.read(key: 'refresh_token');
 
   Future<String?> getUserId() async => await _storage.read(key: 'user_id');
-
-  Future<void> clear() async => await _storage.deleteAll();
 }

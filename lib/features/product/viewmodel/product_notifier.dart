@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_detail_response.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
+import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
 // Product List Notifier Provider
 class ProductListNotifier
@@ -64,8 +64,6 @@ class ProductListNotifier
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
-
-      print('Product List Response ${response.data}');
       final parsed = ProductListResponse.fromJson(response.data);
       final products = parsed.data?.data ?? [];
       if (products.isEmpty) {

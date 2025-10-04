@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
@@ -39,60 +38,59 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final notifier = ref.read(categoryListNotifierProvider.notifier);
 
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade500,
-                Colors.blue.shade100,
-              ],
+    return Container(
+      color: Color(0xFFFFC107),
+      child: SafeArea(
+        child: Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              const CategoryListAppBar(),
-              const SizedBox(height: 8),
-              Expanded(
-                child: RefreshIndicator(
-                  backgroundColor: Colors.blue.shade50,
-                  onRefresh: () => notifier.reset(),
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (scrollInfo) {
-                      if (scrollInfo.metrics.pixels >=
-                          scrollInfo.metrics.maxScrollExtent - 200) {
-                        notifier.getNextPage();
-                      }
-                      return false;
-                    },
-                    child: categoryListAsync.when(
-                      loading: () => categoryListShimmer(context),
-                      error: (e, _) {
-                        return const SizedBox.shrink();
-                      },
-                      data: (categories) {
-                        if (categories.isEmpty) {
-                          return const SizedBox.shrink();
+            child: Column(
+              children: [
+                const CategoryListAppBar(),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: RefreshIndicator(
+                    backgroundColor: Colors.blue.shade50,
+                    onRefresh: () => notifier.reset(),
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scrollInfo) {
+                        if (scrollInfo.metrics.pixels >=
+                            scrollInfo.metrics.maxScrollExtent - 200) {
+                          notifier.getNextPage();
                         }
-                        return categoryListView(
-                          context,
-                          categories,
-                          notifier.isNoMore,
-                          _scrollController,
-                        );
+                        return false;
                       },
+                      child: categoryListAsync.when(
+                        loading: () => categoryListShimmer(context),
+                        error: (e, _) {
+                          return const SizedBox.shrink();
+                        },
+                        data: (categories) {
+                          if (categories.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return categoryListView(
+                            context,
+                            categories,
+                            notifier.isNoMore,
+                            _scrollController,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -123,7 +121,7 @@ class CategoryListAppBar extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              context.go('/home');
+              Navigator.pop(context);
             },
             icon: Icon(
               Icons.arrow_back,
@@ -199,7 +197,7 @@ ListView categoryListView(
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Color(0xFF212121),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
@@ -39,60 +38,59 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final notifier = ref.read(brandListNotifierProvider.notifier);
 
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade900,
-                Colors.blue.shade500,
-                Colors.blue.shade100,
-              ],
+    return Container(
+      color: Color(0xFFFFC107),
+      child: SafeArea(
+        child: Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              const BrandListAppBar(),
-              const SizedBox(height: 8),
-              Expanded(
-                child: RefreshIndicator(
-                  backgroundColor: Colors.blue.shade50,
-                  onRefresh: () => notifier.reset(),
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (scrollInfo) {
-                      if (scrollInfo.metrics.pixels >=
-                          scrollInfo.metrics.maxScrollExtent - 200) {
-                        notifier.getNextPage();
-                      }
-                      return false;
-                    },
-                    child: brandListAsync.when(
-                      loading: () => brandListShimmer(context),
-                      error: (e, _) {
-                        return const SizedBox.shrink();
-                      },
-                      data: (brands) {
-                        if (brands.isEmpty) {
-                          return Center(child: Text('No brands'));
+            child: Column(
+              children: [
+                const BrandListAppBar(),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: RefreshIndicator(
+                    backgroundColor: Colors.blue.shade50,
+                    onRefresh: () => notifier.reset(),
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scrollInfo) {
+                        if (scrollInfo.metrics.pixels >=
+                            scrollInfo.metrics.maxScrollExtent - 200) {
+                          notifier.getNextPage();
                         }
-                        return brandListView(
-                          context,
-                          brands,
-                          notifier.isNoMore,
-                          _scrollController,
-                        );
+                        return false;
                       },
+                      child: brandListAsync.when(
+                        loading: () => brandListShimmer(context),
+                        error: (e, _) {
+                          return const SizedBox.shrink();
+                        },
+                        data: (brands) {
+                          if (brands.isEmpty) {
+                            return Center(child: Text('No brands'));
+                          }
+                          return brandListView(
+                            context,
+                            brands,
+                            notifier.isNoMore,
+                            _scrollController,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -123,7 +121,7 @@ class BrandListAppBar extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              context.go('/home');
+              Navigator.pop(context);
             },
             icon: Icon(
               Icons.arrow_back,
@@ -174,7 +172,7 @@ ListView brandListView(
                   Text(
                     brandName,
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w400,
                     ),
                     maxLines: 2,
@@ -199,7 +197,7 @@ ListView brandListView(
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Color(0xFF212121),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),

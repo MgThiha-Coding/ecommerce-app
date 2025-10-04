@@ -1,5 +1,5 @@
 
-import 'package:picoshop_theme2/features/product/model/response/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
 class ProductHiveModel {
   final int? id;

@@ -60,6 +60,7 @@ class BrandListNotifier
           },
         ),
       );
+       
 
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
@@ -71,6 +72,7 @@ class BrandListNotifier
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
+    
 
       final parsed = BrandListResponse.fromJson(response.data);
       final brands = parsed.data.data;
@@ -100,7 +102,7 @@ class BrandListNotifier
       }
     } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      state = AsyncValue.data(cached);
+     state = AsyncValue.data(cached);
       _isNoMore = true;
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||

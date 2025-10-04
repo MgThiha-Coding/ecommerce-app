@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
 Widget productPreview(
   BuildContext context,

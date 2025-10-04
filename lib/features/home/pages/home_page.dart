@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
+import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
+import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
@@ -107,6 +109,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
           // AppBar Section
           appBar: AppBar(
+            scrolledUnderElevation: 0,
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
@@ -126,19 +129,29 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Welcome 👋",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Welcome ",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.green,
+                              ),
+                            ),
+                            Icon(
+                              Icons.waving_hand,
+                              color: Colors.green,
+                              size: 16,
+                            ),
+                          ],
                         ),
                         Text(
                           ref.watch(userProvider)?.email ?? "Guest",
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: Colors.red.shade400,
                           ),
                         ),
                       ],
@@ -181,7 +194,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                       children: [
                         // Brand Preview Section Header
                         SectionHeader("Brands", () {
-                          context.go('/home/brandList');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BrandListPage(),
+                            ),
+                          );
                         }),
 
                         SizedBox(
@@ -200,7 +218,12 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                         // Categories Preview Section Header
                         SectionHeader("Categories", () {
-                          context.go('/home/categoryList');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CategoryListPage(),
+                            ),
+                          );
                         }),
 
                         SizedBox(

@@ -1,5 +1,5 @@
 import 'package:hive_flutter/adapters.dart';
-import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 
 class ProductDataHiveAdapter extends TypeAdapter<ProductHiveModel> {
   @override

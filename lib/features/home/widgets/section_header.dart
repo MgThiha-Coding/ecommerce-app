@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 Widget SectionHeader(String title, VoidCallback onTap) {
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
+    padding: const EdgeInsets.symmetric(vertical: 12),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

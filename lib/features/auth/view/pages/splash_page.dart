@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -17,8 +20,25 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     super.initState();
     Future.microtask(() async {
       final storage = ref.read(secureStorageProvider);
+
+      final userInfo = await storage.getUserInfo();
+      final userId = await storage.getUserId();
+
+      if (userInfo['name'] != null &&
+          userInfo['email'] != null &&
+          userId != null) {
+        ref.read(userProvider.notifier).state = UserModel(
+          id: userId,
+          name: userInfo['name'] ?? '',
+          email: userInfo['email'] ?? '',
+          phone: userInfo['phone'] ?? '',
+        );
+      }
+
       final isLoggedIn = await storage.isLoggedIn();
+
       await Future.delayed(const Duration(seconds: 2));
+
       if (!mounted) return;
       if (isLoggedIn) {
         context.go('/home');
@@ -34,39 +54,34 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade500,
-              Colors.blue.shade100,
-            ],
+            colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset(AppImage.appLogo, scale: 14),
                   Text(
-                    'Pico Shop',
+                    'Welcome to Pico Shop',
                     style: GoogleFonts.poppins(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                       color: Colors.white,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(width: 8.0),
-                  const Icon(Icons.shopping_bag, color: Colors.white, size: 30),
                 ],
               ),
               const SizedBox(height: 8.0),
               Text(
-                'Your trusted pharmacy online',
+                'All you need is right here',
                 style: GoogleFonts.poppins(fontSize: 16, color: Colors.white70),
               ),
             ],

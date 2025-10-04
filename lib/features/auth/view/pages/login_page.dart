@@ -4,8 +4,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/storage/model/user_model.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
@@ -62,6 +63,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               userId: user.id.toString(),
             );
 
+            storage.saveUserInfo(
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone
+              
+            );
+
             ref.read(userProvider.notifier).state = UserModel(
               id: user.id.toString(),
               name: user.name ?? '',
@@ -100,145 +108,148 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
     });
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFC107), // Amber
-              Color(0xFFFFE082), // Soft Amber
-              Color(0xFFA5D6A7), // Green
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: responsive.authHorizontalPadding,
-              vertical: 50,
+    return Container(
+      color: Color(0xFFFFC107),
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFFFC107),
+                  Color(0xFFFFE082),
+                  Color(0xFFA5D6A7),
+                ],
+              ),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Logo / Title
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive.authHorizontalPadding,
+                  vertical: 50,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
                     children: [
-                      Text(
-                        'Pico Care',
-                        style: GoogleFonts.poppins(
-                          fontSize: responsive.heading,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                      // Logo / Title
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(AppImage.appLogo, scale: 14),
+                          Text(
+                            'Welcome to Pico Shop',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Email Field
+                      _glassCard(
+                        child: AppTextFormField(
+                          controller: _emailController,
+                          hintText: "Email",
+                          validator: (value) =>
+                              value!.isEmpty ? "Email required" : null,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.medical_information,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
+                      const SizedBox(height: 10),
 
-                  // Email Field
-                  _glassCard(
-                    child: AppTextFormField(
-                      controller: _emailController,
-                      hintText: "Email",
-                      validator: (value) =>
-                          value!.isEmpty ? "Email required" : null,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Password Field
-                  _glassCard(
-                    child: AppTextFormField(
-                      controller: _passwordController,
-                      hintText: "Password",
-                      addObscure: true,
-                      validator: (value) {
-                        if (value!.isEmpty) return "Password required";
-                        if (value.length < 6) {
-                          return "Min 6 characters";
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Login Button
-                  SizedBox(
-                    height: 50,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                      // Password Field
+                      _glassCard(
+                        child: AppTextFormField(
+                          controller: _passwordController,
+                          hintText: "Password",
+                          addObscure: true,
+                          validator: (value) {
+                            if (value!.isEmpty) return "Password required";
+                            if (value.length < 6) {
+                              return "Min 6 characters";
+                            }
+                            return null;
+                          },
                         ),
-                        elevation: 4,
-                        shadowColor: Colors.green.withOpacity(0.3),
                       ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) login();
-                      },
-                      child: loginAsync.isLoading
-                          ? const SpinKitCircle(color: Colors.white, size: 28)
-                          : Text(
-                              "Log In",
+                      const SizedBox(height: 20),
+
+                      // Login Button
+                      SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade600,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 4,
+                            shadowColor: Colors.green.withOpacity(0.3),
+                          ),
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) login();
+                          },
+                          child: loginAsync.isLoading
+                              ? const SpinKitCircle(
+                                  color: Colors.white,
+                                  size: 28,
+                                )
+                              : Text(
+                                  "Log In",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: responsive.subHeading,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Register
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account?",
+                            style: GoogleFonts.poppins(color: Colors.white70),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: widget.toggle,
+                            child: Text(
+                              'Register',
                               style: GoogleFonts.poppins(
-                                fontSize: responsive.subHeading,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                                color: Colors.green.shade800,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Register
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Don't have an account?",
-                        style: GoogleFonts.poppins(color: Colors.white70),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.toggle,
-                        child: Text(
-                          'Register',
-                          style: GoogleFonts.poppins(
-                            color: Colors.green.shade800,
-                            fontWeight: FontWeight.w600,
                           ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      // Footer
+                      Text(
+                        '© 2025 Pico SBS',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white70,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 40),
-
-                  // Footer
-                  Text(
-                    '© 2025 Pico SBS',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

@@ -201,7 +201,6 @@ final verifyCodeNotifierProvider =
       (ref) => VerifyCodeNotifier(ref.read(secureStorageProvider)),
     );
 
-// LOGOUT
 class LogOutNotifier extends BaseAuthNotifier<LogOutResponse> {
   LogOutNotifier(SecureStorage storage, [Dio? dio]) : super(storage, dio);
 
