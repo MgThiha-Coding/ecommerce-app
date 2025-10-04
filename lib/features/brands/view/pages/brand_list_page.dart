@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
+import 'package:picoshop_theme2/features/brands/view/pages/brand_detail_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -50,7 +51,11 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+                colors: [
+                  Color(0xFFFFC107),
+                  Color(0xFFFFE082),
+                  Color(0xFFA5D6A7),
+                ],
               ),
             ),
             child: Column(
@@ -157,6 +162,7 @@ ListView brandListView(
     itemBuilder: (context, index) {
       final brandName = brands[index]?.name ?? '';
       final description = brands[index]?.description ?? '';
+      final brandId = brands[index]?.id;
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -195,7 +201,14 @@ ListView brandListView(
             ),
             const SizedBox(width: 12),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BrandDetailPage(brandId),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF212121),
                 shape: RoundedRectangleBorder(
