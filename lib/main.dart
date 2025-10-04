@@ -8,6 +8,8 @@ import 'package:picoshop_theme2/core/router/app_router.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
+import 'package:picoshop_theme2/features/cart/local/cart_item_hive_adapater.dart';
+import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/product/model/local/product_data_hive.dart';
@@ -18,7 +20,6 @@ Future<void> main() async {
   FlutterError.onError = (details) {
     FlutterError.dumpErrorToConsole(details);
   };
-
   try {
     await appInit();
     await AppConfig.loadAccessToken();
@@ -33,14 +34,11 @@ Future<void> main() async {
   }
 }
 
-
 Future<void> appInit() async {
   try {
     await dotenv.load(fileName: '.env');
   } catch (_) {}
-  
   await Hive.initFlutter();
-
   try {
     Hive.registerAdapter(ProductDataHiveAdapter());
   } catch (_) {}
@@ -49,11 +47,13 @@ Future<void> appInit() async {
   } catch (_) {}
   try {
     Hive.registerAdapter(CategoryDataHiveAdapter());
-  } catch (_) {}
-
+  } catch (_) {
+    Hive.registerAdapter(CartItemHiveAdapter());
+  }
   await _openBoxSafe<ProductHiveModel>('products');
   await _openBoxSafe<BrandHiveModel>('brands');
   await _openBoxSafe<CategoryHiveModel>('category');
+  await _openBoxSafe<CartItemHiveModel>('cart');
 }
 
 Future<void> _openBoxSafe<T>(String boxName) async {

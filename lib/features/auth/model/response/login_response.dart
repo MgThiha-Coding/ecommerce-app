@@ -11,13 +11,11 @@ class LoginResponse {
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
-      success: json['success'],
-      message: json['message'],
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
       data: Data.fromJson(json['data']),
     );
   }
-
-  void operator [](String other) {}
 }
 
 class Data {
@@ -44,19 +42,17 @@ class Data {
       refreshToken: json['refresh_token'] ?? '',
     );
   }
-
-  void operator [](String other) {}
 }
 
 class User {
   final int id;
-  final dynamic name;
+  final String? name;
   final String email;
   final String phone;
 
   User({
     required this.id,
-    required this.name,
+    this.name,
     required this.email,
     required this.phone,
   });

@@ -4,14 +4,15 @@ import 'package:picoshop_theme2/core/consts/app_theme.dart';
 class AppTextFormField extends StatefulWidget {
   final TextEditingController? controller;
   final String? hintText;
-  final bool? addObscure;
+  final bool addObscure;
   final String? Function(String?)? validator;
 
   const AppTextFormField({
     super.key,
     this.controller,
     this.hintText,
-    this.addObscure = false, this.validator,
+    this.addObscure = false,
+    this.validator,
   });
 
   @override
@@ -24,7 +25,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
   @override
   void initState() {
     super.initState();
-    obscureText = widget.addObscure ?? false;
+    obscureText = widget.addObscure;
   }
 
   @override
@@ -32,40 +33,48 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
     final theme = AppTheme();
 
     return TextFormField(
-      obscureText: obscureText,
       controller: widget.controller,
+      obscureText: obscureText,
+      validator: widget.validator,
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: theme.hintText1(context),
-        fillColor: Colors.grey.shade100,
         filled: true,
-        suffixIcon: widget.addObscure == true
+        fillColor: Colors.grey.shade100,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 10,
+        ),
+        suffixIcon: widget.addObscure
             ? IconButton(
                 icon: Icon(
                   obscureText ? Icons.visibility_off : Icons.visibility,
-                  size: 20, 
+                  size: 20,
+                  color: Colors.grey.shade600,
                 ),
                 onPressed: () {
                   setState(() {
-                    obscureText = !obscureText; 
+                    obscureText = !obscureText;
                   });
                 },
               )
             : null,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(width: 2, color: Colors.transparent),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(width: 2, color: Color(0xFF4A90E2)),
+          borderSide: const BorderSide(
+            width: 2,
+            color: Color(0xFF42B946), // consistent with your login button green
+          ),
         ),
-
-      
       ),
-
-      validator: widget.validator
     );
   }
 }

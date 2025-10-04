@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,35 +23,30 @@ class RegisterPage extends ConsumerStatefulWidget {
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmController = TextEditingController();
-
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // Get Device Info
   Future<String?> getDeviceName() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final deviceInfo = DeviceInfoPlugin();
     if (kIsWeb) {
-      WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
-      return '${webBrowserInfo.browserName}${webBrowserInfo.platform}${webBrowserInfo.product}${webBrowserInfo.productSub}${webBrowserInfo.vendor}';
-    } else {
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        return androidInfo.id;
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        return iosInfo.identifierForVendor;
-      }
+      final webInfo = await deviceInfo.webBrowserInfo;
+      return '${webInfo.browserName}-${webInfo.platform}';
+    } else if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.id;
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      return iosInfo.identifierForVendor;
     }
     return null;
   }
 
-  // Register Account
-  void register() async {
+  Future<void> register() async {
     if (!_formKey.currentState!.validate()) return;
     final deviceName = await getDeviceName();
     ref
@@ -64,8 +58,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             email: _emailController.text,
             phone: _phoneController.text,
             password: _passwordController.text,
-            deviceName: deviceName!,
             passwordConfirmation: _passwordController.text,
+            deviceName: deviceName ?? "Unknown",
           ),
         );
   }
@@ -74,8 +68,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final registerAsync = ref.watch(registerNotifierProvider);
-
-    final storage = ref.watch(secureStorageProvider);
+    final storage = ref.read(secureStorageProvider);
 
     ref.listen<AsyncValue<RegisterResponse?>>(registerNotifierProvider, (
       previous,
@@ -84,21 +77,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       next.whenOrNull(
         data: (data) async {
           if (data?.success == true) {
-            final accessToken = data!.data.auth.accessToken;
-            final refreshToken = data.data.auth.refreshToken;
-            final userId = data.data.user.toString();
-
+            final auth = data!.data.auth;
+            final user = data.data.user;
             await storage.saveAuthData(
-              accessToken: accessToken,
-              refreshToken: refreshToken,
-              userId: userId,
+              accessToken: auth.accessToken,
+              refreshToken: auth.refreshToken,
+              userId: user.id.toString(),
             );
 
-            AppConfig.updateAccessToken(accessToken);
-
+            AppConfig.updateAccessToken(auth.accessToken);
             final deviceName = await getDeviceName();
             if (!context.mounted) return;
-
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -110,25 +99,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             );
           }
         },
-        error: (error, stack) {
-          // Show snackbar on error
+        error: (error, _) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Text(
-                      error.toString(),
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        color: Colors.blueGrey,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ],
+              content: Text(
+                error.toString(),
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.blueGrey,
+                  fontSize: 12,
+                ),
               ),
             ),
           );
@@ -136,218 +117,194 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
     });
 
-    return Container(
-      color: Colors.blue.shade400,
-      child: SafeArea(
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.grey.shade300, Colors.grey.shade300],
-              ),
+    return SafeArea(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
             ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height,
-              ),
-              child: IntrinsicHeight(
-                child: Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.blue.shade900,
-                        Colors.blue.shade500,
-                        Colors.blue.shade200,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: responsive.authHorizontalPadding,
+              vertical: 50,
+            ),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Pico Care',
+                          style: GoogleFonts.poppins(
+                            fontSize: responsive.heading,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.medical_information,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: responsive.authHorizontalPadding,
-                      vertical: 50,
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Spacer(),
-                          // App Title
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Pico Care',
-                                style: GoogleFonts.poppins(
-                                  fontSize: responsive.heading,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.medical_information,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          // First Name
-                          AppTextFormField(
-                            controller: _firstNameController,
-                            hintText: "First Name",
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "First Name required";
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Last Name
-                          AppTextFormField(
-                            controller: _lastNameController,
-                            hintText: "Last Name",
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Last Name required";
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Email
-                          AppTextFormField(
-                            controller: _emailController,
-                            hintText: "Email",
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Email required";
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Phone
-                          AppTextFormField(
-                            controller: _phoneController,
-                            hintText: "Phone",
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Password
-                          AppTextFormField(
-                            controller: _passwordController,
-                            hintText: "Password",
-                            addObscure: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Password required";
-                              }
-                              if (value.length < 6) {
-                                return "Password must be at least 6 characters";
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8.0),
-
-                          // Confirm Password
-                          AppTextFormField(
-                            controller: _confirmController,
-                            hintText: "Confirm Password",
-                            addObscure: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Confirm Password required";
-                              }
-                              if (value.length < 6) {
-                                return "Password must be at least 6 characters";
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16.0),
-
-                          SizedBox(
-                            height: 46,
-                            width: double.infinity,
-                            child: MaterialButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate())
-                                  register();
-                              },
-                              color: Colors.blue.shade900,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(13),
-                              ),
-                              child: registerAsync.isLoading
-                                  ? SpinKitCircle(color: Colors.white, size: 27)
-                                  : Text(
-                                      "Sign Up",
-                                      style: TextStyle(
-                                        fontSize: responsive.subHeading,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          //
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Already have an account?",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              const SizedBox(width: 4.0),
-                              GestureDetector(
-                                onTap: widget.toggle,
-                                child: Text(
-                                  'Log In',
-                                  style: TextStyle(
-                                    color: Colors.blue.shade800,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Spacer(),
-                          Text(
-                            '© 2025 Pico SBS',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 20),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _firstNameController,
+                        hintText: "First Name",
+                        validator: (v) => v == null || v.isEmpty
+                            ? "First Name required"
+                            : null,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _lastNameController,
+                        hintText: "Last Name",
+                        validator: (v) => v == null || v.isEmpty
+                            ? "Last Name required"
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _emailController,
+                        hintText: "Email",
+                        validator: (v) =>
+                            v == null || v.isEmpty ? "Email required" : null,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _phoneController,
+                        hintText: "Phone",
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _passwordController,
+                        hintText: "Password",
+                        addObscure: true,
+                        validator: (v) {
+                          if (v == null || v.isEmpty)
+                            return "Password required";
+                          if (v.length < 6)
+                            return "Password must be at least 6 characters";
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _confirmController,
+                        hintText: "Confirm Password",
+                        addObscure: true,
+                        validator: (v) {
+                          if (v == null || v.isEmpty)
+                            return "Confirm Password required";
+                          if (v != _passwordController.text)
+                            return "Passwords do not match";
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: MaterialButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) register();
+                        },
+                        color: const Color(0xFF42B946),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: registerAsync.isLoading
+                            ? const SpinKitCircle(color: Colors.white, size: 28)
+                            : Text(
+                                "Sign Up",
+                                style: GoogleFonts.poppins(
+                                  fontSize: responsive.subHeading,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Already have an account?",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: widget.toggle,
+                          child: Text(
+                            'Log In',
+                            style: GoogleFonts.poppins(
+                              color: Colors.green.shade800,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      '© 2025 Pico SBS',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _glassCard({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: child,
     );
   }
 }

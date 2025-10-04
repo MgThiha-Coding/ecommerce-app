@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
@@ -9,7 +10,7 @@ import 'package:picoshop_theme2/features/cart/model/remove_cart_item_response.da
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
 class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
-  final Box<CartItemModel> _localCache;
+  final Box<CartItemHiveModel> _localCache;
   final Dio _dio;
 
   final List<CartItemModel> _onlineItems = [];
@@ -22,7 +23,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
   }
 
   Future<void> _init() async {
-    final cached = _localCache.values.toList();
+    final cached = _localCache.values.map((e) => e.toCartItem()).toList();
     if (cached.isNotEmpty) {
       state = AsyncValue.data(cached);
     } else {
@@ -35,10 +36,12 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
     _isLoading = true;
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/cart',
+        'https://beta.picosbs.com/api/ecommerce/cart',
+        //'${AppConfig.baseUrl}/ecommerce/cart',
         options: Options(
           headers: {
             'Accept': 'application/json',
+            'Authorization':'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
@@ -62,16 +65,14 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
         ..clear()
         ..addAll(items);
 
-      // overwrite cache
       _localCache.clear();
       for (var item in items) {
-        _localCache.put(item.id, item);
+        _localCache.put(item.id, CartItemHiveModel.fromCartItem(item));
       }
 
       state = AsyncValue.data(List.from(_onlineItems));
     } on DioException catch (e, st) {
-      // fallback to cache if error
-      final cached = _localCache.values.toList();
+      final cached = _localCache.values.map((e) => e.toCartItem()).toList();
       state = AsyncValue.data(cached);
 
       if (e.type == DioExceptionType.connectionError ||
@@ -98,7 +99,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
 
 final cartNotifierProvider =
     StateNotifierProvider<CartNotifier, AsyncValue<List<CartItemModel>>>((ref) {
-      final offlineCart = Hive.box<CartItemModel>('cart');
+      final offlineCart = Hive.box<CartItemHiveModel>('cart');
       return CartNotifier(offlineCart);
     });
 
@@ -152,7 +153,6 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>> {
       final parsed = TotalCartItemResponse.fromJson(response.data);
       _onlineTotal = parsed.data;
 
-      // overwrite cache
       _localCache.put('total', _onlineTotal!);
 
       state = AsyncValue.data(_onlineTotal!);
@@ -191,7 +191,6 @@ final totalCartNotifierProvider =
       return TotalCartNotifier(offlineTotal);
     });
 
-// ADD TO CART AND REMOVE FROM CART NOTIFIER
 class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
   final Dio _dio;
 
@@ -249,7 +248,6 @@ final addToCartNotifierProvider =
       (ref) => AddToCartNotifier(),
     );
 
-// Revmoe Cart from Product Notifier
 class RemoveCartItemNotifier
     extends StateNotifier<AsyncValue<RemoveCartItemResponse?>> {
   final Dio _dio;
