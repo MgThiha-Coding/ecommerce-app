@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -114,16 +115,17 @@ class _WrapperPageState extends State<WrapperPage> {
     }
   }
 }
+*/
 
 
-/*
 
 import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/profile_page.dart';
+import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
+
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key});
@@ -173,7 +175,7 @@ class _WrapperPageState extends State<WrapperPage> {
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue.shade400,
+          selectedItemColor: Color(0xFF2ECC71),
           unselectedItemColor: Colors.grey.shade800,
           showSelectedLabels: true,
           showUnselectedLabels: true,
@@ -230,4 +232,3 @@ class _WrapperPageState extends State<WrapperPage> {
     }
   }
 }
-*/

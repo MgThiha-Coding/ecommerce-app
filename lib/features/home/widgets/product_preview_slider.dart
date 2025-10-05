@@ -21,11 +21,11 @@ class ProductPreviewSlider extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.storefront_outlined, size: 30, color: Colors.grey),
+                  Icon(Icons.storefront_outlined, size: 30, color: Colors.white),
                   SizedBox(height: 8),
                   Text(
                     'featured is currently unavailable.',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ],
               ),

@@ -9,6 +9,8 @@ import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
@@ -86,6 +88,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               userId: user.id.toString(),
             );
 
+            storage.saveUserInfo(
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
+            ref.read(userProvider.notifier).state = UserModel(
+              id: user.id.toString(),
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
             AppConfig.updateAccessToken(auth.accessToken);
             final deviceName = await getDeviceName();
             if (!context.mounted) return;
@@ -119,7 +134,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Container(
-      color: Color(0xFFFFC107),
+      color: Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -130,11 +145,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFFFC107),
-                  Color(0xFFFFE082),
-                  Color(0xFFA5D6A7),
-                ],
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
               ),
             ),
             child: Padding(
@@ -237,7 +248,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) register();
                           },
-                          color: const Color(0xFF42B946),
+                          color: Color(0xFFFFC107),
+
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -262,7 +274,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         children: [
                           const Text(
                             "Already have an account?",
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: Colors.white),
                           ),
                           const SizedBox(width: 4),
                           GestureDetector(
@@ -270,7 +282,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             child: Text(
                               'Log In',
                               style: GoogleFonts.poppins(
-                                color: Colors.green.shade800,
+                                color: Color(0xFFFFC107),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

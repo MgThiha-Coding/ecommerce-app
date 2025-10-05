@@ -40,7 +40,7 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
     final notifier = ref.read(brandListNotifierProvider.notifier);
 
     return Container(
-      color: Color(0xFFFFC107),
+      color: Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           body: Container(
@@ -51,11 +51,7 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFFFC107),
-                  Color(0xFFFFE082),
-                  Color(0xFFA5D6A7),
-                ],
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
               ),
             ),
             child: Column(

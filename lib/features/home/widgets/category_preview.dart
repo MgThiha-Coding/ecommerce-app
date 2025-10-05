@@ -14,11 +14,10 @@ Widget categoryPreview(
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Container(
-          height: 80,
           width: 80,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.grey[200],
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(

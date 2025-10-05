@@ -40,7 +40,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
     final notifier = ref.read(categoryListNotifierProvider.notifier);
 
     return Container(
-      color: Color(0xFFFFC107),
+      color: Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           body: Container(
@@ -51,7 +51,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
               ),
             ),
             child: Column(
@@ -158,7 +158,7 @@ ListView categoryListView(
     itemBuilder: (context, index) {
       final categoryName = categories[index]?.name ?? '';
       final description = categories[index]?.description ?? '';
-      final categoryId=  categories[index]?.id;
+      final categoryId = categories[index]?.id;
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -198,7 +198,12 @@ ListView categoryListView(
             const SizedBox(width: 12),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context)=> CategoryDetailPage(categoryId)));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryDetailPage(categoryId),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF212121),

@@ -71,7 +71,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             width: 2,
-            color: Color(0xFF42B946), // consistent with your login button green
+            color: Color(0xFFFFC107) , 
           ),
         ),
       ),

@@ -22,6 +22,8 @@ class PaymentMethodNotifier
           },
         ),
       );
+
+      print("Payment method response test ${response.data}");
       final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&

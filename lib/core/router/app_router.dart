@@ -1,14 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
-import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
-import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
-import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
-import 'package:picoshop_theme2/features/home/pages/home_page.dart';
-import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -21,7 +15,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginOrRegister(),
       ),
 
-
+      /*
       ShellRoute(
         builder: (context, state, child) => WrapperPage(child: child),
         routes: [
@@ -40,7 +34,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-
+         
           GoRoute(
             path: '/products',
             builder: (context, state) => const ProductListPage(),
@@ -52,6 +46,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      */
     ],
   );
 });

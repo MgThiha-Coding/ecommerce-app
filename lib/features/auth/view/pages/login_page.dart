@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
@@ -66,8 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             storage.saveUserInfo(
               name: user.name ?? '',
               email: user.email,
-              phone: user.phone
-              
+              phone: user.phone,
             );
 
             ref.read(userProvider.notifier).state = UserModel(
@@ -77,13 +76,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               phone: user.phone,
             );
 
-            print(user.name);
-            print(user.email);
+          
 
             AppConfig.updateAccessToken(auth.accessToken);
 
             if (context.mounted) {
-              context.go('/home');
+              Navigator.push(context,MaterialPageRoute(builder: (context)=> WrapperPage()));
             }
           }
         },
@@ -109,7 +107,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Container(
-      color: Color(0xFFFFC107),
+      color: Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -120,11 +118,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFFFC107),
-                  Color(0xFFFFE082),
-                  Color(0xFFA5D6A7),
-                ],
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
               ),
             ),
             child: Center(
@@ -188,12 +182,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade600,
+                            backgroundColor: Color(0xFFFFC107),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
                             elevation: 4,
-                            shadowColor: Colors.green.withOpacity(0.3),
+                            shadowColor: Color(0xFFFFC107),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) login();
@@ -221,7 +215,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         children: [
                           Text(
                             "Don't have an account?",
-                            style: GoogleFonts.poppins(color: Colors.white70),
+                            style: GoogleFonts.poppins(color: Colors.white),
                           ),
                           const SizedBox(width: 4),
                           GestureDetector(
@@ -229,7 +223,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             child: Text(
                               'Register',
                               style: GoogleFonts.poppins(
-                                color: Colors.green.shade800,
+                                color: Color(0xFFFFC107),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -261,10 +255,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _glassCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -41,50 +42,58 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
       if (!mounted) return;
       if (isLoggedIn) {
-        context.go('/home');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => WrapperPage()),
+        );
       } else {
-        context.go('/loginOrRegister');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoginOrRegister()),
+        );
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
+    return Container(
+      color: Color(0xFF2ECC71),
+      child: SafeArea(
+        child: Scaffold(
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+              ),
+            ),
+            child: Center(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(AppImage.appLogo, scale: 14),
-                  Text(
-                    'Welcome to Pico Shop',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(AppImage.appLogo, scale: 14),
+                      const SizedBox(height: 8,),
+                      Text(
+                        'Welcome to Pico Shop',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 8.0),
                 ],
               ),
-              const SizedBox(height: 8.0),
-              Text(
-                'All you need is right here',
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.white70),
-              ),
-            ],
+            ),
           ),
         ),
       ),

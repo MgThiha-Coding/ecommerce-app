@@ -10,9 +10,9 @@ Widget SectionHeader(String title, VoidCallback onTap) {
         Text(
           title,
           style: GoogleFonts.poppins(
-            color: Colors.blue.shade900,
+            color: Color(0xFF2ECC71),
             fontSize: 12,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         ),
         GestureDetector(
@@ -20,9 +20,9 @@ Widget SectionHeader(String title, VoidCallback onTap) {
           child: Text(
             'See All',
             style: GoogleFonts.poppins(
-              color: Colors.blue.shade900,
+              color: Color(0xFF2ECC71),
               fontSize: 12,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

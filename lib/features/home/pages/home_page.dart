@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
@@ -54,13 +53,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     ref.read(productNotifierProvider.notifier).getNextPage();
   }
 
-  // Glass Card
-  Widget _buildGlassCard({required Widget child, double borderRadius = 12}) {
+  Widget _buildGlassCard({required Widget child, double borderRadius = 14}) {
     return Container(
       decoration: BoxDecoration(
         // ignore: deprecated_member_use
-        color: Colors.white.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(borderRadius),
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(borderRadius),
+          topRight: Radius.circular(borderRadius),
+        ),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
         ],
@@ -101,13 +102,12 @@ class _HomePageState extends ConsumerState<HomePage> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+          colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
         ),
       ),
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-
           // AppBar Section
           appBar: AppBar(
             scrolledUnderElevation: 0,
@@ -135,13 +135,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                               "Welcome ",
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
-                                color: Colors.green,
+                                color: Colors.amber,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             Icon(
                               Icons.waving_hand,
-                              color: Colors.green,
+                              color: Colors.amber,
                               size: 16,
                             ),
                           ],
@@ -151,7 +151,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Colors.red.shade400,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -166,24 +166,27 @@ class _HomePageState extends ConsumerState<HomePage> {
             backgroundColor: Colors.amber.shade100,
             onRefresh: _resetAll,
             child: ListView(
-              // ScrollController for pagination
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
               children: [
-                // Product Preview Slider Label
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 6,
+                  ),
                   child: Text(
                     'Featured',
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                // Product Preview Slider
-                ProductPreviewSlider(),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: ProductPreviewSlider(),
+                ),
 
                 const SizedBox(height: 12),
 
@@ -192,7 +195,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     padding: const EdgeInsets.all(6),
                     child: Column(
                       children: [
-                        // Brand Preview Section Header
                         SectionHeader("Brands", () {
                           Navigator.push(
                             context,
@@ -203,7 +205,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         }),
 
                         SizedBox(
-                          height: 50,
+                          height: 40,
                           child: brandListAsync.when(
                             data: (brandList) => brandList.isEmpty
                                 ? _buildEmptyState(
@@ -216,7 +218,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                         ),
 
-                        // Categories Preview Section Header
                         SectionHeader("Categories", () {
                           Navigator.push(
                             context,
@@ -227,7 +228,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         }),
 
                         SizedBox(
-                          height: 80,
+                          height: 70,
                           child: categoryListAsync.when(
                             data: (categoryList) => categoryList.isEmpty
                                 ? _buildEmptyState(
@@ -240,13 +241,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                         ),
 
-                        // Product Preview Section Header
-                        SectionHeader("Products", () {
-                          context.push('/products');
-                        }),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: Text(
+                              'Available Products',
+                              style: GoogleFonts.poppins(
+                                color: Color(0xFF2ECC71),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
 
                         SizedBox(
-                          height: 250,
+                          height: 300,
                           child: productListAsync.when(
                             data: (productList) => productList.isEmpty
                                 ? _buildEmptyState(

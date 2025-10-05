@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:picoshop_theme2/core/router/app_router.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/cart/local/cart_item_hive_adapater.dart';
@@ -23,7 +23,7 @@ Future<void> main() async {
   };
 
   // Immediately show splash screen
-  runApp(const ProviderScope(child: MyAppSplash()));
+  runApp(const ProviderScope(child: MyApp()));
 
   // Run existing async initialization in background
   try {
@@ -71,53 +71,23 @@ Future<void> _openBoxSafe<T>(String boxName) async {
   }
 }
 
-// Minimal splash widget for immediate display
-class MyAppSplash extends StatelessWidget {
-  const MyAppSplash({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFFFC107), Color(0xFFA5D6A7)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: const Center(
-            child: Text(
-              'Pico Shop',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // Actual app after initialization
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    return MaterialApp.router(
+    //final router = ref.watch(routerProvider);
+    return MaterialApp(debugShowCheckedModeBanner: false, home: SplashPage());
+    /*
+     MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routeInformationParser: router.routeInformationParser,
       routerDelegate: router.routerDelegate,
       routeInformationProvider: router.routeInformationProvider,
       title: 'Pico Shop',
     );
+    */
   }
 }
 

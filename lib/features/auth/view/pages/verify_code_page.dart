@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/model/request/verify_code_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
@@ -41,7 +43,9 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
   void verifyCode() {
     if (code.length != 6) return;
-    ref.read(verifyCodeNotifierProvider.notifier).verifyCode(
+    ref
+        .read(verifyCodeNotifierProvider.notifier)
+        .verifyCode(
           VerifyCodeRequest(
             emailOrPhone: widget.email!,
             verificationCode: code,
@@ -56,8 +60,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     final storage = ref.watch(secureStorageProvider);
     final responsive = Responsive(context);
 
-    ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider,
-        (_, state) {
+    ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider, (
+      _,
+      state,
+    ) {
       state.when(
         data: (data) async {
           if (data != null && data.success) {
@@ -71,10 +77,21 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
               userId: user.id.toString(),
             );
 
-          
+            storage.saveUserInfo(
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
+            ref.read(userProvider.notifier).state = UserModel(
+              id: user.id.toString(),
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
 
             AppConfig.updateAccessToken(accessToken);
-            context.go('/home');
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> WrapperPage()));
           }
         },
         error: (error, _) {
@@ -105,11 +122,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFC107),
-              Color(0xFFFFE082),
-              Color(0xFFA5D6A7),
-            ],
+            colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
           ),
         ),
         child: SafeArea(
@@ -129,7 +142,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                 const SizedBox(height: 8),
                 Text(
                   'OTP sent to ${widget.email ?? ""}',
-                  style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
+                  style: GoogleFonts.poppins(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -204,7 +220,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                 const SizedBox(height: 20),
                 Text(
                   '© 2025 Pico SBS',
-                  style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12),
+                  style: GoogleFonts.poppins(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),

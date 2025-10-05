@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 
@@ -24,7 +24,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (data != null) {
             final storage = ref.read(secureStorageProvider);
             await storage.clear();
-            if (mounted) context.go('/loginOrRegister');
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginOrRegister()));
           }
         },
         loading: () {},
@@ -46,7 +46,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.amber.shade100,
+      backgroundColor: Color(0xFF2ECC71),
       body: Column(
         children: [
           Stack(
@@ -57,7 +57,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.amber.shade500, Colors.green.shade200],
+                    colors: [Color(0xFF2ECC71)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -68,16 +68,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ),
               Positioned(
-                bottom: -50,
+                bottom: -40,
                 left: 10,
                 child: CircleAvatar(
-                  radius: 45,
+                  radius: 40,
                   backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.amber.shade700,
-                  ),
+                  child: Icon(Icons.person, size: 40, color: Color(0xFF2ECC71)),
                 ),
               ),
               Positioned(
@@ -100,7 +96,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           displayName,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            color: Colors.black87,
+                            color: Colors.amber,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -109,7 +105,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         Text(
                           displayEmail,
                           style: GoogleFonts.poppins(
-                            color: Colors.red,
+                            color: Colors.white,
                             fontWeight: FontWeight.w500,
                             fontSize: 12,
                           ),
@@ -280,10 +276,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             child: Ink(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    Colors.amber.shade700,
-                                    Colors.amber.shade500,
-                                  ],
+                                   colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -324,7 +317,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: Colors.amber.shade700),
+      leading: Icon(icon, color: Color(0xFF2ECC71)),
       title: Text(
         title,
         style: GoogleFonts.poppins(

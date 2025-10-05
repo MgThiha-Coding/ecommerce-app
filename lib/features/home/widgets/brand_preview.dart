@@ -11,11 +11,10 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Container(
-          height: 60,
           width: 120,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.grey[200],
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(12),
               bottomRight: Radius.circular(12),
