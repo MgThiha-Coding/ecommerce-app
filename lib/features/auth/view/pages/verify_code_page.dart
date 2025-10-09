@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
@@ -57,6 +58,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
   @override
   Widget build(BuildContext context) {
     final verifyAsync = ref.watch(verifyCodeNotifierProvider);
+    final resentAsync = ref.watch(verifyCodeNotifierProvider);
     final storage = ref.watch(secureStorageProvider);
     final responsive = Responsive(context);
 
@@ -90,8 +92,13 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
               phone: user.phone,
             );
 
+            storage.isLoggedIn();
             AppConfig.updateAccessToken(accessToken);
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> WrapperPage()));
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => WrapperPage()),
+            );
           }
         },
         error: (error, _) {
@@ -115,6 +122,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Color(0xFF2ECC71),
+        scrolledUnderElevation: 0,
+      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -131,12 +142,15 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Image.asset(AppImage.appLogo, scale: 14),
+
+                const SizedBox(height: 30),
                 Text(
                   'OTP Verification',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -161,11 +175,11 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                       fieldHeight: 50,
                       fieldWidth: 40,
                       activeFillColor: Colors.transparent,
-                      selectedFillColor: Colors.transparent,
-                      inactiveFillColor: Colors.grey.withOpacity(0.1),
-                      activeColor: Colors.grey.shade300,
-                      selectedColor: Colors.green.shade700,
-                      inactiveColor: Colors.grey.shade300,
+                      selectedFillColor: Colors.amber.withOpacity(0.3),
+                      inactiveFillColor: Colors.white.withOpacity(0.2),
+                      activeColor: Colors.amber,
+                      selectedColor: Colors.amber.shade700,
+                      inactiveColor: Colors.white70,
                     ),
                     keyboardType: TextInputType.number,
                     animationType: AnimationType.fade,
@@ -173,35 +187,55 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                     enableActiveFill: true,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     textStyle: const TextStyle(
-                      color: Colors.black,
+                      color:
+                          Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: () => ref
-                        .read(verifyCodeNotifierProvider.notifier)
-                        .resentVerifyCode(widget.email!),
-                    child: Text(
-                      'Resend Code',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: responsive.body,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    onTap: resentAsync.isLoading
+                        ? null
+                        : () => ref
+                              .read(verifyCodeNotifierProvider.notifier)
+                              .resentVerifyCode(widget.email!),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Resend Code',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: responsive.body,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (resentAsync.isLoading)
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
                 SizedBox(
                   height: 50,
                   width: double.infinity,
                   child: MaterialButton(
                     onPressed: verifyAsync.isLoading ? null : verifyCode,
-                    color: const Color(0xFF42B946),
+                    color: Color(0xFFFFC107),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -217,6 +251,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                           ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
                 Text(
                   '© 2025 Pico SBS',
@@ -235,13 +270,15 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
   Widget _glassCard({required Widget child}) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        // ignore: deprecated_member_use
+        //  color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),

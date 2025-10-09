@@ -38,8 +38,6 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
       final isLoggedIn = await storage.isLoggedIn();
 
-      await Future.delayed(const Duration(seconds: 2));
-
       if (!mounted) return;
       if (isLoggedIn) {
         Navigator.pushReplacement(
@@ -47,7 +45,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           MaterialPageRoute(builder: (context) => WrapperPage()),
         );
       } else {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginOrRegister()),
         );
@@ -79,7 +77,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(AppImage.appLogo, scale: 14),
-                      const SizedBox(height: 8,),
+                      const SizedBox(height: 16),
                       Text(
                         'Welcome to Pico Shop',
                         style: GoogleFonts.poppins(

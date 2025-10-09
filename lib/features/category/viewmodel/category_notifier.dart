@@ -8,7 +8,6 @@ import 'package:picoshop_theme2/features/category/model/categories_detail_respon
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 
-// Category List Notifier Provider
 class CategoryListNotifier
     extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
   final Box<CategoryHiveModel> _localCache;
@@ -50,6 +49,7 @@ class CategoryListNotifier
     try {
       final response = await _dio.get(
         'https://beta.picosbs.com/api/ecommerce/categories',
+        //'https://beta.picosbs.com/api/ecommerce/products'
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -59,6 +59,7 @@ class CategoryListNotifier
         ),
       );
 
+      print('brand list testing ${response.data}');
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
 
@@ -96,20 +97,24 @@ class CategoryListNotifier
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineCategories));
       } else {
-        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-        state = AsyncValue.data(cached);
+     //   final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+      //  state = AsyncValue.data(cached);
       }
-    } on DioException catch (e, st) {
+    }  on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      state = AsyncValue.data(cached);
-      _isNoMore = true;
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+
+      if (cached.isNotEmpty) {
+      //  state = AsyncValue.data(cached);
+      } else {
+        _isNoMore = true;
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.unknown) {
+          state = AsyncValue.error('Check Internet', st);
+        } else {
+          state = AsyncValue.error(e.response?.data['message'], st);
+        }
       }
-    } finally {
-      _isLoading = false;
     }
   }
 }

@@ -50,18 +50,17 @@ class BrandListNotifier
 
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/brands',
+        'https://beta.picosbs.com/api/v1/ecommerce/brands',
         //'${AppConfig.baseUrl}/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
-            'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
-       
-
+      print('brand list response test ${response.data}');
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
 
@@ -72,7 +71,6 @@ class BrandListNotifier
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
-    
 
       final parsed = BrandListResponse.fromJson(response.data);
       final brands = parsed.data.data;
@@ -97,20 +95,25 @@ class BrandListNotifier
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineBrands));
       } else {
-        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-        state = AsyncValue.data(cached);
+        //  final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+
+        //  state = AsyncValue.data(cached);
       }
     } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-     state = AsyncValue.data(cached);
-      _isNoMore = true;
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+
+      if (cached.isNotEmpty) {
+        //  state = AsyncValue.data(cached);
+      } else {
+        _isNoMore = true;
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.unknown) {
+          state = AsyncValue.error('Check Internet', st);
+        } else {
+          state = AsyncValue.error(e.response?.data['message'], st);
+        }
       }
-    } finally {
-      _isLoading = false;
     }
   }
 }

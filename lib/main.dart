@@ -22,10 +22,8 @@ Future<void> main() async {
     FlutterError.dumpErrorToConsole(details);
   };
 
-  // Immediately show splash screen
   runApp(const ProviderScope(child: MyApp()));
 
-  // Run existing async initialization in background
   try {
     await appInit();
     await AppConfig.loadAccessToken();

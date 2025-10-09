@@ -23,10 +23,12 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  // password and email controllers
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // login
   void login() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -46,7 +48,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // app responsive
     final responsive = Responsive(context);
+    // watch login state from loginNotifier
     final loginAsync = ref.watch(loginNotifierProvider);
 
     ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (prev, next) {
@@ -57,18 +61,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             final auth = response!.data;
             final user = auth.user;
 
+            // Save auth data
             storage.saveAuthData(
               accessToken: auth.accessToken,
               refreshToken: auth.refreshToken,
               userId: user.id.toString(),
             );
 
+            // save user information
             storage.saveUserInfo(
               name: user.name ?? '',
               email: user.email,
               phone: user.phone,
             );
 
+            // update in userProvider
             ref.read(userProvider.notifier).state = UserModel(
               id: user.id.toString(),
               name: user.name ?? '',
@@ -76,12 +83,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               phone: user.phone,
             );
 
-          
+            storage.isLoggedIn();
 
             AppConfig.updateAccessToken(auth.accessToken);
-
+            // route to wrapper page
             if (context.mounted) {
-              Navigator.push(context,MaterialPageRoute(builder: (context)=> WrapperPage()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => WrapperPage()),
+              );
             }
           }
         },
@@ -131,11 +141,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Logo / Title
+                      // Logo & Title
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(AppImage.appLogo, scale: 14),
+                          const SizedBox(height: 16),
                           Text(
                             'Welcome to Pico Shop',
                             style: GoogleFonts.poppins(
@@ -146,6 +157,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 30),
 
                       // Email Field
@@ -230,7 +242,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 40),
 
                       // Footer
@@ -267,7 +278,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: child,
     );
   }

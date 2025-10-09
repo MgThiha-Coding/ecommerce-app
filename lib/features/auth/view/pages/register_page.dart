@@ -5,12 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/storage/storage.dart';
-import 'package:picoshop_theme2/core/storage/user_model.dart';
-import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
@@ -71,7 +67,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final registerAsync = ref.watch(registerNotifierProvider);
-    final storage = ref.read(secureStorageProvider);
 
     ref.listen<AsyncValue<RegisterResponse?>>(registerNotifierProvider, (
       previous,
@@ -80,30 +75,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       next.whenOrNull(
         data: (data) async {
           if (data?.success == true) {
-            final auth = data!.data.auth;
-            final user = data.data.user;
-            await storage.saveAuthData(
-              accessToken: auth.accessToken,
-              refreshToken: auth.refreshToken,
-              userId: user.id.toString(),
-            );
-
-            storage.saveUserInfo(
-              name: user.name ?? '',
-              email: user.email,
-              phone: user.phone,
-            );
-
-            ref.read(userProvider.notifier).state = UserModel(
-              id: user.id.toString(),
-              name: user.name ?? '',
-              email: user.email,
-              phone: user.phone,
-            );
-
-            AppConfig.updateAccessToken(auth.accessToken);
             final deviceName = await getDeviceName();
+
             if (!context.mounted) return;
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -138,6 +113,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       child: SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
+
           body: Container(
             width: double.infinity,
             height: double.infinity,
@@ -156,14 +132,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               child: Form(
                 key: _formKey,
                 child: SingleChildScrollView(
-                  //   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // Logo & Title
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(AppImage.appLogo, scale: 14),
+                          const SizedBox(height: 16),
                           Text(
                             'Welcome to Pico Shop',
                             style: GoogleFonts.poppins(
@@ -175,6 +152,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ],
                       ),
                       const SizedBox(height: 20),
+
+                      // First Name Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _firstNameController,
@@ -185,6 +164,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Last Name Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _lastNameController,
@@ -195,6 +176,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Email Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _emailController,
@@ -204,6 +187,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Phone Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _phoneController,
@@ -211,6 +196,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Password Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _passwordController,
@@ -226,6 +213,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Confirm Password Field
                       _glassCard(
                         child: AppTextFormField(
                           controller: _confirmController,
@@ -241,6 +230,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
+
+                      // Register Button
                       SizedBox(
                         height: 50,
                         width: double.infinity,
@@ -269,6 +260,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
+
+                      // Log In
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -290,6 +283,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ],
                       ),
                       const SizedBox(height: 40),
+
                       Text(
                         '© 2025 Pico SBS',
                         style: GoogleFonts.poppins(
@@ -311,17 +305,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget _glassCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: child,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
@@ -15,20 +16,38 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  Future<void> clearAllHiveData() async {
+    final boxNames = ['cart', 'products', 'brands', 'category'];
+
+    for (final name in boxNames) {
+      if (Hive.isBoxOpen(name)) {
+        await Hive.box(name).clear();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final logOutAsync = ref.watch(logOutNotifierProvider);
     ref.listen<AsyncValue<dynamic>>(logOutNotifierProvider, (previous, next) {
       next.when(
-        data: (data) async {
+        data: (data) {
           if (data != null) {
-            final storage = ref.read(secureStorageProvider);
-            await storage.clear();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginOrRegister()));
+            Future.microtask(() async {
+              final storage = ref.read(secureStorageProvider);
+              await storage.clear();
+              await clearAllHiveData();
+              if (!mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => LoginOrRegister()),
+              );
+            });
           }
         },
         loading: () {},
         error: (error, _) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
@@ -140,6 +159,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               return Consumer(
                                 builder: (context, ref, _) {
                                   final user = ref.watch(userProvider);
+                                  final displayPhone =
+                                      (user?.phone.isNotEmpty ?? false)
+                                      ? user!.phone
+                                      : "Unknown";
                                   final displayName =
                                       (user?.name.isNotEmpty ?? false)
                                       ? user!.name
@@ -147,10 +170,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   final displayEmail =
                                       (user?.email.isNotEmpty ?? false)
                                       ? user!.email
-                                      : "Unknown";
-                                  final displayPhone =
-                                      (user?.phone.isNotEmpty ?? false)
-                                      ? user!.phone
                                       : "Unknown";
 
                                   return Dialog(
@@ -276,7 +295,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             child: Ink(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                   colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                                  colors: [
+                                    Color(0xFF2ECC71),
+                                    Color(0xFF27AE60),
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
