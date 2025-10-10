@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/features/payment/view/payment_method_page.dart';
+import 'package:picoshop_theme2/features/shipping/view/shipping_method_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -16,16 +17,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  Future<void> clearAllHiveData() async {
-    final boxNames = ['cart', 'products', 'brands', 'category'];
-
-    for (final name in boxNames) {
-      if (Hive.isBoxOpen(name)) {
-        await Hive.box(name).clear();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final logOutAsync = ref.watch(logOutNotifierProvider);
@@ -36,7 +27,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Future.microtask(() async {
               final storage = ref.read(secureStorageProvider);
               await storage.clear();
-              await clearAllHiveData();
+
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
@@ -139,7 +130,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 70),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: 12),
               child: Card(
                 elevation: 6,
                 shape: RoundedRectangleBorder(
@@ -254,12 +245,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       _buildMenuTile(
                         title: "Shipping Methods",
                         icon: Icons.local_shipping,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ShippingMethodPage(),
+                            ),
+                          );
+                        },
                       ),
                       _buildMenuTile(
                         title: "Payment Methods",
                         icon: Icons.payment,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PaymentMethodPage(shippingMethod: ''),
+                            ),
+                          );
+                        },
                       ),
 
                       _buildMenuTile(

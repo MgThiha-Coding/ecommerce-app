@@ -21,7 +21,11 @@ class ProductPreviewSlider extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.storefront_outlined, size: 30, color: Colors.white),
+                  Icon(
+                    Icons.storefront_outlined,
+                    size: 30,
+                    color: Colors.white,
+                  ),
                   SizedBox(height: 8),
                   Text(
                     'featured is currently unavailable.',
@@ -32,7 +36,7 @@ class ProductPreviewSlider extends ConsumerWidget {
             );
 
           return CarouselSlider.builder(
-            itemCount: productList.length,
+            itemCount: productList.take(10).toList().length,
             itemBuilder: (context, index, realIndex) {
               final product = productList[index];
               final productName = product.name ?? '';
@@ -89,8 +93,9 @@ class ProductPreviewSlider extends ConsumerWidget {
               viewportFraction: 1.0,
               enableInfiniteScroll: true,
               autoPlay: true,
-              autoPlayInterval: const Duration(seconds: 1),
-              autoPlayAnimationDuration: const Duration(milliseconds: 300),
+              autoPlayInterval: const Duration(seconds: 5),
+              autoPlayAnimationDuration: const Duration(seconds: 1),
+              autoPlayCurve: Curves.easeInOut,
               scrollPhysics: const BouncingScrollPhysics(),
             ),
           );

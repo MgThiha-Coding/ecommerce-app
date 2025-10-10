@@ -27,10 +27,10 @@ Future<void> main() async {
   try {
     await appInit();
     await AppConfig.loadAccessToken();
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    //await SystemChrome.setPreferredOrientations([
+      //DeviceOrientation.portraitUp,
+      //DeviceOrientation.portraitDown,
+   // ]);
   } catch (e, st) {
     print('Startup error: $e\n$st');
   }

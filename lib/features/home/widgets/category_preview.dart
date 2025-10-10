@@ -11,14 +11,17 @@ Widget categoryPreview(
     itemCount: categoryList.length,
     itemBuilder: (context, index) {
       final categoryName = categoryList[index]?.name ?? '';
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+      return Card(
+        elevation: 0.3,
+        shape: RoundedRectangleBorder( 
+           borderRadius: BorderRadius.circular(9.0)
+        ),
         child: Container(
           width: 80,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white54,
+            borderRadius: BorderRadius.circular(9.0),
           ),
           child: Center(
             child: Text(

@@ -117,15 +117,12 @@ class _WrapperPageState extends State<WrapperPage> {
 }
 */
 
-
-
 import 'package:flutter/material.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
-
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key});
@@ -170,7 +167,7 @@ class _WrapperPageState extends State<WrapperPage> {
       return Scaffold(
         body: _pages[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.blue.shade50,
+          backgroundColor: Colors.white,
           elevation: 4,
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
@@ -190,6 +187,7 @@ class _WrapperPageState extends State<WrapperPage> {
               icon: Icon(Icons.grid_view),
               label: 'Products',
             ),
+
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart),
               label: 'Cart',
@@ -205,14 +203,6 @@ class _WrapperPageState extends State<WrapperPage> {
             children: [
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Image.asset(
-                      'assets/images/picocare.png',
-                      height: 50,
-                      width: 50,
-                    ),
-                  ),
                   Expanded(
                     child: NavigationRail(
                       selectedIndex: _currentIndex,

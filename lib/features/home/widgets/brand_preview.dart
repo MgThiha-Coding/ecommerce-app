@@ -8,26 +8,25 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
     itemCount: brandList.length,
     itemBuilder: (context, index) {
       final brandName = brandList[index]?.name ?? '';
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+      return Card(
+        elevation: 0.3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9.0),
+        ),
         child: Container(
           width: 120,
-          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(12),
-              bottomRight: Radius.circular(12),
-              bottomLeft: Radius.circular(6),
-            ),
+            color: Colors.white54,
+            borderRadius: BorderRadius.circular(9.0),
           ),
+          padding: const EdgeInsets.all(8.0),
           child: Center(
             child: Text(
               brandName,
               style: GoogleFonts.poppins(
                 color: Colors.black,
                 fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,

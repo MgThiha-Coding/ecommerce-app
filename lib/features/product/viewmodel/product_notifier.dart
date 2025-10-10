@@ -44,7 +44,7 @@ class ProductListNotifier
     _isLoading = true;
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/products',
+        '${AppConfig.baseUrl}/v1/ecommerce/products',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -54,7 +54,6 @@ class ProductListNotifier
         ),
       );
 
-      
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
       if (!isSuccess) {

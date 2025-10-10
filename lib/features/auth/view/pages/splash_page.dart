@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
@@ -55,6 +56,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive(context);
     return Container(
       color: Color(0xFF2ECC71),
       child: SafeArea(
@@ -81,7 +83,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                       Text(
                         'Welcome to Pico Shop',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: responsive.heading,
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                         ),

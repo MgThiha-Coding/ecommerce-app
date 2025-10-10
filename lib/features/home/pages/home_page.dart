@@ -47,9 +47,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     ref.read(productNotifierProvider.notifier).reset();
   }
 
-  void _getNextPageAll() {
+  void _getNextPageAll() async {
+    await Future.delayed(const Duration(milliseconds: 500));
     ref.read(brandListNotifierProvider.notifier).getNextPage();
+    await Future.delayed(const Duration(milliseconds: 500));
     ref.read(categoryListNotifierProvider.notifier).getNextPage();
+    await Future.delayed(const Duration(milliseconds: 500));
     ref.read(productNotifierProvider.notifier).getNextPage();
   }
 
@@ -163,36 +166,138 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
 
           body: RefreshIndicator(
-            backgroundColor: Colors.amber.shade100,
+            backgroundColor: Colors.white,
             onRefresh: _resetAll,
             child: ListView(
               controller: _scrollController,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
                     vertical: 6,
-                    horizontal: 6,
                   ),
-                  child: Text(
-                    'Featured',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  child: SizedBox(
+                    height: 45,
+                    child: TextField(
+                      style: GoogleFonts.podkova(
+                        fontSize: 15,
+                        color: Colors.black87,
+                        textStyle: const TextStyle(
+                          fontFamilyFallback: ['Roboto', 'Arial'],
+                        ),
+                      ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Search...",
+                        hintStyle: GoogleFonts.podkova(
+                          color: Colors.grey[500],
+                          fontSize: 15,
+                          textStyle: const TextStyle(
+                            fontFamilyFallback: ['Roboto', 'Arial'],
+                          ),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Color(0xFF27AE60),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                            color: Color(0xFF2ECC71),
+                            width: 2,
+                          ),
+                        ),
+                        isDense: true,
+                      ),
                     ),
                   ),
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: ProductPreviewSlider(),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 12,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'All your favourite is here',
+                        style: GoogleFonts.poly(
+                          color: Colors.amber,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          textStyle: const TextStyle(
+                            fontFamilyFallback: ['Roboto', 'Arial'],
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Explore your special moment',
+                        style: GoogleFonts.podkova(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          textStyle: const TextStyle(
+                            fontFamilyFallback: ['Roboto', 'Arial'],
+                          ),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          'Get Order Now',
+                          style: GoogleFonts.podkova(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            textStyle: const TextStyle(
+                              fontFamilyFallback: ['Roboto', 'Arial'],
+                            ),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          backgroundColor: Color(0xFFFFC107),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
                 _buildGlassCard(
                   child: Padding(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     child: Column(
                       children: [
                         SectionHeader("Brands", () {
@@ -211,7 +316,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 ? _buildEmptyState(
                                     'Brand list is currently unavailable.',
                                   )
-                                : brandPreview(context, brandList),
+                                : brandPreview(
+                                    context,
+                                    brandList.take(5).toList(),
+                                  ),
                             loading: () => _buildShimmer(height: 80),
                             error: (error, _) =>
                                 _buildEmptyState(error.toString()),
@@ -234,11 +342,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 ? _buildEmptyState(
                                     'Category list is currently unavailable.',
                                   )
-                                : categoryPreview(context, categoryList),
+                                : categoryPreview(
+                                    context,
+                                    categoryList.take(5).toList(),
+                                  ),
                             loading: () => _buildShimmer(height: 110),
                             error: (error, _) =>
                                 _buildEmptyState(error.toString()),
                           ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: ProductPreviewSlider(),
                         ),
 
                         Padding(
@@ -256,13 +372,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
 
                         SizedBox(
-                          height: 300,
+                          height: 180,
                           child: productListAsync.when(
                             data: (productList) => productList.isEmpty
                                 ? _buildEmptyState(
                                     'Product list is currently unavailable.',
                                   )
-                                : productPreview(context, productList),
+                                : productPreview(
+                                    context,
+                                    productList.take(5).toList(),
+                                  ),
                             loading: () => _buildShimmer(height: 180),
                             error: (error, _) =>
                                 _buildEmptyState(error.toString()),

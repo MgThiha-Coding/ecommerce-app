@@ -21,21 +21,40 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(productNotifierProvider.notifier).getNextPage();
+      _fetchNextIfNeeded();
     });
-    _scrollController.addListener(() {
+
+    _scrollController.addListener(() async {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
+        await Future.delayed(const Duration(milliseconds: 500));
         ref.read(productNotifierProvider.notifier).getNextPage();
       }
     });
   }
 
-  Future<void> _onRefresh() async {
-    await ref.read(productNotifierProvider.notifier).reset();
+  Future<void> _fetchNextIfNeeded() async {
+    final notifier = ref.read(productNotifierProvider.notifier);
+    await notifier.getNextPage();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.position.maxScrollExtent == 0 &&
+          !notifier.isNoMore) {
+        _fetchNextIfNeeded();
+      }
+    });
   }
 
-  Widget _buildGlassCard({required Widget child, double borderRadius = 18}) {
+  Future<void> _onRefresh() async {
+    final notifier = ref.read(productNotifierProvider.notifier);
+    await notifier.reset();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchNextIfNeeded();
+    });
+  }
+
+  Widget _buildGlassCard({required Widget child, double borderRadius = 8}) {
     return Container(
       decoration: BoxDecoration(
         // ignore: deprecated_member_use
@@ -127,8 +146,8 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                       itemCount: products.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: responsive.isMobile ? 3 : 5,
-                        mainAxisSpacing: 4,
-                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 6,
+                        crossAxisSpacing: 6,
                         childAspectRatio: 1 / 1.2,
                       ),
                       itemBuilder: (context, index) {
@@ -144,7 +163,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(7),
                             ),
                             child: Column(
@@ -157,18 +176,22 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                     ),
                                     child:
                                         product.productImage?.isNotEmpty == true
-                                        ? Image.network(
-                                            product.productImage!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                Image.asset(
-                                                  AppImage.emptyContainer,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                        ? SizedBox.expand(
+                                            child: Image.network(
+                                              product.productImage!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Image.asset(
+                                                    AppImage.emptyContainer,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                            ),
                                           )
-                                        : Image.asset(
-                                            AppImage.emptyContainer,
-                                            fit: BoxFit.cover,
+                                        : SizedBox.expand(
+                                            child: Image.asset(
+                                              AppImage.emptyContainer,
+                                              fit: BoxFit.cover,
+                                            ),
                                           ),
                                   ),
                                 ),
@@ -177,7 +200,11 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       product.name ?? '',
-                                      style: GoogleFonts.poppins(fontSize: 10),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),

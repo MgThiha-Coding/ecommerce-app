@@ -149,7 +149,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   'OTP Verification',
                   style: GoogleFonts.poppins(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: responsive.subHeading,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -158,7 +158,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   'OTP sent to ${widget.email ?? ""}',
                   style: GoogleFonts.poppins(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: responsive.body,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -187,8 +187,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                     enableActiveFill: true,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     textStyle: const TextStyle(
-                      color:
-                          Colors.white,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
