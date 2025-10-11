@@ -36,8 +36,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
     _isLoading = true;
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/cart',
-        //'${AppConfig.baseUrl}/ecommerce/cart',
+        '${AppConfig.baseUrl}/ecommerce/cart',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -202,7 +201,7 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
     state = const AsyncValue.loading();
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/v1/ecommerce/cart',
+        '${AppConfig.baseUrl}/v1/ecommerce/cart',
         data: {
           "product_id": params.productId,
           "purchase_qty": params.purchaseQty,
@@ -259,7 +258,7 @@ class RemoveCartItemNotifier
     state = AsyncValue.loading();
     try {
       final response = await _dio.delete(
-        'https://beta.picosbs.com/api/v1/ecommerce/cart?cart_item_id=$id',
+        '${AppConfig.baseUrl}/v1/ecommerce/cart?cart_item_id=$id',
         options: Options(
           headers: {
             'Accept': 'application/json',

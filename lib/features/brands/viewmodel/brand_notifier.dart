@@ -50,8 +50,7 @@ class BrandListNotifier
 
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/brands',
-        //'${AppConfig.baseUrl}/ecommerce/brands',
+        '${AppConfig.baseUrl}/v1/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -136,7 +135,7 @@ class BrandDetailNotifier
 
   Future<void> getBrandDetail(int id) async {
     final response = await _dio.get(
-      'https://beta.picosbs.com/api/v1/ecommerce/brands/details/$id',
+      '${AppConfig.baseUrl}/v1/ecommerce/brands/details/$id',
       options: Options(
         headers: {
           'Accept': 'application/json',

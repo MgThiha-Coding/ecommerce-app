@@ -80,7 +80,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
       }
 
       final response = await _dio.post(
-        "https://beta.picosbs.com/api/v1/ecommerce/order",
+        "${AppConfig.baseUrl}/v1/ecommerce/order",
         data: formData,
         options: Options(
           headers: {

@@ -62,7 +62,7 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
 
     try {
       final refreshRes = await _dio.post(
-        'https://beta.picosbs.com/api/v1/refresh-token',
+        '${AppConfig.baseUrl}/v1/refresh-token',
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         data: {"refresh_token": refreshToken},
       );
@@ -102,7 +102,7 @@ class LoginNotifier extends BaseAuthNotifier<LoginResponse> {
   @override
   Future<LoginResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/central/login',
+      '${AppConfig.baseUrl}/v1/central/login',
       data: data,
       options: Options(
         headers: {
@@ -137,7 +137,7 @@ class RegisterNotifier extends BaseAuthNotifier<RegisterResponse> {
   @override
   Future<RegisterResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/register',
+      '${AppConfig.baseUrl}/v1/register',
       data: data,
       options: Options(
         headers: {
@@ -172,7 +172,7 @@ class VerifyCodeNotifier extends BaseAuthNotifier<VerifyCodeResponse> {
   @override
   Future<VerifyCodeResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/verify',
+      '${AppConfig.baseUrl}/v1/verify',
       data: data,
       options: Options(
         headers: {
@@ -211,7 +211,7 @@ class LogOutNotifier extends BaseAuthNotifier<LogOutResponse> {
   @override
   Future<LogOutResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/logout',
+      '${AppConfig.baseUrl}/v1/logout',
       options: Options(
         headers: {
           'Accept': 'application/json',

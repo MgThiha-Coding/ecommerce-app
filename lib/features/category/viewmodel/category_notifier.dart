@@ -48,8 +48,7 @@ class CategoryListNotifier
 
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/categories',
-        //'https://beta.picosbs.com/api/ecommerce/products'
+        '${AppConfig.baseUrl}/ecommerce/categories',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -137,7 +136,7 @@ class CategoryDetailNotifier
   Future<void> getCagetoryDetail(int id) async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/categories/details/$id',
+        '${AppConfig.baseUrl}/v1/ecommerce/categories/details/$id',
         options: Options(
           headers: {
             'Accept': 'application/json',

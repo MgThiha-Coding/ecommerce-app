@@ -13,7 +13,7 @@ class ShippingMethodNotifier
   Future<void> getShippingMethod() async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/shipping-methods',
+        '${AppConfig.baseUrl}/v1/ecommerce/shipping-methods',
         options: Options(
           headers: {
             'Accept': 'application/json',
