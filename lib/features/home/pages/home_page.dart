@@ -13,6 +13,7 @@ import 'package:picoshop_theme2/features/home/widgets/product_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
 import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
+import 'package:picoshop_theme2/features/search/view/search_page.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -176,59 +177,70 @@ class _HomePageState extends ConsumerState<HomePage> {
                     horizontal: 12,
                     vertical: 6,
                   ),
-                  child: SizedBox(
-                    height: 45,
-                    child: TextField(
-                      style: GoogleFonts.podkova(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        textStyle: const TextStyle(
-                          fontFamilyFallback: ['Roboto', 'Arial'],
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SearchPage(),
                         ),
-                      ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Search...",
-                        hintStyle: GoogleFonts.podkova(
-                          color: Colors.grey[500],
-                          fontSize: 15,
-                          textStyle: const TextStyle(
-                            fontFamilyFallback: ['Roboto', 'Arial'],
+                      );
+                    },
+                    child: SizedBox(
+                      height: 45,
+                      child: AbsorbPointer(
+                        child: TextField(
+                          style: GoogleFonts.podkova(
+                            fontSize: 15,
+                            color: Colors.black87,
+                            textStyle: const TextStyle(
+                              fontFamilyFallback: ['Roboto', 'Arial'],
+                            ),
+                          ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Search...",
+                            hintStyle: GoogleFonts.podkova(
+                              color: Colors.grey[500],
+                              fontSize: 15,
+                              textStyle: const TextStyle(
+                                fontFamilyFallback: ['Roboto', 'Arial'],
+                              ),
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xFF27AE60),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF2ECC71),
+                                width: 2,
+                              ),
+                            ),
+                            isDense: true,
                           ),
                         ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Color(0xFF27AE60),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                            color: Color(0xFF2ECC71),
-                            width: 2,
-                          ),
-                        ),
-                        isDense: true,
                       ),
                     ),
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 6,

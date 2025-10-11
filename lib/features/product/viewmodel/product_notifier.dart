@@ -7,8 +7,9 @@ import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+import 'package:hive/hive.dart';
 
-// Product List Notifier Provider
+
 class ProductListNotifier
     extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
   final Box<ProductHiveModel> _localCache;
@@ -17,6 +18,7 @@ class ProductListNotifier
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
+
   ProductListNotifier(this._localCache)
     : _dio = Dio(),
       super(const AsyncValue.loading()) {

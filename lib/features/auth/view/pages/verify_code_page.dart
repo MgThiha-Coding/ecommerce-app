@@ -176,7 +176,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                       fieldWidth: 40,
                       activeFillColor: Colors.transparent,
                       selectedFillColor: Colors.amber.withOpacity(0.3),
-                      inactiveFillColor: Colors.white.withOpacity(0.2),
+                      inactiveFillColor: Colors.white.withOpacity(0.3),
                       activeColor: Colors.amber,
                       selectedColor: Colors.amber.shade700,
                       inactiveColor: Colors.white70,
