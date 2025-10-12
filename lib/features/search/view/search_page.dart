@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/search/viewmodel/product_search_notifier.dart';
@@ -71,17 +72,17 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppColors.appBarEmailText),
         scrolledUnderElevation: 0,
         centerTitle: true,
-        backgroundColor: const Color(0xFF2ECC71),
+        backgroundColor: AppColors.backgroundGradientStart,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         title: Text(
           'Search Products',
-          style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: 14, color: AppColors.bannerTextPrimary),
         ),
       ),
       body: Column(

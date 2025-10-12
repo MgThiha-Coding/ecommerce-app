@@ -1,0 +1,21 @@
+{
+  "seeAll": "Bekijk alles",
+  "welcome": "Welkom",
+  "welcomeToPicoShop": "Welkom bij PicoShop!",
+  "caption": "Ontdek je favorieten en verken nieuwe aankomsten.",
+  "availableProducts": "Beschikbare producten",
+  "home": "Home",
+  "product": "Product",
+  "cart": "Winkelwagen",
+  "search": "Zoeken",
+  "profile": "Profiel",
+  "accountInfo": "Accountinformatie",
+  "orderHistory": "Bestelgeschiedenis",
+  "paymentMethod": "Betaalmethode",
+  "shippingMethod": "Verzendmethode",
+  "settings": "Instellingen",
+  "language": "Taal",
+  "theme": "Thema",
+  "brand": "Merk",
+  "category": "Categorie"
+}

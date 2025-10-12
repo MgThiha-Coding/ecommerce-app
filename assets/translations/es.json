@@ -1,0 +1,21 @@
+{
+  "seeAll": "Ver todo",
+  "welcome": "Bienvenido",
+  "welcomeToPicoShop": "¡Bienvenido a PicoShop!",
+  "caption": "Descubre tus favoritos y explora nuevas llegadas.",
+  "availableProducts": "Productos disponibles",
+  "home": "Inicio",
+  "product": "Producto",
+  "cart": "Carrito",
+  "search": "Buscar",
+  "profile": "Perfil",
+  "accountInfo": "Información de la cuenta",
+  "orderHistory": "Historial de pedidos",
+  "paymentMethod": "Método de pago",
+  "shippingMethod": "Método de envío",
+  "settings": "Configuración",
+  "language": "Idioma",
+  "theme": "Tema",
+  "brand": "Marca",
+  "category": "Categoría"
+}

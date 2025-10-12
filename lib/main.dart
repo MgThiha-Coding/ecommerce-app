@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/localization/codegen_loader.g.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
@@ -17,21 +19,47 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // EasyLocalization initialization
+  await EasyLocalization.ensureInitialized();
+
   FlutterError.onError = (details) => FlutterError.dumpErrorToConsole(details);
+
   final bool isTablet =
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
+
   await SystemChrome.setPreferredOrientations(
     isTablet
-        ? DeviceOrientation
-              .values // allow all on tablet
+        ? DeviceOrientation.values
         : [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
 
   // Initialize app resources asynchronously
   await _initializeApp();
 
-  // Launch app
-  runApp(const ProviderScope(child: MyApp()));
+  // Run app with EasyLocalization and ProviderScope
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('en'),
+        Locale('es'),
+        Locale('fr'),
+        Locale('ar'),
+        Locale('ja'),
+        Locale('de'),
+        Locale('nl'),
+        Locale('th'),
+        Locale('my'),
+        Locale('zh'),
+      ],
+      path: 'assets/translations',
+      assetLoader: const CodegenLoader(),
+      fallbackLocale: const Locale('en'),
+      saveLocale: true,
+      startLocale: const Locale('my'),
+      child: const ProviderScope(child: MyApp()),
+    ),
+  );
 }
 
 Future<void> _initializeApp() async {
@@ -55,7 +83,6 @@ Future<void> _initializeApp() async {
   }
 }
 
-// Local Storage 
 void _registerHiveAdapters() {
   try {
     Hive.registerAdapter(ProductDataHiveAdapter());
@@ -65,9 +92,10 @@ void _registerHiveAdapters() {
   } catch (_) {}
   try {
     Hive.registerAdapter(CategoryDataHiveAdapter());
-  } catch (_) {
+  } catch (_) {}
+  try {
     Hive.registerAdapter(CartItemHiveAdapter());
-  }
+  } catch (_) {}
 }
 
 Future<void> _openBoxSafe<T>(String boxName) async {
@@ -83,9 +111,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashPage(),
+      locale: context.locale,
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
+      home: const SplashPage(),
     );
   }
 }
