@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
-/// Product Search Notifier Provider
+/// Product Search Notifier 
 class ProductSearchNotifier
     extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
   final Dio _dio;
@@ -12,7 +12,10 @@ class ProductSearchNotifier
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
-  String _searchQuery = '';
+
+  String _nameQuery = '';
+  String _brandQuery = '';
+  String _categoryQuery = '';
 
   ProductSearchNotifier() : _dio = Dio(), super(const AsyncValue.data([]));
 
@@ -23,27 +26,43 @@ class ProductSearchNotifier
     _searchResults.clear();
     _currentPage = 1;
     _isNoMore = false;
-    _searchQuery = '';
+    _nameQuery = '';
+    _brandQuery = '';
+    _categoryQuery = '';
     state = const AsyncValue.data([]);
   }
 
-  Future<void> search(String query) async {
-    _searchQuery = query.trim();
+  Future<void> search({
+    String? name,
+    String? brand,
+    String? category,
+    String? keyword,
+  }) async {
+    final kw = keyword?.trim() ?? '';
+
+    _nameQuery = name?.trim() ?? (kw.isNotEmpty ? kw : '');
+    _brandQuery = brand?.trim() ?? (kw.isNotEmpty ? kw : '');
+    _categoryQuery = category?.trim() ?? (kw.isNotEmpty ? kw : '');
+
     _searchResults.clear();
     _currentPage = 1;
     _isNoMore = false;
 
-    if (_searchQuery.isEmpty) {
+    if (_nameQuery.isEmpty && _brandQuery.isEmpty && _categoryQuery.isEmpty) {
       await resetSearch();
       return;
     }
 
     state = const AsyncValue.loading();
+
     await _fetchSearchPage();
   }
 
   Future<void> loadMore() async {
-    if (_isLoading || _isNoMore || _searchQuery.isEmpty) return;
+    if (_isLoading || _isNoMore) return;
+    if (_nameQuery.isEmpty && _brandQuery.isEmpty && _categoryQuery.isEmpty) {
+      return;
+    }
     await _fetchSearchPage();
   }
 
@@ -51,9 +70,19 @@ class ProductSearchNotifier
     _isLoading = true;
 
     try {
+      final Map<String, dynamic> filters = {
+        'page': _currentPage,
+        if (_nameQuery.isNotEmpty)
+          'filter[products.name][\$like]': '%$_nameQuery%',
+        if (_brandQuery.isNotEmpty)
+          'filter[products.brand][\$like]': '%$_brandQuery%',
+        if (_categoryQuery.isNotEmpty)
+          'filter[products.category][\$like]': '%$_categoryQuery%',
+      };
+
       final response = await _dio.get(
         '${AppConfig.baseUrl}/v1/ecommerce/products',
-        queryParameters: {'page': _currentPage, 'search': _searchQuery},
+        queryParameters: filters,
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -73,7 +102,6 @@ class ProductSearchNotifier
 
       final parsed = ProductListResponse.fromJson(response.data);
       final products = parsed.data?.data ?? [];
-
       if (products.isEmpty) {
         _isNoMore = true;
       } else {
@@ -100,7 +128,6 @@ class ProductSearchNotifier
   }
 }
 
-/// Provider for ProductSearchNotifier
 final productSearchNotifierProvider =
     StateNotifierProvider<
       ProductSearchNotifier,

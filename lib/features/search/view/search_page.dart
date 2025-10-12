@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/search/viewmodel/product_search_notifier.dart';
 
@@ -13,9 +14,11 @@ class SearchPage extends ConsumerStatefulWidget {
 }
 
 class _SearchPageState extends ConsumerState<SearchPage> {
-  final TextEditingController _controller = TextEditingController();
+  final _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
+
+  String _selectedFilter = 'product';
 
   @override
   void initState() {
@@ -32,16 +35,33 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _searchController.dispose();
     _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
+  void _onSearchChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      ref.read(productSearchNotifierProvider.notifier).search(query);
+      final keyword = _searchController.text.trim();
+      if (keyword.isEmpty) {
+        ref.read(productSearchNotifierProvider.notifier).resetSearch();
+        return;
+      }
+
+      final notifier = ref.read(productSearchNotifierProvider.notifier);
+
+      switch (_selectedFilter) {
+        case 'brand':
+          notifier.search(brand: keyword);
+          break;
+        case 'category':
+          notifier.search(category: keyword);
+          break;
+        default:
+          notifier.search(name: keyword);
+      }
     });
   }
 
@@ -51,39 +71,121 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green.shade600,
-        title: TextField(
-          controller: _controller,
-          onChanged: _onSearchChanged,
-          textInputAction: TextInputAction.search,
-          style: GoogleFonts.poppins(color: Colors.white, fontSize: 14),
-          cursorColor: Colors.white,
-          decoration: InputDecoration(
-            hintText: 'Search products...',
-            hintStyle: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
-            border: InputBorder.none,
-            prefixIcon: const Icon(Icons.search, color: Colors.white),
-          ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        backgroundColor: const Color(0xFF2ECC71),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
+        title: Text(
+          'Search Products',
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.white),
         ),
       ),
-      body: searchState.when(
-        data: (products) {
-          if (products.isEmpty) return _buildEmptyState();
-          return ListView.builder(
-            controller: _scrollController,
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return _buildProductTile(product);
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(
-            e.toString(),
-            style: GoogleFonts.poppins(color: Colors.red),
+      body: Column(
+        children: [
+          _buildSearchBar(),
+          const Divider(height: 1),
+          Expanded(
+            child: searchState.when(
+              data: (products) {
+                if (products.isEmpty) return _buildEmptyState();
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return _buildProductTile(product);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Text(
+                  e.toString(),
+                  style: GoogleFonts.poppins(color: Colors.red),
+                ),
+              ),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: (_) => _onSearchChanged(),
+                decoration: InputDecoration(
+                  hintText: 'Search by $_selectedFilter...',
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  hintStyle: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Colors.green.shade600,
+                      width: 1.5,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 6,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedFilter,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'product',
+                      child: Text('Product', style: TextStyle(fontSize: 12)),
+                    ),
+                    DropdownMenuItem(
+                      value: 'brand',
+                      child: Text('Brand', style: TextStyle(fontSize: 12)),
+                    ),
+                    DropdownMenuItem(
+                      value: 'category',
+                      child: Text('Category', style: TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedFilter = value);
+                      _onSearchChanged();
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -93,18 +195,37 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.grey.shade200,
-        backgroundImage:
-            product.image != null ? NetworkImage(product.image!) : null,
-        child: product.image == null
-            ? const Icon(Icons.image_not_supported)
-            : null,
+        radius: 25,
+        child: ClipOval(
+          child: product.image != null && product.image!.isNotEmpty
+              ? Image.network(
+                  product.image!,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      AppImage.emptyContainer,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                )
+              : Image.asset(
+                  AppImage.emptyContainer,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+        ),
       ),
       title: Text(
         product.name ?? 'Unknown Product',
         style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
-        product.brandName ?? '', // safer since ProductDataModel has no description field
+        product.brandName ?? '',
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),

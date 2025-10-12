@@ -4,12 +4,9 @@ import 'package:picoshop_theme2/core/storage/storage.dart';
 class AppConfig {
   static String _accessToken = '';
 
-  // Make baseUrl a private variable so it can be updated
-  static String _baseUrl = 'https://beta.picosbs.com/api';
-
   // Public getters
   static String get accessToken => _accessToken;
-  static String get baseUrl => _baseUrl;
+  static String get baseUrl => dotenv.env['API_BASE_URL']!;
   static String get xApiToken => dotenv.env['X_API_TOKEN']!;
 
   // Load access token from secure storage
@@ -21,15 +18,5 @@ class AppConfig {
   // Update access token
   static void updateAccessToken(String token) {
     _accessToken = token;
-  }
-
-  // Clear access token
-  static void clearAccessToken() {
-    _accessToken = '';
-  }
-
-  // NEW: Update base URL dynamically
-  static void updateBaseUrl(String newUrl) {
-    _baseUrl = newUrl;
   }
 }

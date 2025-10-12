@@ -17,33 +17,46 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (details) => FlutterError.dumpErrorToConsole(details);
+  final bool isTablet =
+      WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
+  await SystemChrome.setPreferredOrientations(
+    isTablet
+        ? DeviceOrientation
+              .values // allow all on tablet
+        : [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  );
 
-  FlutterError.onError = (details) {
-    FlutterError.dumpErrorToConsole(details);
-  };
+  // Initialize app resources asynchronously
+  await _initializeApp();
 
-  runApp(const ProviderScope(child: MyApp()));
-
-  try {
-    await appInit();
-    await AppConfig.loadAccessToken();
-    //await SystemChrome.setPreferredOrientations([
-      //DeviceOrientation.portraitUp,
-      //DeviceOrientation.portraitDown,
-   // ]);
-  } catch (e, st) {
-    print('Startup error: $e\n$st');
-  }
-
-  // Replace splash with actual app
+  // Launch app
   runApp(const ProviderScope(child: MyApp()));
 }
 
-Future<void> appInit() async {
+Future<void> _initializeApp() async {
   try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {}
-  await Hive.initFlutter();
+    await Future.wait([dotenv.load(fileName: '.env'), Hive.initFlutter()]);
+
+    // Register Hive adapters
+    _registerHiveAdapters();
+
+    // Open Hive boxes in parallel
+    await Future.wait([
+      _openBoxSafe<ProductHiveModel>('products'),
+      _openBoxSafe<BrandHiveModel>('brands'),
+      _openBoxSafe<CategoryHiveModel>('category'),
+      _openBoxSafe<CartItemHiveModel>('cart'),
+    ]);
+
+    await AppConfig.loadAccessToken();
+  } catch (e, st) {
+    debugPrint('Startup error: $e\n$st');
+  }
+}
+
+// Local Storage 
+void _registerHiveAdapters() {
   try {
     Hive.registerAdapter(ProductDataHiveAdapter());
   } catch (_) {}
@@ -55,37 +68,25 @@ Future<void> appInit() async {
   } catch (_) {
     Hive.registerAdapter(CartItemHiveAdapter());
   }
-  await _openBoxSafe<ProductHiveModel>('products');
-  await _openBoxSafe<BrandHiveModel>('brands');
-  await _openBoxSafe<CategoryHiveModel>('category');
-  await _openBoxSafe<CartItemHiveModel>('cart');
 }
 
 Future<void> _openBoxSafe<T>(String boxName) async {
   try {
     await Hive.openBox<T>(boxName);
   } catch (e) {
-    print('Failed to open box "$boxName": $e');
+    debugPrint('Failed to open box "$boxName": $e');
   }
 }
 
-// Actual app after initialization
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    //final router = ref.watch(routerProvider);
-    return MaterialApp(debugShowCheckedModeBanner: false, home: SplashPage());
-    /*
-     MaterialApp.router(
+  Widget build(BuildContext context) {
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      routeInformationParser: router.routeInformationParser,
-      routerDelegate: router.routerDelegate,
-      routeInformationProvider: router.routeInformationProvider,
-      title: 'Pico Shop',
+      home: SplashPage(),
     );
-    */
   }
 }
 
@@ -94,12 +95,12 @@ class ErrorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
         body: Center(
           child: Text(
             'Something went wrong. Please restart the app.',
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 16),
             textAlign: TextAlign.center,
           ),
         ),

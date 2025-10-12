@@ -25,10 +25,12 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final ScrollController _scrollController = ScrollController();
+  bool _isFetching = false;
 
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getNextPageAll();
     });
@@ -42,19 +44,29 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _resetAll() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    ref.read(brandListNotifierProvider.notifier).reset();
-    ref.read(categoryListNotifierProvider.notifier).reset();
-    ref.read(productNotifierProvider.notifier).reset();
+    // Reset all lists
+    await Future.wait([
+      ref.read(brandListNotifierProvider.notifier).reset(),
+      ref.read(categoryListNotifierProvider.notifier).reset(),
+      ref.read(productNotifierProvider.notifier).reset(),
+    ]);
+
+    _getNextPageAll();
   }
 
   void _getNextPageAll() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    ref.read(brandListNotifierProvider.notifier).getNextPage();
-    await Future.delayed(const Duration(milliseconds: 500));
-    ref.read(categoryListNotifierProvider.notifier).getNextPage();
-    await Future.delayed(const Duration(milliseconds: 500));
-    ref.read(productNotifierProvider.notifier).getNextPage();
+    if (_isFetching) return;
+    _isFetching = true;
+
+    try {
+      await Future.wait([
+        ref.read(brandListNotifierProvider.notifier).getNextPage(),
+        ref.read(categoryListNotifierProvider.notifier).getNextPage(),
+        ref.read(productNotifierProvider.notifier).getNextPage(),
+      ]);
+    } finally {
+      _isFetching = false;
+    }
   }
 
   Widget _buildGlassCard({required Widget child, double borderRadius = 14}) {
@@ -143,7 +155,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.waving_hand,
                               color: Colors.amber,
                               size: 16,
@@ -294,7 +306,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             horizontal: 10,
                             vertical: 4,
                           ),
-                          backgroundColor: Color(0xFFFFC107),
+                          backgroundColor: const Color(0xFFFFC107),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
@@ -316,7 +328,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => BrandListPage(),
+                              builder: (context) => const BrandListPage(),
                             ),
                           );
                         }),
@@ -342,7 +354,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CategoryListPage(),
+                              builder: (context) => const CategoryListPage(),
                             ),
                           );
                         }),
@@ -364,8 +376,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                         ),
 
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
                           child: ProductPreviewSlider(),
                         ),
 
@@ -375,7 +387,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             child: Text(
                               'Available Products',
                               style: GoogleFonts.poppins(
-                                color: Color(0xFF2ECC71),
+                                color: const Color(0xFF2ECC71),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
