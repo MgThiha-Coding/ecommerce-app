@@ -37,14 +37,14 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
            fontSize: 14,
         ),),
         centerTitle: true,
-        backgroundColor: Color(0xFFFFC107),
+        backgroundColor: const Color(0xFFFFC107),
         scrolledUnderElevation: 0,
       ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -141,7 +141,7 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
               return const SizedBox.shrink();
             }
           },
-          error: (err, _) => Center(child: Text('')),
+          error: (err, _) => const Center(child: Text('')),
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ),

@@ -18,9 +18,9 @@ class ConnectivityNotifier extends StateNotifier<AsyncValue<String>> {
     _connectivityStream.listen((result) {
       final isOnline = result != ConnectivityResult.none;
       if (isOnline) {
-        state = AsyncValue.data('Back online');
+        state = const AsyncValue.data('Back online');
       } else {
-        state = AsyncValue.data('You are offline');
+        state = const AsyncValue.data('You are offline');
       }
     });
 
@@ -33,9 +33,9 @@ class ConnectivityNotifier extends StateNotifier<AsyncValue<String>> {
       final result = await _connectivity.checkConnectivity();
       final isOnline = result != ConnectivityResult.none;
       if (isOnline) {
-        state = AsyncValue.data('Back online');
+        state = const AsyncValue.data('Back online');
       } else {
-        state = AsyncValue.data('You are offline');
+        state = const AsyncValue.data('You are offline');
       }
     } catch (e, st) {
       state = AsyncValue.error('Failed to check connectivity', st);

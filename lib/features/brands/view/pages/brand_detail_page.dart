@@ -33,17 +33,17 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         centerTitle: true,
-        backgroundColor: Color(0xFFFFC107),
+        backgroundColor: const Color(0xFFFFC107),
         leading: IconButton(onPressed: () {
           Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back)),
+        }, icon: const Icon(Icons.arrow_back)),
         title: Text('Brand Details', style: GoogleFonts.poppins(fontSize: 14)),
       ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

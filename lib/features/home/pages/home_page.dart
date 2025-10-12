@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
+import 'package:picoshop_theme2/core/consts/app_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
@@ -44,7 +46,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _resetAll() async {
-    // Reset all lists
     await Future.wait([
       ref.read(brandListNotifierProvider.notifier).reset(),
       ref.read(categoryListNotifierProvider.notifier).reset(),
@@ -73,7 +74,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Container(
       decoration: BoxDecoration(
         // ignore: deprecated_member_use
-        color: Colors.white,
+        color: AppColors.glassCardBackground,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(borderRadius),
           topRight: Radius.circular(borderRadius),
@@ -92,15 +93,15 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.storefront_outlined,
             size: 30,
-            color: Colors.grey.shade600,
+            color: AppColors.emptyStateIcon,
           ),
           const SizedBox(height: 6),
           Text(
             message,
-            style: GoogleFonts.poppins(color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(color: AppColors.emptyStateText),
           ),
         ],
       ),
@@ -112,73 +113,76 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
+    final fonts = AppFonts(context);
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-        ),
-      ),
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          // AppBar Section
-          appBar: AppBar(
-            scrolledUnderElevation: 0,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            titleSpacing: 0,
-            title: Consumer(
-              builder: (context, ref, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: AppColors.backgroundGradientStart,
+        elevation: 0,
+        titleSpacing: 0,
+        title: Consumer(
+          builder: (context, ref, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 8),
+                CircleAvatar(
+                  radius: 18,
+                  child: Image.asset(AppImage.person, fit: BoxFit.cover),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 8),
-                    CircleAvatar(
-                      radius: 18,
-                      child: Image.asset(AppImage.person, fit: BoxFit.cover),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Welcome ",
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.amber,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.waving_hand,
-                              color: Colors.amber,
-                              size: 16,
-                            ),
-                          ],
-                        ),
                         Text(
-                          ref.watch(userProvider)?.email ?? "Guest",
+                          "Welcome ",
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            fontSize: fonts.caption,
+                            color: AppColors.appBarWelcomeText,
+                            fontWeight: FontWeight.w500,
                           ),
+                        ),
+                         Icon(
+                          Icons.waving_hand,
+                          color: AppColors.appBarWelcomeText,
+                          size: fonts.caption,
                         ),
                       ],
                     ),
+                    Text(
+                      ref.watch(userProvider)?.email ?? "Guest",
+                      style: GoogleFonts.poppins(
+                        fontSize: fonts.caption,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.appBarEmailText,
+                      ),
+                    ),
                   ],
-                );
-              },
-            ),
-          ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
 
-          body: RefreshIndicator(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.backgroundGradientStart,
+              AppColors.backgroundGradientEnd,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
             backgroundColor: Colors.white,
             onRefresh: _resetAll,
             child: ListView(
@@ -204,17 +208,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: TextField(
                           style: GoogleFonts.podkova(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: AppColors.searchText,
                             textStyle: const TextStyle(
                               fontFamilyFallback: ['Roboto', 'Arial'],
                             ),
                           ),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: AppColors.searchFill,
                             hintText: "Search...",
                             hintStyle: GoogleFonts.podkova(
-                              color: Colors.grey[500],
+                              color: AppColors.searchHint,
                               fontSize: 15,
                               textStyle: const TextStyle(
                                 fontFamilyFallback: ['Roboto', 'Arial'],
@@ -222,7 +226,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                             prefixIcon: const Icon(
                               Icons.search,
-                              color: Color(0xFF27AE60),
+                              color: AppColors.searchIcon,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 0,
@@ -234,15 +238,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                              borderSide: const BorderSide(
+                                color: AppColors.searchBorder,
                                 width: 1,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: const BorderSide(
-                                color: Color(0xFF2ECC71),
+                                color: AppColors.searchBorderFocused,
                                 width: 2,
                               ),
                             ),
@@ -262,10 +266,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'All your favourite is here',
+                        'Welcome to PicoShop!',
                         style: GoogleFonts.poly(
-                          color: Colors.amber,
-                          fontSize: 18,
+                          color: AppColors.bannerTextPrimary,
+                          fontSize: fonts.title,
                           fontWeight: FontWeight.w600,
                           textStyle: const TextStyle(
                             fontFamilyFallback: ['Roboto', 'Arial'],
@@ -273,44 +277,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                       ),
                       Text(
-                        'Explore your special moment',
+                        'Discover your favourites and explore new arrivals.',
                         style: GoogleFonts.podkova(
-                          color: Colors.white,
-                          fontSize: 12,
+                          color: AppColors.bannerTextSecondary,
+                          fontSize: fonts.caption,
                           fontWeight: FontWeight.w500,
                           textStyle: const TextStyle(
                             fontFamilyFallback: ['Roboto', 'Arial'],
                           ),
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                        label: Text(
-                          'Get Order Now',
-                          style: GoogleFonts.podkova(
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            textStyle: const TextStyle(
-                              fontFamilyFallback: ['Roboto', 'Arial'],
-                            ),
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          backgroundColor: const Color(0xFFFFC107),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          elevation: 2,
                         ),
                       ),
                     ],
@@ -387,7 +361,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             child: Text(
                               'Available Products',
                               style: GoogleFonts.poppins(
-                                color: const Color(0xFF2ECC71),
+                                color: const Color(0xFF3E5060),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -426,11 +400,11 @@ class _HomePageState extends ConsumerState<HomePage> {
   // Shimmer Loading
   Widget _buildShimmer({required double height}) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
+      baseColor: AppColors.shimmerBase,
+      highlightColor: AppColors.shimmerHighlight,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
+          color: AppColors.shimmerBase,
           borderRadius: BorderRadius.circular(12),
         ),
         height: height,

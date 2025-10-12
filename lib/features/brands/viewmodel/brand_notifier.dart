@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
@@ -59,7 +58,7 @@ class BrandListNotifier
           },
         ),
       );
-      print('brand list response test ${response.data}');
+
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
 
@@ -94,15 +93,14 @@ class BrandListNotifier
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineBrands));
       } else {
-        //  final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-
-        //  state = AsyncValue.data(cached);
+        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+        state = AsyncValue.data(cached);
       }
     } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
 
       if (cached.isNotEmpty) {
-        //  state = AsyncValue.data(cached);
+        state = AsyncValue.data(cached);
       } else {
         _isNoMore = true;
         if (e.type == DioExceptionType.connectionError ||

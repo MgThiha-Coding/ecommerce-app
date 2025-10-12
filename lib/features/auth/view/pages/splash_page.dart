@@ -43,12 +43,12 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       if (isLoggedIn) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => WrapperPage()),
+          MaterialPageRoute(builder: (context) => const WrapperPage()),
         );
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginOrRegister()),
+          MaterialPageRoute(builder: (context) => const LoginOrRegister()),
         );
       }
     });
@@ -58,7 +58,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           body: Container(

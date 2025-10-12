@@ -40,14 +40,14 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
     final notifier = ref.read(categoryListNotifierProvider.notifier);
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           body: Container(
             width: double.infinity,
             height: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -107,7 +107,7 @@ class CategoryListAppBar extends StatelessWidget {
     final responsive = Responsive(context);
 
     return Container(
-      margin: EdgeInsets.only(top: 18),
+      margin: const EdgeInsets.only(top: 18),
       height: responsive.value(mobile: 40, tablet: 50, desktop: 70),
       width: double.infinity,
       child: Row(
@@ -138,7 +138,7 @@ class CategoryListAppBar extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-          SizedBox(width: 48),
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -206,7 +206,7 @@ ListView categoryListView(
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF212121),
+                backgroundColor: const Color(0xFF212121),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),

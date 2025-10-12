@@ -35,11 +35,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 3),
               child: Column( 
                 children: [ 
-                   ProductDetailAppBar(),
+                   const ProductDetailAppBar(),
                    Center( 
                      child: TextButton(onPressed: (){
                           Navigator.pop(context);
-                     }, child: Text('Back')),
+                     }, child: const Text('Back')),
                    )
                 ],
               )
@@ -59,7 +59,7 @@ class ProductDetailAppBar extends StatelessWidget {
     final responsive = Responsive(context);
 
     return Container(
-      margin: EdgeInsets.only(top: 18, bottom: 10),
+      margin: const EdgeInsets.only(top: 18, bottom: 10),
       height: responsive.value(mobile: 25, tablet: 50, desktop: 70),
       width: double.infinity,
       child: Row(

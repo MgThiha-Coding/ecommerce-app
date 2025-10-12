@@ -255,7 +255,7 @@ class RemoveCartItemNotifier
       super(const AsyncValue.data(null));
 
   Future<void> removeCartItem(int id) async {
-    state = AsyncValue.loading();
+    state = const AsyncValue.loading();
     try {
       final response = await _dio.delete(
         '${AppConfig.baseUrl}/v1/ecommerce/cart?cart_item_id=$id',

@@ -30,18 +30,18 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
     ];
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
             scrolledUnderElevation: 0,
             centerTitle: true,
-            backgroundColor: Color(0xFF2ECC71),
+            backgroundColor: const Color(0xFF2ECC71),
             leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
             ),
             title: Text(
               'Shipping',
@@ -51,7 +51,7 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -113,7 +113,7 @@ class _ShippingMethodPageState extends ConsumerState<ShippingMethodPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      PaymentMethodPage(shippingMethod: '1'),
+                                      const PaymentMethodPage(shippingMethod: '1'),
                                 ),
                               );
                             },

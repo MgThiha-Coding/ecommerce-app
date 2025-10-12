@@ -90,7 +90,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             if (context.mounted) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => WrapperPage()),
+                MaterialPageRoute(builder: (context) => const WrapperPage()),
               );
             }
           }
@@ -117,7 +117,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -195,12 +195,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFFFC107),
+                            backgroundColor: const Color(0xFFFFC107),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
                             elevation: 4,
-                            shadowColor: Color(0xFFFFC107),
+                            shadowColor: const Color(0xFFFFC107),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) login();
@@ -236,7 +236,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             child: Text(
                               'Register',
                               style: GoogleFonts.poppins(
-                                color: Color(0xFFFFC107),
+                                color: const Color(0xFFFFC107),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

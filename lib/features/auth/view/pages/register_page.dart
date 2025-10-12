@@ -109,7 +109,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     });
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -204,10 +204,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: "Password",
                           addObscure: true,
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return "Password required";
-                            if (v.length < 6)
+                            }
+                            if (v.length < 6) {
                               return "Password must be at least 6 characters";
+                            }
                             return null;
                           },
                         ),
@@ -221,10 +223,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           hintText: "Confirm Password",
                           addObscure: true,
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return "Confirm Password required";
-                            if (v != _passwordController.text)
+                            }
+                            if (v != _passwordController.text) {
                               return "Passwords do not match";
+                            }
                             return null;
                           },
                         ),
@@ -239,7 +243,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) register();
                           },
-                          color: Color(0xFFFFC107),
+                          color: const Color(0xFFFFC107),
 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -275,7 +279,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             child: Text(
                               'Log In',
                               style: GoogleFonts.poppins(
-                                color: Color(0xFFFFC107),
+                                color: const Color(0xFFFFC107),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

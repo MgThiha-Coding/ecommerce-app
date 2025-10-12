@@ -50,7 +50,7 @@ class _CartPageState extends ConsumerState<CartPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF2ECC71),
+        backgroundColor: const Color(0xFF2ECC71),
         title: Text(
           'Cart',
           style: GoogleFonts.poppins(
@@ -121,8 +121,8 @@ class _CartPageState extends ConsumerState<CartPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 0),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -243,13 +243,13 @@ class _CartPageState extends ConsumerState<CartPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ShippingMethodPage(),
+                            builder: (context) => const ShippingMethodPage(),
                           ),
                         );
                       },
                       child: Ink(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
                           ),
                           borderRadius: BorderRadius.circular(12),

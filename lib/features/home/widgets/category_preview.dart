@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 
 Widget categoryPreview(
@@ -20,14 +21,14 @@ Widget categoryPreview(
           width: 80,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: Colors.white54,
+            color: AppColors.categoryCardBackground,
             borderRadius: BorderRadius.circular(9.0),
           ),
           child: Center(
             child: Text(
               categoryName,
               style: GoogleFonts.poppins(
-                color: Colors.black,
+                color: AppColors.categoryCardText,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
+
 
 Widget SectionHeader(String title, VoidCallback onTap) {
   return Padding(
@@ -10,7 +12,7 @@ Widget SectionHeader(String title, VoidCallback onTap) {
         Text(
           title,
           style: GoogleFonts.poppins(
-            color: Color(0xFF2ECC71),
+            color: AppColors.sectionHeaderText,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -20,7 +22,7 @@ Widget SectionHeader(String title, VoidCallback onTap) {
           child: Text(
             'See All',
             style: GoogleFonts.poppins(
-              color: Color(0xFF2ECC71),
+              color: AppColors.sectionHeaderText,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

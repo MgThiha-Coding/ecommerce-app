@@ -77,11 +77,11 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     final responsive = Responsive(context);
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Color(0xFF2ECC71),
+            backgroundColor: const Color(0xFF2ECC71),
             title: Text(
               'Available Products',
               style: GoogleFonts.poppins(
@@ -96,7 +96,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
             width: double.infinity,
             height: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 0),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

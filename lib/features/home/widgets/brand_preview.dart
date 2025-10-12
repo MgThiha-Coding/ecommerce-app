@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
 Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
@@ -16,7 +17,7 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
         child: Container(
           width: 120,
           decoration: BoxDecoration(
-            color: Colors.white54,
+            color: AppColors.brandCardBackground,
             borderRadius: BorderRadius.circular(9.0),
           ),
           padding: const EdgeInsets.all(8.0),
@@ -24,7 +25,7 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
             child: Text(
               brandName,
               style: GoogleFonts.poppins(
-                color: Colors.black,
+                color: AppColors.brandCardText,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),

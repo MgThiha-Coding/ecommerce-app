@@ -172,7 +172,7 @@ class _WrapperPageState extends State<WrapperPage> {
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Color(0xFF2ECC71),
+          selectedItemColor: const Color(0xFF2ECC71),
           unselectedItemColor: Colors.grey.shade800,
           showSelectedLabels: true,
           showUnselectedLabels: true,

@@ -97,7 +97,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => WrapperPage()),
+              MaterialPageRoute(builder: (context) => const WrapperPage()),
             );
           }
         },
@@ -123,7 +123,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: Color(0xFF2ECC71),
+        backgroundColor: const Color(0xFF2ECC71),
         scrolledUnderElevation: 0,
       ),
       body: Container(
@@ -234,7 +234,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   width: double.infinity,
                   child: MaterialButton(
                     onPressed: verifyAsync.isLoading ? null : verifyCode,
-                    color: Color(0xFFFFC107),
+                    color: const Color(0xFFFFC107),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

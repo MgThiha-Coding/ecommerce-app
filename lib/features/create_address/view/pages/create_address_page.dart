@@ -16,7 +16,7 @@ class CreateAddressPage extends ConsumerStatefulWidget {
 
 class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
   String _selectedType = "pickup";
-  GlobalKey<FormState> _formKey = GlobalKey();
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -175,7 +175,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -200,7 +200,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -219,7 +219,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -244,7 +244,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -270,7 +270,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -296,7 +296,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -321,7 +321,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -348,7 +348,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,
                                   horizontal: 5,
                                 ),
@@ -370,7 +370,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 3,
                         vertical: 10,
                       ),
@@ -387,7 +387,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                           ),
                         ),
                         child: createAddressAsync.isLoading
-                            ? SpinKitCircle(color: Colors.white, size: 27)
+                            ? const SpinKitCircle(color: Colors.white, size: 27)
                             : Text(
                                 "Save Address",
                                 style: GoogleFonts.poppins(

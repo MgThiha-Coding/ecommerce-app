@@ -29,25 +29,25 @@ class _PaymentMethodPageState extends ConsumerState<PaymentMethodPage> {
     ];
 
     return Container(
-      color: Color(0xFF2ECC71),
+      color: const Color(0xFF2ECC71),
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
             scrolledUnderElevation: 0,
             centerTitle: true,
-            backgroundColor:Color(0xFF2ECC71),
+            backgroundColor:const Color(0xFF2ECC71),
             leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
             ),
             title: Text('Payment', style: GoogleFonts.poppins(fontSize: 14,color: Colors.white)),
           ),
           body: Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
@@ -22,7 +23,7 @@ Widget productPreview(
             height: 130,
             width: 100,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.productPreviewBackground,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(

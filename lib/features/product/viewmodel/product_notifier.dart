@@ -95,15 +95,19 @@ class ProductListNotifier
       }
     } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      state = AsyncValue.data(cached);
-      _isNoMore = true;
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+
+      if (cached.isNotEmpty) {
+        state = AsyncValue.data(cached);
+      } else {
+        _isNoMore = true;
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.unknown) {
+          state = AsyncValue.error('Check Internet', st);
+        } else {
+          state = AsyncValue.error(e.response?.data['message'], st);
+        }
       }
-    } finally {
-      _isLoading = false;
     }
   }
 }

@@ -16,8 +16,8 @@ class ProductPreviewSlider extends ConsumerWidget {
       width: double.infinity,
       child: productListAsync.when(
         data: (productList) {
-          if (productList.isEmpty)
-            return Center(
+          if (productList.isEmpty) {
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -34,6 +34,7 @@ class ProductPreviewSlider extends ConsumerWidget {
                 ],
               ),
             );
+          }
 
           return CarouselSlider.builder(
             itemCount: productList.take(10).toList().length,

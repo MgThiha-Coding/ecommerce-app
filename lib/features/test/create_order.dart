@@ -15,7 +15,7 @@ class CreateOrderPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(orderNotifierProvider);
 
-    void _createOrder() async {
+    void createOrder() async {
       final notifier = ref.read(orderNotifierProvider.notifier);
       await notifier.createOrder();
     }
@@ -27,7 +27,7 @@ class CreateOrderPage extends ConsumerWidget {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: _createOrder,
+              onPressed: createOrder,
               child: const Text("Create Pickup Order"),
             ),
             const SizedBox(height: 20),
@@ -63,14 +63,14 @@ class OrderNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
 
       // Pickup order with placeholders for shipping fields
       formData.fields.addAll([
-        MapEntry("order_type", "pickup"),
-        MapEntry("shipping_method_id", ""), // null
-        MapEntry("payment_account_id", ""), // null
-        MapEntry("shipping[address]", "-"),
-        MapEntry("shipping[township]", "-"),
-        MapEntry("shipping[region]", "-"),
-        MapEntry("shipping[country]", "-"),
-        MapEntry("shipping[phone]", "-"),
+        const MapEntry("order_type", "pickup"),
+        const MapEntry("shipping_method_id", ""), // null
+        const MapEntry("payment_account_id", ""), // null
+        const MapEntry("shipping[address]", "-"),
+        const MapEntry("shipping[township]", "-"),
+        const MapEntry("shipping[region]", "-"),
+        const MapEntry("shipping[country]", "-"),
+        const MapEntry("shipping[phone]", "-"),
       ]);
 
       // Add cart items

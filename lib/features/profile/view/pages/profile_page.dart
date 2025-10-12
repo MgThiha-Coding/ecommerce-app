@@ -31,7 +31,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => LoginOrRegister()),
+                MaterialPageRoute(builder: (_) => const LoginOrRegister()),
               );
             });
           }
@@ -56,7 +56,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     return Scaffold(
-      backgroundColor: Color(0xFF2ECC71),
+      backgroundColor: const Color(0xFF2ECC71),
       body: Column(
         children: [
           Stack(
@@ -65,19 +65,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Container(
                 height: 100,
                 width: double.infinity,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF2ECC71)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(5),
                     bottomRight: Radius.circular(5),
                   ),
                 ),
               ),
-              Positioned(
+              const Positioned(
                 bottom: -40,
                 left: 10,
                 child: CircleAvatar(
@@ -130,7 +130,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 70),
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Card(
                 elevation: 6,
                 shape: RoundedRectangleBorder(
@@ -249,7 +249,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ShippingMethodPage(),
+                              builder: (context) => const ShippingMethodPage(),
                             ),
                           );
                         },
@@ -262,7 +262,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  PaymentMethodPage(shippingMethod: ''),
+                                  const PaymentMethodPage(shippingMethod: ''),
                             ),
                           );
                         },
@@ -300,7 +300,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   },
                             child: Ink(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
+                                gradient: const LinearGradient(
                                   colors: [
                                     Color(0xFF2ECC71),
                                     Color(0xFF27AE60),
@@ -310,7 +310,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               ),
                               child: Center(
                                 child: logOutAsync.isLoading
-                                    ? SpinKitCircle(
+                                    ? const SpinKitCircle(
                                         size: 20,
                                         color: Colors.white,
                                       )
@@ -345,7 +345,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: Color(0xFF2ECC71)),
+      leading: Icon(icon, color: const Color(0xFF2ECC71)),
       title: Text(
         title,
         style: GoogleFonts.poppins(

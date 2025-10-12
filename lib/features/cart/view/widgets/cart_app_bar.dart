@@ -10,13 +10,13 @@ class CartAppBar extends StatelessWidget {
     final responsive = Responsive(context);
 
     return Container(
-      margin: EdgeInsets.only(top: 18, bottom: 8),
+      margin: const EdgeInsets.only(top: 18, bottom: 8),
       height: responsive.value(mobile: 40, tablet: 50, desktop: 70),
       width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(width: 48),
+          const SizedBox(width: 48),
           Text(
             'Cart',
             style: GoogleFonts.poppins(
