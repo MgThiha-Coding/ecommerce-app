@@ -1,0 +1,21 @@
+{
+  "seeAll": "すべて見る",
+  "welcome": "ようこそ",
+  "welcomeToPicoShop": "PicoShopへようこそ！",
+  "caption": "お気に入りを見つけ、新着商品をチェックしましょう。",
+  "availableProducts": "利用可能な商品",
+  "home": "ホーム",
+  "product": "商品",
+  "cart": "カート",
+  "search": "検索",
+  "profile": "プロフィール",
+  "accountInfo": "アカウント情報",
+  "orderHistory": "注文履歴",
+  "paymentMethod": "支払い方法",
+  "shippingMethod": "配送方法",
+  "settings": "設定",
+  "language": "言語",
+  "theme": "テーマ",
+  "brand": "ブランド",
+  "category": "カテゴリ"
+}

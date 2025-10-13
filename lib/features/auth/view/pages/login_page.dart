@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/login_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/login_response.dart';
@@ -19,197 +23,235 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  // password and email controllers
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // login
   void login() {
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    final rememberMe = true;
-    final deviceName = 'Pico User';
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) return;
+
     ref
         .read(loginNotifierProvider.notifier)
         .login(
           LoginRequest(
             emailOrPhoneOrUserName: email,
             password: password,
-            rememberMe: rememberMe,
-            deviceName: deviceName,
+            rememberMe: true,
+            deviceName: 'Pico User',
           ),
         );
   }
 
   @override
   Widget build(BuildContext context) {
+    // app responsive
+    final responsive = Responsive(context);
+    // watch login state from loginNotifier
     final loginAsync = ref.watch(loginNotifierProvider);
-    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (
-      previous,
-      next,
-    ) {
-      next.when(
-        data: (data) {
-          if (data?.success == true && data?.data.accessToken != null) {
-            final storage = ref.read(secureStorageProvider);
 
+    ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (prev, next) {
+      next.whenOrNull(
+        data: (response) {
+          if (response?.success == true && response?.data.accessToken != null) {
+            final storage = ref.read(secureStorageProvider);
+            final auth = response!.data;
+            final user = auth.user;
+
+            // Save auth data
             storage.saveAuthData(
-              accessToken: data!.data.accessToken,
-              refreshToken: data.data.refreshToken,
-              userId: data.data.user.id.toString(),
+              accessToken: auth.accessToken,
+              refreshToken: auth.refreshToken,
+              userId: user.id.toString(),
             );
-            AppConfig.updateAccessToken(data.data.accessToken);
-            if (!mounted) return;
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const WrapperPage()),
+
+            // save user information
+            storage.saveUserInfo(
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
             );
+
+            // update in userProvider
+            ref.read(userProvider.notifier).state = UserModel(
+              id: user.id.toString(),
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
+            storage.isLoggedIn();
+
+            AppConfig.updateAccessToken(auth.accessToken);
+            // route to wrapper page
+            if (context.mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const WrapperPage()),
+              );
+            }
           }
         },
-        error: (err, _) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.grey[300],
-              content: Text(
-                err.toString(),
-                style: TextStyle(color: Colors.grey[800]),
+        error: (error, _) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.grey.shade200,
+                content: Text(
+                  error.toString(),
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    color: Colors.red.shade700,
+                    fontSize: 12,
+                  ),
+                ),
               ),
-            ),
-          );
+            );
         },
-        loading: () {},
       );
     });
 
-    double getHorizontalPadding(double width) {
-      if (width >= 1400) return 400;
-      if (width >= 1024) return 200;
-      if (width >= 768) return 50;
-      return 15;
-    }
-
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade500,
-              Colors.blue.shade100,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
+    return Container(
+      color: const Color(0xFF2ECC71),
+      child: SafeArea(
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+              ),
             ),
-            child: IntrinsicHeight(
-              child: Padding(
+            child: Center(
+              child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
-                  horizontal: getHorizontalPadding(screenWidth),
+                  horizontal: responsive.authHorizontalPadding,
                   vertical: 50,
                 ),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // App Title
-                      Row(
+                      
+                      // Logo & Title
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Image.asset(AppImage.appLogo, scale: 14),
+                          const SizedBox(height: 16),
                           Text(
-                            'Pico Shop',
+                            'Welcome to Pico Shop',
                             style: GoogleFonts.poppins(
-                              fontSize: 24,
+                              fontSize: 16,
                               color: Colors.white,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Icon(
-                            Icons.shopping_bag,
-                            color: Colors.white,
-                            size: 30,
                           ),
                         ],
                       ),
+
+                      const SizedBox(height: 30),
+
+                      // Email Field
+                      _glassCard(
+                        child: AppTextFormField(
+                          controller: _emailController,
+                          hintText: "Email",
+                          validator: (value) =>
+                              value!.isEmpty ? "Email required" : null,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Password Field
+                      _glassCard(
+                        child: AppTextFormField(
+                          controller: _passwordController,
+                          hintText: "Password",
+                          addObscure: true,
+                          validator: (value) {
+                            if (value!.isEmpty) return "Password required";
+                            if (value.length < 6) {
+                              return "Min 6 characters";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                       const SizedBox(height: 20),
-
-                      // Email
-                      AppTextFormField(
-                        controller: _emailController,
-                        hintText: "Email",
-                        validator: (value) =>
-                            value!.isEmpty ? "Email required" : null,
-                      ),
-                      const SizedBox(height: 8.0),
-
-                      // Password
-                      AppTextFormField(
-                        controller: _passwordController,
-                        hintText: "Password",
-                        addObscure: true,
-                        validator: (value) {
-                          if (value!.isEmpty) return "Password required";
-                          if (value.length < 6)
-                            return "Password must be at least 6 characters";
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16.0),
 
                       // Login Button
                       SizedBox(
-                        height: 46,
+                        height: 50,
                         width: double.infinity,
-                        child: MaterialButton(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFC107),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 4,
+                            shadowColor: const Color(0xFFFFC107),
+                          ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) login();
                           },
-                          color: Colors.blue.shade900,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(13),
-                          ),
                           child: loginAsync.isLoading
-                              ? SpinKitCircle(color: Colors.white, size: 27)
-                              : const Text(
+                              ? const SpinKitCircle(
+                                  color: Colors.white,
+                                  size: 28,
+                                )
+                              : Text(
                                   "Log In",
-                                  style: TextStyle(
-                                    fontSize: 14,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: responsive.subHeading,
+                                    fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
                                 ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
 
-                      //
+                      // Register
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             "Don't have an account?",
-                            style: TextStyle(color: Colors.white),
+                            style: GoogleFonts.poppins(color: Colors.white),
                           ),
-                          const SizedBox(width: 4.0),
+                          const SizedBox(width: 4),
                           GestureDetector(
                             onTap: widget.toggle,
                             child: Text(
                               'Register',
-                              style: TextStyle(
-                                color: Colors.blue.shade800,
-                                fontWeight: FontWeight.bold,
+                              style: GoogleFonts.poppins(
+                                color: const Color(0xFFFFC107),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Footer
+                      Text(
+                        '© 2025 Pico SBS',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -219,6 +261,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _glassCard({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        // ignore: deprecated_member_use
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            // ignore: deprecated_member_use
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: child,
     );
   }
 }

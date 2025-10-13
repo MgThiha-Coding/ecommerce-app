@@ -1,0 +1,21 @@
+{
+  "seeAll": "查看全部",
+  "welcome": "欢迎",
+  "welcomeToPicoShop": "欢迎来到PicoShop！",
+  "caption": "发现您喜爱的商品并探索新品。",
+  "availableProducts": "可用产品",
+  "home": "主页",
+  "product": "产品",
+  "cart": "购物车",
+  "search": "搜索",
+  "profile": "个人资料",
+  "accountInfo": "账户信息",
+  "orderHistory": "订单历史",
+  "paymentMethod": "支付方式",
+  "shippingMethod": "配送方式",
+  "settings": "设置",
+  "language": "语言",
+  "theme": "主题",
+  "brand": "品牌",
+  "category": "类别"
+}

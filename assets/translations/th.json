@@ -1,0 +1,21 @@
+{
+  "seeAll": "ดูทั้งหมด",
+  "welcome": "ยินดีต้อนรับ",
+  "welcomeToPicoShop": "ยินดีต้อนรับสู่ PicoShop!",
+  "caption": "ค้นหาสินค้าที่คุณชื่นชอบและสำรวจสินค้ามาใหม่",
+  "availableProducts": "สินค้าที่มีจำหน่าย",
+  "home": "หน้าแรก",
+  "product": "สินค้า",
+  "cart": "ตะกร้า",
+  "search": "ค้นหา",
+  "profile": "โปรไฟล์",
+  "accountInfo": "ข้อมูลบัญชี",
+  "orderHistory": "ประวัติการสั่งซื้อ",
+  "paymentMethod": "วิธีการชำระเงิน",
+  "shippingMethod": "วิธีการจัดส่ง",
+  "settings": "การตั้งค่า",
+  "language": "ภาษา",
+  "theme": "ธีม",
+  "brand": "แบรนด์",
+  "category": "ประเภท"
+}

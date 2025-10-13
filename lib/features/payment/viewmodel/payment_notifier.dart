@@ -13,7 +13,7 @@ class PaymentMethodNotifier
   Future<void> getPaymentMethod() async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/payment-methods',
+        '${AppConfig.baseUrl}/v1/ecommerce/payment-methods',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -22,7 +22,9 @@ class PaymentMethodNotifier
           },
         ),
       );
-       final isSuccess =
+
+      print("Payment method response test ${response.data}");
+      final isSuccess =
           response.data != null &&
           response.statusCode == 200 &&
           response.data['success'] == true;

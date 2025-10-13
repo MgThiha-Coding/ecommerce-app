@@ -1,10 +1,11 @@
-// wrapper_page.dart
 import 'package:flutter/material.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
-import 'package:picoshop_theme2/features/home/view/pages/home_page.dart';
+import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/profile_page.dart';
+import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
+import 'package:picoshop_theme2/features/search/view/search_page.dart';
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key});
@@ -20,6 +21,7 @@ class _WrapperPageState extends State<WrapperPage> {
     HomePage(),
     ProductListPage(),
     CartPage(),
+    SearchPage(),
     ProfilePage(),
   ];
 
@@ -29,67 +31,80 @@ class _WrapperPageState extends State<WrapperPage> {
     });
   }
 
-  final List<NavigationRailDestination> _railDestinations = const [
-    NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-    NavigationRailDestination(icon: Icon(Icons.grid_view), label: Text('Products')),
-    NavigationRailDestination(icon: Icon(Icons.shopping_cart), label: Text('Cart')),
-    NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    if (responsive.isMobile) {
+
+    if (responsive.isMobile || responsive.isTablet) {
       return Scaffold(
         body: _pages[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.blue.shade50,
-          elevation: 4,
+          backgroundColor: AppColors.navBackgroundColor,
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.blue.shade400,
-          unselectedItemColor: Colors.grey.shade800,
+          selectedItemColor: AppColors.selectedColor,
+          unselectedItemColor: AppColors.unselectedColor,
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          selectedLabelStyle:
-              const TextStyle(fontSize: 7, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: const TextStyle(fontSize: 8),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: const TextStyle(fontSize: 10),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Products'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.grid_view),
+              label: 'Products',
+            ),
+            BottomNavigationBarItem(icon: SizedBox(), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
-      );
-    } else {
-      return SafeArea(
-        child: Scaffold(
-          body: Row(
-            children: [
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Image.asset('assets/images/picocare.png',height: 50,width: 50,),
-                  ),
-                  Expanded(
-                    child: NavigationRail(
-                      selectedIndex: _currentIndex,
-                      onDestinationSelected: _onTabTapped,
-                      labelType: NavigationRailLabelType.all,
-                      destinations: _railDestinations,
-                    ),
-                  ),
-                ],
-              ),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: _pages[_currentIndex]),
-            ],
-          ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _onTabTapped(2),
+          backgroundColor: AppColors.selectedColor,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.shopping_cart, color: Colors.white),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       );
     }
+
+    return SafeArea(
+      child: Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: _onTabTapped,
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.grid_view),
+                  label: Text('Products'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.shopping_cart),
+                  label: Text('Cart'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person),
+                  label: Text('Profile'),
+                ),
+              ],
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: _pages[_currentIndex]),
+          ],
+        ),
+      ),
+    );
   }
 }

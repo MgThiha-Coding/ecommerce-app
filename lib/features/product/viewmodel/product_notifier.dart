@@ -1,58 +1,53 @@
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_detail_response.dart';
-import 'package:picoshop_theme2/features/product/model/response/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
+import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+import 'package:hive/hive.dart';
 
-// search notifier provider 
-class ProductFilterState {
-  final String searchQuery;
-  final List<ChildData?> filteredList;
 
-  ProductFilterState({this.searchQuery = '', this.filteredList = const []});
-
-  ProductFilterState copyWith({String? searchQuery, List<ChildData?>? filteredList}) {
-    return ProductFilterState(
-      searchQuery: searchQuery ?? this.searchQuery,
-      filteredList: filteredList ?? this.filteredList,
-    );
-  }
-}
-
-class ProductFilterNotifier extends StateNotifier<ProductFilterState> {
-  final List<ChildData?> allProducts;
-
-  ProductFilterNotifier(this.allProducts) : super(ProductFilterState(filteredList: allProducts));
-
-  void updateSearchQuery(String query) {
-    final filtered = allProducts.where((product) {
-      final name = product?.name?.toLowerCase() ?? '';
-      return name.contains(query.toLowerCase());
-    }).toList();
-
-    state = state.copyWith(searchQuery: query, filteredList: filtered);
-  }
-
-  void reset() {
-    state = ProductFilterState(filteredList: allProducts);
-  }
-}
-
-final productFilterProvider = StateNotifierProvider.family<ProductFilterNotifier, ProductFilterState, List<ChildData?>>(
-  (ref, allProducts) => ProductFilterNotifier(allProducts),
-);
-
-// product list
-class ProductListNotifier extends StateNotifier<AsyncValue<List<ChildData?>>> {
+class ProductListNotifier
+    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+  final Box<ProductHiveModel> _localCache;
   final Dio _dio;
-  ProductListNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.data([]));
+  final List<ProductDataModel> _onlineProducts = [];
+  int _currentPage = 1;
+  bool _isNoMore = false;
+  bool _isLoading = false;
 
-  Future<void> getProductList(int page) async {
+  ProductListNotifier(this._localCache)
+    : _dio = Dio(),
+      super(const AsyncValue.loading()) {
+    _init();
+  }
+  bool get isNoMore => _isNoMore;
+  Future<void> _init() async {
+    final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+    if (cached.isNotEmpty) {
+      state = AsyncValue.data(cached);
+    } else {
+      await getNextPage();
+    }
+  }
+
+  Future<void> reset() async {
+    _onlineProducts.clear();
+    _currentPage = 1;
+    _isNoMore = false;
+    await getNextPage();
+  }
+
+  Future<void> getNextPage() async {
+    if (_isNoMore || _isLoading) return;
+    _isLoading = true;
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/products?page=$page',
+        '${AppConfig.baseUrl}/v1/ecommerce/products',
+        queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -62,38 +57,75 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ChildData?>>> {
       );
 
       final isSuccess =
-          response.data != null &&
-          response.data['success'] == true &&
-          response.statusCode == 200;
-      if (isSuccess) {
-        final responseData = ProductListResponse.fromJson(response.data);
-        final newProductList = responseData.data?.data ?? [];
-        state = state.whenData(
-          (oldProductList) => [...oldProductList, ...newProductList],
-        );
+          response.statusCode == 200 && response.data['success'] == true;
+      if (!isSuccess) {
+        final message =
+            response.data['message'] ??
+            "Something went wrong\nPlease try again";
+        state = AsyncValue.error(message, StackTrace.current);
+        return;
+      }
+      final parsed = ProductListResponse.fromJson(response.data);
+      final products = parsed.data?.data ?? [];
+      if (products.isEmpty) {
+        _isNoMore = true;
+      } else {
+        _onlineProducts.addAll(products);
+        final limitedItems = products.take(20).toList();
+        for (var product in limitedItems) {
+          if (_localCache.length >= 20) {
+            _localCache.delete(_localCache.keys.first);
+          }
+          if (product.id != null) {
+            _localCache.put(
+              product.id,
+              ProductHiveModel.fromDataModel(product),
+            );
+          }
+        }
+        _currentPage++;
+      }
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOnline = connectivityResult != ConnectivityResult.none;
+      if (isOnline) {
+        state = AsyncValue.data(List.from(_onlineProducts));
+      } else {
+        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+        state = AsyncValue.data(cached);
       }
     } on DioException catch (e, st) {
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+      final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+
+      if (cached.isNotEmpty) {
+        state = AsyncValue.data(cached);
       } else {
-        final errorData = e.response?.data['message'];
-        state = AsyncValue.error(errorData, st);
+        _isNoMore = true;
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.unknown) {
+          state = AsyncValue.error('Check Internet', st);
+        } else {
+          state = AsyncValue.error(e.response?.data['message'], st);
+        }
       }
     }
   }
 }
 
 final productNotifierProvider =
-    StateNotifierProvider<ProductListNotifier, AsyncValue<List<ChildData?>>>(
-      (ref) => ProductListNotifier(),
-    );
+    StateNotifierProvider<
+      ProductListNotifier,
+      AsyncValue<List<ProductDataModel>>
+    >((ref) {
+      final offlineProducts = Hive.box<ProductHiveModel>('products');
+      return ProductListNotifier(offlineProducts);
+    });
 
-// product detail
+// Product Detail Notifier Provider
 class ProductDetailNotifier
     extends StateNotifier<AsyncValue<ProductDetailResponse?>> {
   final Dio _dio;
+
   ProductDetailNotifier([Dio? dio])
     : _dio = dio ?? Dio(),
       super(const AsyncValue.data(null));
@@ -101,7 +133,7 @@ class ProductDetailNotifier
   Future<void> getProductDetail(int productId) async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/products/details/$productId',
+        '${AppConfig.baseUrl}/v1/ecommerce/products/details/$productId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -116,7 +148,6 @@ class ProductDetailNotifier
           response.statusCode == 200;
       if (isSuccess) {
         final responseData = ProductDetailResponse.fromJson(response.data);
-
         state = AsyncValue.data(responseData);
       }
     } on DioException catch (e, st) {

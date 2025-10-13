@@ -1,24 +1,25 @@
-// lib/features/auth/ui/verify_code_page.dart
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/storage/user_model.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/model/request/verify_code_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerifyCodePage extends ConsumerStatefulWidget {
   final String? email;
   final String? deviceName;
-
   const VerifyCodePage({super.key, this.email, this.deviceName});
 
   @override
@@ -28,40 +29,21 @@ class VerifyCodePage extends ConsumerStatefulWidget {
 class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
   String code = '';
 
-  // Get Device Info
   Future<String?> getDeviceName() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
     if (kIsWeb) {
-      WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
-      return '${webBrowserInfo.browserName}${webBrowserInfo.platform}${webBrowserInfo.product}${webBrowserInfo.productSub}${webBrowserInfo.vendor}';
-    } else {
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        return androidInfo.id;
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        return iosInfo.identifierForVendor;
-      }
+      final webInfo = await deviceInfo.webBrowserInfo;
+      return '${webInfo.browserName}-${webInfo.platform}';
+    } else if (Platform.isAndroid) {
+      return (await deviceInfo.androidInfo).id;
+    } else if (Platform.isIOS) {
+      return (await deviceInfo.iosInfo).identifierForVendor;
     }
     return null;
   }
 
-  // Verify code
   void verifyCode() {
-    if (widget.email == null || widget.deviceName == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Email is required')));
-      return;
-    }
-    if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-digit code')),
-      );
-      return;
-    }
-
+    if (code.length != 6) return;
     ref
         .read(verifyCodeNotifierProvider.notifier)
         .verifyCode(
@@ -75,10 +57,11 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
   @override
   Widget build(BuildContext context) {
-    final verifyState = ref.watch(verifyCodeNotifierProvider);
+    final verifyAsync = ref.watch(verifyCodeNotifierProvider);
+    final resentAsync = ref.watch(verifyCodeNotifierProvider);
     final storage = ref.watch(secureStorageProvider);
+    final responsive = Responsive(context);
 
-    // listen to the VerifycodeNotifier response , save auth data in local stroage and route to wrapperpage
     ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider, (
       _,
       state,
@@ -88,180 +71,220 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           if (data != null && data.success) {
             final accessToken = data.data.auth.accessToken;
             final refreshToken = data.data.auth.refreshToken;
-            final userId = data.data.user.id.toString();
+            final user = data.data.user;
 
             await storage.saveAuthData(
               accessToken: accessToken,
               refreshToken: refreshToken,
-              userId: userId,
+              userId: user.id.toString(),
             );
 
-            // Navigate to WrapperPage
+            storage.saveUserInfo(
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
+            ref.read(userProvider.notifier).state = UserModel(
+              id: user.id.toString(),
+              name: user.name ?? '',
+              email: user.email,
+              phone: user.phone,
+            );
+
+            storage.isLoggedIn();
+            AppConfig.updateAccessToken(accessToken);
+
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => WrapperPage()),
+              MaterialPageRoute(builder: (context) => const WrapperPage()),
             );
           }
         },
         error: (error, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[200],
+              content: Text(
+                error.toString(),
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  color: Colors.blueGrey,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          );
         },
         loading: () {},
       );
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2ECC71),
+        scrolledUnderElevation: 0,
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
           ),
-          child: IntrinsicHeight(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.blue.shade900,
-                    Colors.blue.shade500,
-                    Colors.blue.shade100,
-                  ],
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(AppImage.appLogo, scale: 14),
+
+                const SizedBox(height: 30),
+                Text(
+                  'OTP Verification',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: responsive.subHeading,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                
-                  
-                    const SizedBox(height: 20),
-                    Text(
-                      'OTP Verification',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'OTP sent to your Mail ${widget.email ?? ""}',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                const SizedBox(height: 8),
+                Text(
+                  'OTP sent to ${widget.email ?? ""}',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white70,
+                    fontSize: responsive.body,
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-                    // Otp pin code field 
-                    PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      onChanged: (value) => code = value,
-                      onCompleted: (value) => code = value,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(4),
-                        fieldHeight: 50,
-                        fieldWidth: 36,
-                        activeFillColor: Colors.white,
-                        selectedFillColor: Colors.grey.shade200,
-                        inactiveFillColor: Colors.grey.shade100,
-                        activeColor: Colors.blue,
-                        selectedColor: Colors.blue,
-                        inactiveColor: Colors.grey,
-                      ),
-                      keyboardType: TextInputType.number,
-                      animationType: AnimationType.fade,
-                      animationDuration: const Duration(milliseconds: 300),
-                      enableActiveFill: true,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                _glassCard(
+                  child: PinCodeTextField(
+                    appContext: context,
+                    length: 6,
+                    onChanged: (value) => code = value,
+                    onCompleted: (value) => code = value,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(8),
+                      fieldHeight: 50,
+                      fieldWidth: 40,
+                      activeFillColor: Colors.transparent,
+                      selectedFillColor: Colors.amber.withOpacity(0.3),
+                      inactiveFillColor: Colors.white.withOpacity(0.3),
+                      activeColor: Colors.amber,
+                      selectedColor: Colors.amber.shade700,
+                      inactiveColor: Colors.white70,
                     ),
-                    const SizedBox(height: 8.0),
-                    // Resent code Button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'Resend Code',
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      ),
+                    keyboardType: TextInputType.number,
+                    animationType: AnimationType.fade,
+                    animationDuration: const Duration(milliseconds: 250),
+                    enableActiveFill: true,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 10.0),
+                  ),
+                ),
 
-                    // Verify Code Button 
-                    SizedBox(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          disabledBackgroundColor: Colors.blue,
-                          disabledForegroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: verifyState.isLoading ? null : verifyCode,
-                        child: verifyState.isLoading
-                            ? const SpinKitFadingCircle(
-                                size: 30,
-                                color: Colors.white,
-                              )
-                            : Text(
-                                'Verify Code',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    //
-                    SizedBox(
-                      height: 45,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          disabledBackgroundColor: Colors.blue,
-                          disabledForegroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginOrRegister(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Back',
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: resentAsync.isLoading
+                        ? null
+                        : () => ref
+                              .read(verifyCodeNotifierProvider.notifier)
+                              .resentVerifyCode(widget.email!),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Resend Code',
                           style: GoogleFonts.poppins(
                             color: Colors.white,
-                            fontSize: 15,
+                            fontSize: responsive.body,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        if (resentAsync.isLoading)
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 50,
+                  width: double.infinity,
+                  child: MaterialButton(
+                    onPressed: verifyAsync.isLoading ? null : verifyCode,
+                    color: const Color(0xFFFFC107),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: verifyAsync.isLoading
+                        ? const SpinKitCircle(color: Colors.white, size: 28)
+                        : Text(
+                            'Verify Code',
+                            style: GoogleFonts.poppins(
+                              fontSize: responsive.subHeading,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                Text(
+                  '© 2025 Pico SBS',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _glassCard({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+      decoration: BoxDecoration(
+        // ignore: deprecated_member_use
+        //  color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            // ignore: deprecated_member_use
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

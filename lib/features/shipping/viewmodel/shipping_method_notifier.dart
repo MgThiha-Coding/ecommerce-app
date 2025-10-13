@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/shipping/model/response/shipping_method_response.dart';
+import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
 
 class ShippingMethodNotifier
     extends StateNotifier<AsyncValue<ShippingMethodResponse?>> {
@@ -13,7 +13,7 @@ class ShippingMethodNotifier
   Future<void> getShippingMethod() async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/v1/ecommerce/shipping-methods',
+        '${AppConfig.baseUrl}/v1/ecommerce/shipping-methods',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -22,6 +22,8 @@ class ShippingMethodNotifier
           },
         ),
       );
+
+      print('Get Shipping method testing ${response.data}');
 
       final isSuccess =
           response.data != null &&

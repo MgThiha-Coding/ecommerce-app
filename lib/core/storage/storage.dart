@@ -8,7 +8,7 @@ class SecureStorage {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
-  /// Save accessToken, refreshToken, and userId securely
+
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
@@ -19,29 +19,34 @@ class SecureStorage {
     await _storage.write(key: 'user_id', value: userId);
   }
 
-  /// Check if the user is logged in
+  Future<void> saveUserInfo({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    await _storage.write(key: 'user_name', value: name);
+    await _storage.write(key: 'user_email', value: email);
+    await _storage.write(key: 'user_phone', value: phone);
+  }
+
+  Future<Map<String, String?>> getUserInfo() async {
+    final name = await _storage.read(key: 'user_name');
+    final email = await _storage.read(key: 'user_email');
+    return {'name': name, 'email': email};
+  }
+
+  Future<void> clear() async => await _storage.deleteAll();
+
   Future<bool> isLoggedIn() async {
     final token = await _storage.read(key: 'access_token');
     return token != null && token.isNotEmpty;
   }
 
-  /// Get the access token
-  Future<String?> getAccessToken() async {
-    return await _storage.read(key: 'access_token');
-  }
+  Future<String?> getAccessToken() async =>
+      await _storage.read(key: 'access_token');
 
-  /// Get the refresh token
-  Future<String?> getRefreshToken() async {
-    return await _storage.read(key: 'refresh_token');
-  }
+  Future<String?> getRefreshToken() async =>
+      await _storage.read(key: 'refresh_token');
 
-  /// Get the user ID
-  Future<String?> getUserId() async {
-    return await _storage.read(key: 'user_id');
-  }
-
-  /// Clear all stored data
-  Future<void> clear() async {
-    await _storage.deleteAll();
-  }
+  Future<String?> getUserId() async => await _storage.read(key: 'user_id');
 }
