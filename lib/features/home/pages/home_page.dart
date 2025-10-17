@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
-import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
@@ -102,7 +101,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           const SizedBox(height: 6),
           Text(
             'Something went wrong. Please try again later.',
-            style: GoogleFonts.poppins(color: AppColors.emptyStateText),
+            style: GoogleFonts.poppins(color: AppColors.emptyStateText,fontSize: 10),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -157,11 +156,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ],
                     ),
                     Text(
-                      ref.watch(userProvider)?.email ?? "Guest",
+                    //  ref.watch(userProvider)?.email ?? "Guest",
+                    'Min Thiha Aung',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.appBarEmailText,
+                        color: Colors.green,
+                        // AppColors.appBarEmailText,
                       ),
                     ),
                   ],
@@ -217,7 +218,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: AppColors.searchFill,
+                            fillColor: Colors.grey[100],
+                            // AppColors.searchFill,
                             hintText: "${LocaleKeys.search.tr()}..",
                             hintStyle: GoogleFonts.podkova(
                               color: AppColors.searchHint,

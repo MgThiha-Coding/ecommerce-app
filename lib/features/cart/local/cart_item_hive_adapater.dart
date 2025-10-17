@@ -3,7 +3,7 @@ import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 
 class CartItemHiveAdapter extends TypeAdapter<CartItemHiveModel> {
   @override
-  final typeId = 1; 
+  final typeId = 3; 
 
   @override
   CartItemHiveModel read(BinaryReader reader) {

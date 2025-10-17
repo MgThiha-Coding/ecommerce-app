@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
@@ -40,6 +39,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       final isLoggedIn = await storage.isLoggedIn();
 
       if (!mounted) return;
+      await Future.delayed(const Duration(seconds: 2));
       if (isLoggedIn) {
         Navigator.pushReplacement(
           context,
@@ -56,43 +56,46 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Responsive(context);
-    return Container(
-      color: const Color(0xFF2ECC71),
-      child: SafeArea(
-        child: Scaffold(
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-              ),
+    return Scaffold(
+      extendBodyBehindAppBar: false,
+      body: SafeArea(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF1F3B4D),
+                Color(0xFF2C5364)
+              ],
             ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(AppImage.appLogo, scale: 14),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Welcome to Pico Shop',
-                        style: GoogleFonts.poppins(
-                          fontSize: responsive.heading,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(AppImage.appLogo, scale: 14),
+                const SizedBox(height: 8),
+                Text(
+                  'Welcome to picoshop',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 8.0),
-                ],
-              ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Discover your favourites',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

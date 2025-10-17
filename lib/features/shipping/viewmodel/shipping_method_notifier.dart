@@ -23,7 +23,7 @@ class ShippingMethodNotifier
         ),
       );
 
-      print('Get Shipping method testing ${response.data}');
+    
 
       final isSuccess =
           response.data != null &&

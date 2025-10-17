@@ -116,145 +116,138 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
     });
 
-    return Container(
-      color: const Color(0xFF2ECC71),
-      child: SafeArea(
-        child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
-              ),
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1F3B4D), Color(0xFF2C5364)],
             ),
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: responsive.authHorizontalPadding,
-                  vertical: 50,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      
-                      // Logo & Title
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(AppImage.appLogo, scale: 14),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Welcome to Pico Shop',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: responsive.authHorizontalPadding,
+                vertical: 50,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Logo & Title
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(AppImage.appLogo, scale: 14),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Welcome to Pico Shop',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // Email Field
-                      _glassCard(
-                        child: AppTextFormField(
-                          controller: _emailController,
-                          hintText: "Email",
-                          validator: (value) =>
-                              value!.isEmpty ? "Email required" : null,
                         ),
-                      ),
-                      const SizedBox(height: 10),
+                      ],
+                    ),
 
-                      // Password Field
-                      _glassCard(
-                        child: AppTextFormField(
-                          controller: _passwordController,
-                          hintText: "Password",
-                          addObscure: true,
-                          validator: (value) {
-                            if (value!.isEmpty) return "Password required";
-                            if (value.length < 6) {
-                              return "Min 6 characters";
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 30),
 
-                      // Login Button
-                      SizedBox(
-                        height: 50,
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFC107),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 4,
-                            shadowColor: const Color(0xFFFFC107),
+                    // Email Field
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _emailController,
+                        hintText: "Email",
+                        validator: (value) =>
+                            value!.isEmpty ? "Email required" : null,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Password Field
+                    _glassCard(
+                      child: AppTextFormField(
+                        controller: _passwordController,
+                        hintText: "Password",
+                        addObscure: true,
+                        validator: (value) {
+                          if (value!.isEmpty) return "Password required";
+                          if (value.length < 6) {
+                            return "Min 6 characters";
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Login Button
+                    SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFC107),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) login();
-                          },
-                          child: loginAsync.isLoading
-                              ? const SpinKitCircle(
+                          elevation: 4,
+                          shadowColor: const Color(0xFFFFC107),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) login();
+                        },
+                        child: loginAsync.isLoading
+                            ? const SpinKitCircle(color: Colors.white, size: 28)
+                            : Text(
+                                "Log In",
+                                style: GoogleFonts.poppins(
+                                  fontSize: responsive.subHeading,
+                                  fontWeight: FontWeight.w500,
                                   color: Colors.white,
-                                  size: 28,
-                                )
-                              : Text(
-                                  "Log In",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: responsive.subHeading,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
                                 ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Register
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Don't have an account?",
-                            style: GoogleFonts.poppins(color: Colors.white),
-                          ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: widget.toggle,
-                            child: Text(
-                              'Register',
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFFFFC107),
-                                fontWeight: FontWeight.w600,
                               ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Register
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: GoogleFonts.poppins(color: Colors.white),
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: widget.toggle,
+                          child: Text(
+                            'Register',
+                            style: GoogleFonts.poppins(
+                              color: const Color(0xFFFFC107),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-
-                      // Footer
-                      Text(
-                        '© 2025 Pico SBS',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white70,
-                          fontSize: 12,
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Footer
+                    Text(
+                      '© 2025 Pico SBS',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 12,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

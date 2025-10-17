@@ -110,6 +110,7 @@ class ProductSearchNotifier
       }
 
       final connectivity = await Connectivity().checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = connectivity != ConnectivityResult.none;
 
       if (isOnline) {

@@ -19,25 +19,17 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // EasyLocalization initialization
   await EasyLocalization.ensureInitialized();
-
   FlutterError.onError = (details) => FlutterError.dumpErrorToConsole(details);
-
   final bool isTablet =
+      // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
-
   await SystemChrome.setPreferredOrientations(
     isTablet
         ? DeviceOrientation.values
         : [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
-
-  // Initialize app resources asynchronously
   await _initializeApp();
-
-  // Run app with EasyLocalization and ProviderScope
   runApp(
     EasyLocalization(
       supportedLocales: const [

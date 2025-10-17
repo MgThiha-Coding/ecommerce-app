@@ -62,12 +62,13 @@ class AppColors {
   }
 
   static bool get isDark => _isDark;
-
+  // Color(0xFF1F3B4D)
+  // Color(0xFF2C5364)
   // === Background (Linear Gradient) ===
   static Color get backgroundGradientStart =>
-      _isDark ? const Color(0xFF1F3B4D) : const Color(0xFFF0F0F0);
+      _isDark ?  Colors.white : const Color(0xFFF0F0F0);
   static Color get backgroundGradientEnd =>
-      _isDark ? const Color(0xFF2C5364) : const Color(0xFFE0E0E0);
+      _isDark ? Colors.white : const Color(0xFFE0E0E0);
 
   // === Banner / Home Page ===
   static Color get bannerTextPrimary =>
@@ -106,7 +107,7 @@ class AppColors {
   static Color get unselectedColor =>
       _isDark ? const Color(0xFF2C5364) : const Color(0xFF2C5364);
   static Color get buttonColor =>
-      _isDark ? const Color(0xFF1F3B4D) :  const Color(0xFF1F3B4D);
+      _isDark ? const Color(0xFF1F3B4D) : const Color(0xFF1F3B4D);
   static Color get navBackgroundColor =>
       _isDark ? const Color(0xFFF0F0F0) : const Color(0xFFF0F0F0);
 

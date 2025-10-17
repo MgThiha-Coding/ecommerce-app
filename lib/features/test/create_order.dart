@@ -92,7 +92,7 @@ class OrderNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
           contentType: 'multipart/form-data',
         ),
       );
-      print('response ${response.data}');
+    
       state = AsyncValue.data(response.data);
     } on DioException catch (e, st) {
       final errorData = e.response?.data ?? e.message;

@@ -31,6 +31,7 @@ class ConnectivityNotifier extends StateNotifier<AsyncValue<String>> {
   Future<void> _checkInitialConnectivity() async {
     try {
       final result = await _connectivity.checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = result != ConnectivityResult.none;
       if (isOnline) {
         state = const AsyncValue.data('Back online');

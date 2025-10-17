@@ -58,7 +58,7 @@ class CategoryListNotifier
         ),
       );
 
-      print('brand list testing ${response.data}');
+    
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
 
@@ -91,19 +91,20 @@ class CategoryListNotifier
       }
 
       final connectivityResult = await Connectivity().checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineCategories));
       } else {
-     //   final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      //  state = AsyncValue.data(cached);
+       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+       state = AsyncValue.data(cached);
       }
     }  on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
 
       if (cached.isNotEmpty) {
-      //  state = AsyncValue.data(cached);
+        state = AsyncValue.data(cached);
       } else {
         _isNoMore = true;
         if (e.type == DioExceptionType.connectionError ||

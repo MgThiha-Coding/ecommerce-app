@@ -7,7 +7,6 @@ import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
-import 'package:hive/hive.dart';
 
 
 class ProductListNotifier
@@ -86,6 +85,7 @@ class ProductListNotifier
         _currentPage++;
       }
       final connectivityResult = await Connectivity().checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineProducts));

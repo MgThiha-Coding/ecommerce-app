@@ -49,11 +49,10 @@ class BrandListNotifier
 
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/v1/ecommerce/brands',
+        '${AppConfig.baseUrl}/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
@@ -88,6 +87,7 @@ class BrandListNotifier
       }
 
       final connectivityResult = await Connectivity().checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
       if (isOnline) {
