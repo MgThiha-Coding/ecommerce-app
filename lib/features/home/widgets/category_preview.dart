@@ -13,7 +13,7 @@ Widget categoryPreview(
     itemBuilder: (context, index) {
       final categoryName = categoryList[index]?.name ?? '';
       return Card(
-        elevation: 0.3,
+        elevation: 0.4,
         shape: RoundedRectangleBorder( 
            borderRadius: BorderRadius.circular(9.0)
         ),
@@ -21,14 +21,14 @@ Widget categoryPreview(
           width: 80,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: AppColors.categoryCardBackground,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(9.0),
           ),
           child: Center(
             child: Text(
               categoryName,
               style: GoogleFonts.poppins(
-                color: AppColors.categoryCardText,
+                color: AppColors.textSecondary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),

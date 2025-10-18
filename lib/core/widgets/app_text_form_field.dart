@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:picoshop_theme2/core/consts/app_theme.dart';
+
 
 class AppTextFormField extends StatefulWidget {
   final TextEditingController? controller;
@@ -30,7 +30,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = AppTheme();
+   
 
     return TextFormField(
       controller: widget.controller,
@@ -38,7 +38,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       validator: widget.validator,
       decoration: InputDecoration(
         hintText: widget.hintText,
-        hintStyle: theme.hintText1(context),
+        hintStyle: TextStyle(),
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(

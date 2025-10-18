@@ -43,7 +43,7 @@ class CartItemHiveModel {
       productVariantId: productVariantId ?? 0,
       quantity: quantity ?? 0,
       uomPrice: uomPrice ?? 0,
-      createdAt: DateTime.now(), // you can store createdAt separately if needed
+      createdAt: DateTime.now(), 
       updatedAt: DateTime.now(),
     );
   }

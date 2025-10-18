@@ -37,14 +37,25 @@ class _WrapperPageState extends State<WrapperPage> {
 
     if (responsive.isMobile || responsive.isTablet) {
       return Scaffold(
-        body: _pages[_currentIndex],
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: _pages[_currentIndex],
+        ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: AppColors.navBackgroundColor,
+          backgroundColor: AppColors.background,
           currentIndex: _currentIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppColors.selectedColor,
-          unselectedItemColor: AppColors.unselectedColor,
+          selectedItemColor: AppColors.selectedNavColor,
+          unselectedItemColor: AppColors.unselctedNavColor,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(
@@ -58,18 +69,14 @@ class _WrapperPageState extends State<WrapperPage> {
               icon: Icon(Icons.grid_view),
               label: 'Products',
             ),
-            BottomNavigationBarItem(icon: SizedBox(), label: ''),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: 'Cart',
+            ),
             BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _onTabTapped(2),
-          backgroundColor: AppColors.selectedColor,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.shopping_cart, color: Colors.white),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       );
     }
 
@@ -101,7 +108,14 @@ class _WrapperPageState extends State<WrapperPage> {
               ],
             ),
             const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: _pages[_currentIndex]),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: _pages[_currentIndex],
+              ),
+            ),
           ],
         ),
       ),

@@ -48,7 +48,7 @@ class CategoryListNotifier
 
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/categories',
+        'https://beta.picosbs.com/api/ecommerce/categories',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
@@ -57,6 +57,8 @@ class CategoryListNotifier
           },
         ),
       );
+
+      print('Category ${response.data}');
 
     
       final isSuccess =
@@ -77,6 +79,8 @@ class CategoryListNotifier
         _isNoMore = true;
       } else {
         _onlineCategories.addAll(categories);
+        _localCache.clear();
+        /*
         final limitedItems = categories.take(20).toList();
         for (var category in limitedItems) {
           if (_localCache.length >= 20) {
@@ -87,6 +91,7 @@ class CategoryListNotifier
             CategoryHiveModel.fromDataModel(category),
           );
         }
+        */
         _currentPage++;
       }
 

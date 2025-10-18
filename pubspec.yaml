@@ -54,6 +54,7 @@ dependencies:
   flutter_lints: ^2.0.0
   curved_navigation_bar: ^1.0.6
   easy_localization: ^3.0.8
+  path_provider: ^2.1.5
 
 
 dev_dependencies:
@@ -92,6 +93,13 @@ flutter:
     - assets/images/empty.png
     - assets/images/person.png
     - assets/translations/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

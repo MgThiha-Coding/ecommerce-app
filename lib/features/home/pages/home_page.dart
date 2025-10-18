@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
@@ -70,38 +71,25 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  Widget _buildGlassCard({required Widget child, double borderRadius = 14}) {
-    return Container(
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: AppColors.glassCardBackground,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(borderRadius),
-          topRight: Radius.circular(borderRadius),
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-        ],
-      ),
-      child: child,
-    );
-  }
-
   // Error Widget
   Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.storefront_outlined,
             size: 30,
-            color: AppColors.emptyStateIcon,
+            color: AppColors.primary,
           ),
           const SizedBox(height: 6),
           Text(
             'Something went wrong. Please try again later.',
-            style: GoogleFonts.poppins(color: AppColors.emptyStateText,fontSize: 10),
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontSize: Responsive(context).body,
+              color: AppColors.textSecondary,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -114,15 +102,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
-    //final fonts = AppFonts(context);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: AppColors.backgroundGradientStart,
+        backgroundColor: AppColors.background,
         elevation: 0,
         titleSpacing: 0,
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
         title: Consumer(
           builder: (context, ref, _) {
             return Row(
@@ -142,28 +130,28 @@ class _HomePageState extends ConsumerState<HomePage> {
                       children: [
                         Text(
                           '${LocaleKeys.welcome.tr()} ',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppColors.appBarWelcomeText,
-                            fontWeight: FontWeight.w500,
+                          style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: Responsive(context).body,
+                            color: AppColors.textSecondary
                           ),
                         ),
-                        Icon(
+                        const Icon(
                           Icons.waving_hand,
-                          color: AppColors.appBarWelcomeText,
+                          color: AppColors.primary,
                           size: 16,
                         ),
                       ],
                     ),
                     Text(
-                    //  ref.watch(userProvider)?.email ?? "Guest",
-                    'Min Thiha Aung',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green,
-                        // AppColors.appBarEmailText,
-                      ),
+                      //  ref.watch(userProvider)?.email ?? "Guest",
+                      'Min Thiha Aung',
+                      style: TextStyle( 
+                         fontFamily: "Poppins",
+                         fontSize: Responsive(context).subHeading,
+                         color: AppColors.textPrimary,
+                         fontWeight: FontWeight.w500
+                      )
                     ),
                   ],
                 ),
@@ -173,226 +161,99 @@ class _HomePageState extends ConsumerState<HomePage> {
         ),
       ),
 
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.backgroundGradientStart,
-              AppColors.backgroundGradientEnd,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: RefreshIndicator(
-            backgroundColor: Colors.white,
-            onRefresh: _resetAll,
+      body: SafeArea(
+        child: RefreshIndicator(
+          backgroundColor: Colors.white,
+          onRefresh: _resetAll,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: ListView(
               controller: _scrollController,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                // SearchBar
+                const SearchBar(),
+
+                // Brand Preview Section Header & BrandList
+                SectionHeader(LocaleKeys.brand.tr(), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BrandListPage(),
+                    ),
+                  );
+                }),
+                SizedBox(
+                  height: 55,
+                  child: brandListAsync.when(
+                    data: (brandList) => brandList.isEmpty
+                        ? _buildEmptyState(
+                            'Brand list is currently unavailable.',
+                          )
+                        : brandPreview(context, brandList.take(5).toList()),
+                    loading: () => _buildShimmer(height: 80),
+                    error: (error, _) => _buildEmptyState(error.toString()),
                   ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SearchPage(),
-                        ),
-                      );
-                    },
-                    child: SizedBox(
-                      height: 45,
-                      child: AbsorbPointer(
-                        child: TextField(
-                          style: GoogleFonts.podkova(
-                            fontSize: 15,
-                            color: AppColors.searchText,
-                            textStyle: const TextStyle(
-                              fontFamilyFallback: ['Roboto', 'Arial'],
-                            ),
+                ),
+
+                // Categories Preview & CategoryList
+                SectionHeader(LocaleKeys.category.tr(), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CategoryListPage(),
+                    ),
+                  );
+                }),
+                SizedBox(
+                  height: 70,
+                  child: categoryListAsync.when(
+                    data: (categoryList) => categoryList.isEmpty
+                        ? _buildEmptyState(
+                            'Category list is currently unavailable.',
+                          )
+                        : categoryPreview(
+                            context,
+                            categoryList.take(5).toList(),
                           ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            // AppColors.searchFill,
-                            hintText: "${LocaleKeys.search.tr()}..",
-                            hintStyle: GoogleFonts.podkova(
-                              color: AppColors.searchHint,
-                              fontSize: 14,
-                              textStyle: const TextStyle(
-                                fontFamilyFallback: ['Roboto', 'Arial'],
-                              ),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: AppColors.searchIcon,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0,
-                              horizontal: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(
-                                color: AppColors.searchBorder,
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide(
-                                color: AppColors.searchBorderFocused,
-                                width: 2,
-                              ),
-                            ),
-                            isDense: true,
-                          ),
-                        ),
+                    loading: () => _buildShimmer(height: 110),
+                    error: (error, _) => _buildEmptyState(error.toString()),
+                  ),
+                ),
+
+                // Featured Product Slider
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 13),
+                  child: ProductPreviewSlider(),
+                ),
+
+                // Product Preview Section Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Text(
+                      LocaleKeys.availableProducts.tr(),
+                      style: GoogleFonts.poppins(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 6,
-                    horizontal: 12,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        LocaleKeys.welcomeToPicoShop.tr(),
-                        style: GoogleFonts.poly(
-                          color: AppColors.bannerTextPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          textStyle: const TextStyle(
-                            fontFamilyFallback: ['Roboto', 'Arial'],
-                          ),
-                        ),
-                      ),
-                      Text(
-                        LocaleKeys.caption.tr(),
-                        style: GoogleFonts.podkova(
-                          color: AppColors.bannerTextSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          textStyle: const TextStyle(
-                            fontFamilyFallback: ['Roboto', 'Arial'],
-                          ),
-                        ),
-                      ),
-                    ],
+                SizedBox(
+                  height: 180,
+                  child: productListAsync.when(
+                    data: (productList) => productList.isEmpty
+                        ? _buildEmptyState(
+                            'Product list is currently unavailable.',
+                          )
+                        : productPreview(context, productList.take(5).toList()),
+                    loading: () => _buildShimmer(height: 180),
+                    error: (error, _) => _buildEmptyState(error.toString()),
                   ),
                 ),
 
-                const SizedBox(height: 10),
-
-                _buildGlassCard(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        SectionHeader(LocaleKeys.brand.tr(), () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BrandListPage(),
-                            ),
-                          );
-                        }),
-
-                        SizedBox(
-                          height: 40,
-                          child: brandListAsync.when(
-                            data: (brandList) => brandList.isEmpty
-                                ? _buildEmptyState(
-                                    'Brand list is currently unavailable.',
-                                  )
-                                : brandPreview(
-                                    context,
-                                    brandList.take(5).toList(),
-                                  ),
-                            loading: () => _buildShimmer(height: 80),
-                            error: (error, _) =>
-                                _buildEmptyState(error.toString()),
-                          ),
-                        ),
-
-                        SectionHeader(LocaleKeys.category.tr(), () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CategoryListPage(),
-                            ),
-                          );
-                        }),
-
-                        SizedBox(
-                          height: 70,
-                          child: categoryListAsync.when(
-                            data: (categoryList) => categoryList.isEmpty
-                                ? _buildEmptyState(
-                                    'Category list is currently unavailable.',
-                                  )
-                                : categoryPreview(
-                                    context,
-                                    categoryList.take(5).toList(),
-                                  ),
-                            loading: () => _buildShimmer(height: 110),
-                            error: (error, _) =>
-                                _buildEmptyState(error.toString()),
-                          ),
-                        ),
-
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: ProductPreviewSlider(),
-                        ),
-
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Center(
-                            child: Text(
-                              LocaleKeys.availableProducts.tr(),
-                              style: GoogleFonts.poppins(
-                                color: const Color(0xFF3E5060),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(
-                          height: 180,
-                          child: productListAsync.when(
-                            data: (productList) => productList.isEmpty
-                                ? _buildEmptyState(
-                                    'Product list is currently unavailable.',
-                                  )
-                                : productPreview(
-                                    context,
-                                    productList.take(5).toList(),
-                                  ),
-                            loading: () => _buildShimmer(height: 180),
-                            error: (error, _) =>
-                                _buildEmptyState(error.toString()),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // space
               ],
             ),
           ),
@@ -401,18 +262,75 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  // Shimmer Loading
   Widget _buildShimmer({required double height}) {
     return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase,
-      highlightColor: AppColors.shimmerHighlight,
+      baseColor: AppColors.background,
+      highlightColor: AppColors.background,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.shimmerBase,
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(12),
         ),
         height: height,
         width: double.infinity,
+      ),
+    );
+  }
+}
+
+class SearchBar extends StatelessWidget {
+  const SearchBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final fontSize = Responsive(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SearchPage()),
+          );
+        },
+        child: SizedBox(
+          height: 48,
+          child: AbsorbPointer(
+            child: TextField(
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: fontSize.caption,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.searchBarFillColor,
+                hintText: "Search",
+                hintStyle: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: fontSize.body,
+                ),
+                prefixIcon: const Icon(Icons.search),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                isDense: true,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

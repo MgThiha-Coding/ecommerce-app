@@ -72,17 +72,17 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: AppColors.appBarEmailText),
+        iconTheme: IconThemeData(color: AppColors.primary),
         scrolledUnderElevation: 0,
         centerTitle: true,
-        backgroundColor: AppColors.backgroundGradientStart,
+        backgroundColor: AppColors.primary,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         title: Text(
           'Search Products',
-          style: GoogleFonts.poppins(fontSize: 14, color: AppColors.bannerTextPrimary),
+          style: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary),
         ),
       ),
       body: Column(

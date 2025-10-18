@@ -53,12 +53,12 @@ class _CartPageState extends ConsumerState<CartPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundGradientStart,
+        backgroundColor: AppColors.primary,
         title: Text(
           LocaleKeys.cart.tr(),
           style: GoogleFonts.poppins(
             fontSize: responsive.value(mobile: 15, tablet: 20, desktop: 25),
-            color: AppColors.bannerTextPrimary,
+            color: AppColors.primary,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -78,7 +78,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                       onPressed: () {},
                       icon: Icon(
                         Icons.shopping_cart,
-                        color: AppColors.bannerTextPrimary,
+                        color: AppColors.primary,
                         size: responsive.value(
                           mobile: 20,
                           tablet: 25,
@@ -130,8 +130,8 @@ class _CartPageState extends ConsumerState<CartPage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.backgroundGradientStart,
-              AppColors.backgroundGradientEnd
+              AppColors.primary,
+              AppColors.secondary,
             ],
           ),
         ),
@@ -256,7 +256,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                         },
                         child: Ink(
                           decoration: BoxDecoration(
-                            color: AppColors.buttonColor,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(

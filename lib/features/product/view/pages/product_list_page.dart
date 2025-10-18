@@ -81,12 +81,12 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundGradientStart,
+        backgroundColor: AppColors.background,
         title: Text(
           LocaleKeys.availableProducts.tr(),
           style: GoogleFonts.poppins(
             fontSize: responsive.value(mobile: 15, tablet: 20, desktop: 25),
-            color: AppColors.bannerTextPrimary,
+            color: AppColors.background,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -104,8 +104,8 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.backgroundGradientStart,
-              AppColors.backgroundGradientEnd,
+              AppColors.primary,
+              AppColors.secondary,
             ],
           ),
         ),

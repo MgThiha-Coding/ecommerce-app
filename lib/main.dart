@@ -1,10 +1,9 @@
-import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/localization/codegen_loader.g.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
@@ -17,7 +16,7 @@ import 'package:picoshop_theme2/features/category/local/category_data_hive_adapa
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive_adapater.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   FlutterError.onError = (details) => FlutterError.dumpErrorToConsole(details);
@@ -57,10 +56,8 @@ Future<void> main() async {
 Future<void> _initializeApp() async {
   try {
     await Future.wait([dotenv.load(fileName: '.env'), Hive.initFlutter()]);
-
     // Register Hive adapters
     _registerHiveAdapters();
-
     // Open Hive boxes in parallel
     await Future.wait([
       _openBoxSafe<ProductHiveModel>('products'),
@@ -68,7 +65,6 @@ Future<void> _initializeApp() async {
       _openBoxSafe<CategoryHiveModel>('category'),
       _openBoxSafe<CartItemHiveModel>('cart'),
     ]);
-
     await AppConfig.loadAccessToken();
   } catch (e, st) {
     debugPrint('Startup error: $e\n$st');

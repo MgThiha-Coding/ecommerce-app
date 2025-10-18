@@ -102,7 +102,7 @@ class LoginNotifier extends BaseAuthNotifier<LoginResponse> {
   @override
   Future<LoginResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      '${AppConfig.baseUrl}/v1/central/login',
+      'https://beta.picosbs.com/api/v1/central/login',
       data: data,
       options: Options(
         headers: {
@@ -211,7 +211,7 @@ class LogOutNotifier extends BaseAuthNotifier<LogOutResponse> {
   @override
   Future<LogOutResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      '${AppConfig.baseUrl}/v1/logout',
+      'https://beta.picosbs.com/api/v1/logout',
       options: Options(
         headers: {
           'Accept': 'application/json',

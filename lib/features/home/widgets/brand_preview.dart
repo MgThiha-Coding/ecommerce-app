@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
 Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
@@ -10,24 +10,24 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
     itemBuilder: (context, index) {
       final brandName = brandList[index]?.name ?? '';
       return Card(
-        elevation: 0.3,
+        elevation: 0.4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(9.0),
         ),
         child: Container(
-          width: 120,
+          width: 100,
           decoration: BoxDecoration(
-            color: AppColors.brandCardBackground,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(9.0),
           ),
           padding: const EdgeInsets.all(8.0),
           child: Center(
             child: Text(
               brandName,
-              style: GoogleFonts.poppins(
-                color: AppColors.brandCardText,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: Responsive(context).caption,
+                color: AppColors.textSecondary
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,

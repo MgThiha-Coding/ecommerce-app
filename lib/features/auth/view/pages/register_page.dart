@@ -3,15 +3,16 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/widgets/app_text_form_field.dart';
 import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/verify_code_page.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
+import 'package:picoshop_theme2/shared/app_button.dart';
+import 'package:picoshop_theme2/shared/app_text_field.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   final VoidCallback toggle;
@@ -111,211 +112,159 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF1F3B4D), Color(0xFF2C5364)],
-            ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.authHorizontalPadding,
+            vertical: 50,
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: responsive.authHorizontalPadding,
-              vertical: 50,
-            ),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Logo & Title
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(AppImage.appLogo, scale: 14),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Welcome to Pico Shop',
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Logo & Title
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(AppImage.appLogo, scale: 14),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Welcome to Pico Shop',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  AppTextField(
+                    controller: _firstNameController,
+                    hintText: "First Name",
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "First Name required" : null,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  AppTextField(
+                    controller: _lastNameController,
+                    hintText: "Last Name",
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Last Name required" : null,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  AppTextField(
+                    controller: _emailController,
+                    hintText: "Email",
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Email required" : null,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Phone Field
+                  AppTextField(
+                    controller: _passwordController,
+                    hintText: "Phone",
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Phone number required" : null,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Password Field
+                  AppTextField(
+                    controller: _passwordController,
+                    hintText: "Password",
+                    addObscure: true,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Password required";
+                      }
+                      if (v.length < 6) {
+                        return "Password must be at least 6 characters";
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  AppTextField(
+                    controller: _confirmController,
+                    hintText: "Confirm Password",
+                    addObscure: true,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return "Confirm Password required";
+                      }
+                      if (v != _passwordController.text) {
+                        return "Passwords do not match";
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Register Button
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: AppButton(
+                      title: "Sign Up",
+                      onTap: register,
+                      backgroundColor: AppColors.primary,
+                      labelColor: AppColors.background,
+                      isLoading: registerAsync.isLoading? true:false,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Log In
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: widget.toggle,
+                        child: Text(
+                          'Sign In',
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFFFFC107),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // First Name Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _firstNameController,
-                        hintText: "First Name",
-                        validator: (v) => v == null || v.isEmpty
-                            ? "First Name required"
-                            : null,
                       ),
-                    ),
-                    const SizedBox(height: 10),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
 
-                    // Last Name Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _lastNameController,
-                        hintText: "Last Name",
-                        validator: (v) => v == null || v.isEmpty
-                            ? "Last Name required"
-                            : null,
-                      ),
+                  // Footer
+                  Text(
+                    '© 2025 Pico SBS',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 12,
                     ),
-                    const SizedBox(height: 10),
-
-                    // Email Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _emailController,
-                        hintText: "Email",
-                        validator: (v) =>
-                            v == null || v.isEmpty ? "Email required" : null,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Phone Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _phoneController,
-                        hintText: "Phone",
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Password Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _passwordController,
-                        hintText: "Password",
-                        addObscure: true,
-                        validator: (v) {
-                          if (v == null || v.isEmpty) {
-                            return "Password required";
-                          }
-                          if (v.length < 6) {
-                            return "Password must be at least 6 characters";
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Confirm Password Field
-                    _glassCard(
-                      child: AppTextFormField(
-                        controller: _confirmController,
-                        hintText: "Confirm Password",
-                        addObscure: true,
-                        validator: (v) {
-                          if (v == null || v.isEmpty) {
-                            return "Confirm Password required";
-                          }
-                          if (v != _passwordController.text) {
-                            return "Passwords do not match";
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Register Button
-                    SizedBox(
-                      height: 50,
-                      width: double.infinity,
-                      child: MaterialButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) register();
-                        },
-                        color: const Color(0xFFFFC107),
-
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: registerAsync.isLoading
-                            ? const SpinKitCircle(color: Colors.white, size: 28)
-                            : Text(
-                                "Sign Up",
-                                style: GoogleFonts.poppins(
-                                  fontSize: responsive.subHeading,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Log In
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Already have an account?",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(width: 4),
-                        GestureDetector(
-                          onTap: widget.toggle,
-                          child: Text(
-                            'Log In',
-                            style: GoogleFonts.poppins(
-                              color: const Color(0xFFFFC107),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
-
-                    Text(
-                      '© 2025 Pico SBS',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _glassCard({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: child,
     );
   }
 }

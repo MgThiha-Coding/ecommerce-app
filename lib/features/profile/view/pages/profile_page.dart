@@ -59,7 +59,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundGradientStart,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -85,7 +85,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             displayName,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              color: AppColors.appBarWelcomeText,
+                              color: AppColors.primary,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -94,7 +94,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           Text(
                             displayEmail,
                             style: GoogleFonts.poppins(
-                              color: AppColors.bannerTextPrimary,
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                             ),
@@ -104,11 +104,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     },
                   ),
                   CircleAvatar(
-                    backgroundColor: AppColors.backgroundGradientEnd,
+                    backgroundColor: AppColors.primary,
                     child:  Icon(
                       Icons.person,
                       size: 35,
-                      color: AppColors.bannerTextSecondary,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -264,17 +264,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           onTap: () {},
                         ),
 
-                        _buildMenuTile(
-                          title: AppColors.isDark
-                              ? "Switch to Light Mode"
-                              : "Switch to Dark Mode",
-                          icon: Icons.brightness_6,
-                          onTap: () {
-                            setState(() {
-                              AppColors.switchTheme(!AppColors.isDark);
-                            });
-                          },
-                        ),
+                     
                         _buildMenuTile(
                           title: LocaleKeys.language.tr(),
 
@@ -285,7 +275,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               builder: (context) {
                                 return Dialog(
                                   backgroundColor:
-                                      AppColors.backgroundGradientStart,
+                                      AppColors.primary,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -399,7 +389,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                     },
                               child: Ink(
                                 decoration: BoxDecoration(
-                                  color: AppColors.buttonColor,
+                                  color: AppColors.primary,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Center(
@@ -457,7 +447,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: AppColors.backgroundGradientStart),
+      leading: Icon(icon, color: AppColors.secondary),
       title: Text(
         title,
         style: GoogleFonts.poppins(

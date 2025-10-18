@@ -3,19 +3,19 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/model/request/verify_code_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
+import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
+import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerifyCodePage extends ConsumerStatefulWidget {
@@ -59,9 +59,9 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
   @override
   Widget build(BuildContext context) {
     final verifyAsync = ref.watch(verifyCodeNotifierProvider);
-    final resentAsync = ref.watch(verifyCodeNotifierProvider);
+    //final resentAsync = ref.watch(verifyCodeNotifierProvider);
     final storage = ref.watch(secureStorageProvider);
-    final responsive = Responsive(context);
+    final fontSize = Responsive(context);
 
     ref.listen<AsyncValue<VerifyCodeResponse?>>(verifyCodeNotifierProvider, (
       _,
@@ -122,181 +122,141 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
       );
     });
 
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.white),
-            backgroundColor: AppColors.backgroundGradientStart,
-            scrolledUnderElevation: 0,
-          ),
-          body: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF1F3B4D), Color(0xFF2C5364)],
-              ),
-            ),
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 50,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset(AppImage.appLogo, scale: 14),
-
-                    const SizedBox(height: 30),
-                    Text(
-                      'OTP Verification',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: responsive.subHeading,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'OTP sent to ${widget.email ?? ""}',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: responsive.body,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    _glassCard(
-                      child: PinCodeTextField(
-                        appContext: context,
-                        length: 6,
-                        onChanged: (value) => code = value,
-                        onCompleted: (value) => code = value,
-                        pinTheme: PinTheme(
-                          shape: PinCodeFieldShape.box,
-                          borderRadius: BorderRadius.circular(8),
-                          fieldHeight: 50,
-                          fieldWidth: 40,
-                          activeFillColor: Colors.transparent,
-                          // ignore: deprecated_member_use
-                          selectedFillColor: Colors.amber.withOpacity(0.3),
-                          // ignore: deprecated_member_use
-                          inactiveFillColor: Colors.white.withOpacity(0.3),
-                          activeColor: Colors.amber,
-                          selectedColor: Colors.amber.shade700,
-                          inactiveColor: Colors.white70,
-                        ),
-                        keyboardType: TextInputType.number,
-                        animationType: AnimationType.fade,
-                        animationDuration: const Duration(milliseconds: 250),
-                        enableActiveFill: true,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        textStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: resentAsync.isLoading
-                            ? null
-                            : () => ref
-                                  .read(verifyCodeNotifierProvider.notifier)
-                                  .resentVerifyCode(widget.email!),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Resend Code',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: responsive.body,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            if (resentAsync.isLoading)
-                              const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 50,
-                      width: double.infinity,
-                      child: MaterialButton(
-                        onPressed: verifyAsync.isLoading ? null : verifyCode,
-                        color: const Color(0xFFFFC107),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: verifyAsync.isLoading
-                            ? const SpinKitCircle(color: Colors.white, size: 28)
-                            : Text(
-                                'Verify Code',
-                                style: GoogleFonts.poppins(
-                                  fontSize: responsive.subHeading,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-                    Text(
-                      '© 2025 Pico SBS',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(AppImage.appLogo, scale: 14),
+    
+              const SizedBox(height: 30),
+              Text(
+                'OTP Verification',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: fontSize.subHeading,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            ),
+              const SizedBox(height: 8),
+              Text(
+                'OTP sent to ${widget.email ?? ""}',
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: fontSize.body,
+                ),
+              ),
+              const SizedBox(height: 24),
+              PinCodeTextField(
+                onChanged: (value) => code = value,
+                onCompleted: (value) {
+                  code = value;
+                  verifyCode();
+                },
+                appContext: context,
+                length: 6,
+                keyboardType: TextInputType.number,
+                enableActiveFill: true,
+                animationType: AnimationType.none,
+                animationDuration: Duration.zero,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                textStyle: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+                pinTheme: PinTheme(
+                  shape: PinCodeFieldShape.box,
+                  borderRadius: BorderRadius.circular(8),
+                  fieldHeight: 50,
+                  fieldWidth: 40,
+                  borderWidth: 1.5,
+                  activeFillColor: Colors.grey[100],
+                  selectedFillColor: Colors.grey[100],
+                  inactiveFillColor: Colors.grey[100],
+                  activeColor: Colors.grey[400],
+                  selectedColor: Colors.grey[400],
+                  inactiveColor: Colors.grey[400],
+                ),
+              ),
+    
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    ref
+                        .read(verifyCodeNotifierProvider.notifier)
+                        .resentVerifyCode(widget.email!);
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Resend Code',
+                        style: TextStyle(fontSize: fontSize.body),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
+              ),
+    
+              const SizedBox(height: 16),
+    
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: AppButton(
+                  title: 'Verify Code',
+                  onTap: verifyCode,
+                  backgroundColor: AppColors.primary,
+                  labelColor: Colors.white,
+                  isLoading: verifyAsync.isLoading ? true : false,
+                ),
+              ),
+    
+              const SizedBox(height: 20),
+    
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Back to",
+                    style: TextStyle(
+                      fontSize: fontSize.subHeading,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: fontSize.subHeading,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+              Text(
+                '© 2025 Pico SBS',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: fontSize.body,
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _glassCard({required Widget child}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        //  color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

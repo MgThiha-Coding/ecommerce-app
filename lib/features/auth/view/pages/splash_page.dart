@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
-import 'package:picoshop_theme2/core/router/wrapper_page.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
+import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -58,45 +59,32 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: false,
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF1F3B4D),
-                Color(0xFF2C5364)
-              ],
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(AppImage.appLogo, scale: 14),
-                const SizedBox(height: 8),
-                Text(
-                  'Welcome to picoshop',
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(AppImage.appLogo, scale: 14),
+              const SizedBox(height: 8),
+              Text(
+                'Welcome to picoshop',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Discover your favourites',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                  ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Discover your favourites',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

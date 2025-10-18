@@ -15,7 +15,7 @@ Widget SectionHeader(String title, VoidCallback onTap) {
         Text(
           title,
           style: GoogleFonts.poppins(
-            color: AppColors.sectionHeaderText,
+            color: AppColors.primary,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -25,7 +25,7 @@ Widget SectionHeader(String title, VoidCallback onTap) {
           child: Text(
             LocaleKeys.seeAll.tr(),
             style: GoogleFonts.poppins(
-              color: AppColors.sectionHeaderText,
+              color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
