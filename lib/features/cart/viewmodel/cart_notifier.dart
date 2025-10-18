@@ -6,7 +6,6 @@ import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
-import 'package:picoshop_theme2/features/cart/model/remove_cart_item_response.dart';
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
 class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
@@ -247,6 +246,17 @@ final addToCartNotifierProvider =
       (ref) => AddToCartNotifier(),
     );
 
+/*
+class CartState {
+  final Map<int, bool> itemLoading;
+
+  CartState({required this.itemLoading});
+
+  CartState copyWith({Map<int, bool>? itemLoading}) {
+    return CartState(itemLoading: itemLoading ?? this.itemLoading);
+  }
+}
+
 class RemoveCartItemNotifier
     extends StateNotifier<AsyncValue<RemoveCartItemResponse?>> {
   final Dio _dio;
@@ -255,10 +265,11 @@ class RemoveCartItemNotifier
       super(const AsyncValue.data(null));
 
   Future<void> removeCartItem(int id) async {
-    state = const AsyncValue.loading();
+   
     try {
       final response = await _dio.delete(
-        '${AppConfig.baseUrl}/v1/ecommerce/cart?cart_item_id=$id',
+        'https://beta.picosbs.com/api/ecommerce/cart',
+        queryParameters: {'cart_item_id': id},
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -298,3 +309,84 @@ final removeCartItemNotifierProvider =
       RemoveCartItemNotifier,
       AsyncValue<RemoveCartItemResponse?>
     >((ref) => RemoveCartItemNotifier());
+*/
+
+class CartState {
+  final Map<int, bool> itemLoading;
+  final Map<int, String?> itemError;
+
+  CartState({required this.itemLoading, required this.itemError});
+
+  CartState copyWith({
+    Map<int, bool>? itemLoading,
+    Map<int, String?>? itemError,
+  }) {
+    return CartState(
+      itemLoading: itemLoading ?? this.itemLoading,
+      itemError: itemError ?? this.itemError,
+    );
+  }
+}
+
+class RemoveCartItemNotifier extends StateNotifier<CartState> {
+  final Dio _dio;
+
+  RemoveCartItemNotifier([Dio? dio])
+      : _dio = dio ?? Dio(),
+        super(CartState(itemLoading: {}, itemError: {}));
+
+  Future<void> removeCartItem(int id) async {
+    // Mark the item as loading and clear previous error
+    state = state.copyWith(
+      itemLoading: {...state.itemLoading, id: true},
+      itemError: {...state.itemError}..remove(id),
+    );
+
+    try {
+      final response = await _dio.delete(
+        'https://beta.picosbs.com/api/ecommerce/cart',
+        queryParameters: {'cart_item_id': id},
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
+
+      final isSuccess =
+          response.data != null &&
+          response.data['success'] == true &&
+          response.statusCode == 200;
+
+      if (!isSuccess) {
+        final msg = response.data['message'] ?? "Failed to remove item";
+        throw Exception(msg);
+      }
+
+      // Remove loading state after success
+      state = state.copyWith(
+        itemLoading: {...state.itemLoading}..remove(id),
+        itemError: {...state.itemError}..remove(id),
+      );
+    } on DioException catch (e, _) {
+      final errorData =
+          e.response?.data['message'] ?? "Something went wrong. Please try again.";
+
+      state = state.copyWith(
+        itemLoading: {...state.itemLoading}..remove(id),
+        itemError: {...state.itemError, id: errorData},
+      );
+    } catch (e) {
+      state = state.copyWith(
+        itemLoading: {...state.itemLoading}..remove(id),
+        itemError: {...state.itemError, id: e.toString()},
+      );
+    }
+  }
+}
+final removeCartItemNotifierProvider =
+    StateNotifierProvider<RemoveCartItemNotifier, CartState>(
+  (ref) => RemoveCartItemNotifier(),
+);

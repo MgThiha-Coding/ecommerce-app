@@ -316,80 +316,77 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       ),
     );
   }
-Widget errorOverShimmer({required dynamic error}) {
-  final List<String> messages = [];
-  if (error is String) {
-    messages.add(error);
-  } else if (error is List) {
-    messages.addAll(error.map((e) => e.toString()));
-  } else {
-    messages.add("Something went wrong. Please try again.");
-  }
 
-  return Stack(
-    children: [
-     
-      Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(height: 300, color: Colors.grey.shade300),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: List.generate(
-                    5,
-                    (_) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Container(
-                        height: 16,
-                        width: double.infinity,
-                        color: Colors.grey.shade300,
+  Widget errorOverShimmer({required dynamic error}) {
+    final List<String> messages = [];
+    if (error is String) {
+      messages.add(error);
+    } else if (error is List) {
+      messages.addAll(error.map((e) => e.toString()));
+    } else {
+      messages.add("Something went wrong. Please try again.");
+    }
+
+    return Stack(
+      children: [
+        Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 300, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: List.generate(
+                      5,
+                      (_) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Container(
+                          height: 16,
+                          width: double.infinity,
+                          color: Colors.grey.shade300,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    
-      Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: messages.map((msg) {
-              return Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  msg,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: messages.map((msg) {
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              );
-            }).toList(),
+                  child: Text(
+                    msg,
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget _loadingShimmer(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
