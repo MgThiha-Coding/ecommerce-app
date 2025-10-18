@@ -304,7 +304,7 @@ class SearchBar extends StatelessWidget {
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColors.searchBarFillColor,
+                fillColor: Colors.grey[200],
                 hintText: "Search",
                 hintStyle: TextStyle(
                   fontFamily: "Poppins",

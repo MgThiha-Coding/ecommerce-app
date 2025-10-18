@@ -20,8 +20,8 @@ class _WrapperPageState extends State<WrapperPage> {
   final List<Widget> _pages = const [
     HomePage(),
     ProductListPage(),
-    CartPage(),
     SearchPage(),
+    CartPage(),
     ProfilePage(),
   ];
 
@@ -70,10 +70,10 @@ class _WrapperPageState extends State<WrapperPage> {
               label: 'Products',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: 'Cart',
+              icon: Icon(Icons.search),
+              label: 'Search',
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
         ),

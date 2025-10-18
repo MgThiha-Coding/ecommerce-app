@@ -371,6 +371,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
                     color: Colors.grey.shade50.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(12),
                   ),

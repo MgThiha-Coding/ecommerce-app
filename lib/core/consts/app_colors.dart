@@ -20,7 +20,7 @@ class AppColors {
   static const Color card = Colors.white;
 
   // search bar fill color
-  static final Color searchBarFillColor = Colors.grey[100]!;
+  static final Color searchBarFillColor = Colors.grey[200]!;
 
   // linear gradient color
   static const LinearGradient primaryGradient = LinearGradient(

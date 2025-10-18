@@ -185,7 +185,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      SizedBox(height: 4),
+                                      const SizedBox(height: 4),
                                       Text(
                                         'Quantity: ${item.quantity}',
                                         style: GoogleFonts.poppins(
@@ -193,7 +193,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                           color: AppColors.textSecondary,
                                         ),
                                       ),
-                                      SizedBox(height: 2),
+                                      const SizedBox(height: 2),
                                       Text(
                                         'Price: ${item.uomPrice}',
                                         style: GoogleFonts.poppins(
@@ -236,6 +236,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 Positioned.fill(
                                   child: Container(
                                     decoration: BoxDecoration(
+                                      // ignore: deprecated_member_use
                                       color: Colors.red.shade50.withOpacity(
                                         0.95,
                                       ),

@@ -21,7 +21,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
 
-  String _selectedFilter = 'product';
+  final String _selectedFilter = 'product';
 
   @override
   void initState() {
