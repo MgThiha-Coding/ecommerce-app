@@ -26,7 +26,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchNextIfNeeded();
     });
-
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -39,7 +38,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   Future<void> _fetchNextIfNeeded() async {
     final notifier = ref.read(productNotifierProvider.notifier);
     await notifier.getNextPage();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.position.maxScrollExtent == 0 &&
           !notifier.isNoMore) {
@@ -51,181 +49,223 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   Future<void> _onRefresh() async {
     final notifier = ref.read(productNotifierProvider.notifier);
     await notifier.reset();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchNextIfNeeded();
     });
   }
 
-  Widget _buildGlassCard({required Widget child, double borderRadius = 0}) {
-    return Container(
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(borderRadius),
-          topRight: Radius.circular(borderRadius),
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-        ],
-      ),
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final productListAsync = ref.watch(productNotifierProvider);
-    final responsive = Responsive(context);
-
+    final fontSize = Responsive(context);
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
+        elevation: 6,
         title: Text(
           LocaleKeys.availableProducts.tr(),
           style: GoogleFonts.poppins(
-            fontSize: responsive.value(mobile: 15, tablet: 20, desktop: 25),
-            color: AppColors.background,
-            fontWeight: FontWeight.w400,
+            fontSize: fontSize.subHeading,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: (){}, icon: const Icon(Icons.search,color: Colors.white,))
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search, color: AppColors.textPrimary),
+          ),
         ],
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 0),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary,
-              AppColors.secondary,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: RefreshIndicator(
-            backgroundColor: Colors.blue.shade50,
-            onRefresh: _onRefresh,
-            child: _buildGlassCard(
-              child: productListAsync.when(
-                loading: () => _productGridShimmer(context),
-                error: (error, _) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.grey[200],
-                        content: Text(
-                          error.toString(),
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            color: Colors.blueGrey,
-                            fontSize: 10,
-                          ),
-                        ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          backgroundColor: Colors.white,
+          onRefresh: _onRefresh,
+          child: productListAsync.when(
+            loading: () => _productGridShimmer(context),
+            error: (error, _) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.grey[100],
+                    content: Text(
+                      error.toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.blueGrey,
+                        fontSize: 10,
                       ),
-                    );
-                  });
-                  return const SizedBox.shrink();
-                },
-                data: (products) {
-                  if (products.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Product list is currently unavailable.',
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
-                      ),
-                    );
-                  }
-                  return GridView.builder(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(6),
-                    itemCount: products.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: responsive.isMobile ? 3 : 5,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 1 / 1.4,
                     ),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ProductDetailPage(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
+                  ),
+                );
+              });
+              return const SizedBox.shrink();
+            },
+            data: (products) {
+              if (products.isEmpty) {
+                return Center(
+                  child: Text(
+                    'Product list is currently unavailable.',
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                );
+              }
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: fontSize.isMobile ? 8 : 20,
+                  vertical: fontSize.isMobile ? 6 : 10,
+                ),
+                child: GridView.builder(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: products.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: fontSize.isTablet
+                        ? 3
+                        : fontSize.isDesktop
+                            ? 5
+                            : 2,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 14,
+                    childAspectRatio: fontSize.isMobile ? 1 / 1.6 : 1 / 1.4,
+                  ),
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProductDetailPage(),
                           ),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12),
-                                  ),
-                                  child: product.productImage?.isNotEmpty == true
-                                      ? SizedBox.expand(
-                                          child: Image.network(
-                                            product.productImage!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) =>
-                                                Image.asset(
-                                                  AppImage.emptyContainer,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                          ),
-                                        )
-                                      : SizedBox.expand(
-                                          child: Image.asset(
-                                            AppImage.emptyContainer,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.15),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(14),
                                 ),
+                                child: product.productImage?.isNotEmpty == true
+                                    ? Image.network(
+                                        product.productImage!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        errorBuilder: (_, __, ___) =>
+                                            Image.asset(
+                                          AppImage.emptyContainer,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        AppImage.emptyContainer,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      ),
                               ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
                                     product.name ?? '',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 10,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: fontSize.body,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
                                     ),
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
+                                  SizedBox(height: fontSize.isMobile ? 3 : 5),
+                                  Text(
+                                    'Brand ${product.brandName ?? ''}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: fontSize.caption,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    product.productType ?? '',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: fontSize.caption,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: fontSize.isMobile ? 6 : 10),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const ProductDetailPage(),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        backgroundColor: AppColors.primary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'See Detail',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: fontSize.caption,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -237,12 +277,16 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     return GridView.builder(
       itemCount: itemCount,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(10),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: responsive.isMobile ? 3 : 5,
-        mainAxisSpacing: 7,
-        crossAxisSpacing: 7,
-        childAspectRatio: 1 / 1.2,
+        crossAxisCount: responsive.isTablet
+            ? 3
+            : responsive.isDesktop
+                ? 5
+                : 2,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
+        childAspectRatio: responsive.isMobile ? 1 / 1.5 : 1 / 1.3,
       ),
       itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
@@ -250,30 +294,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                flex: 2,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(7),
-                  ),
-                  child: Container(color: Colors.grey.shade300),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: double.infinity,
-                    height: 10,
-                    color: Colors.grey.shade300,
-                  ),
-                ),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
