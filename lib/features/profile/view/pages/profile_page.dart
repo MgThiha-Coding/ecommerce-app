@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
@@ -85,7 +86,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             displayName,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              color: AppColors.primary,
+                              color: AppColors.textPrimary,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -94,7 +95,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           Text(
                             displayEmail,
                             style: GoogleFonts.poppins(
-                              color: AppColors.primary,
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                               fontSize: 12,
                             ),
@@ -102,14 +103,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ],
                       );
                     },
-                  ),
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary,
-                    child:  Icon(
-                      Icons.person,
-                      size: 35,
-                      color: AppColors.primary,
-                    ),
                   ),
                 ],
               ),
@@ -253,109 +246,142 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             );
                           },
                         ),
-                        _buildMenuTile(
-                          title: "Payment Information",
-                          icon: Icons.credit_card,
-                          onTap: () {},
-                        ),
-                        _buildMenuTile(
-                          title: LocaleKeys.settings.tr(),
-                          icon: Icons.settings,
-                          onTap: () {},
-                        ),
 
-                     
                         _buildMenuTile(
                           title: LocaleKeys.language.tr(),
-
                           icon: Icons.language,
                           onTap: () {
                             showDialog(
                               context: context,
                               builder: (context) {
                                 return Dialog(
-                                  backgroundColor:
-                                      AppColors.primary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
+                                  elevation: 10,
                                   insetPadding: const EdgeInsets.symmetric(
                                     horizontal: 24,
                                     vertical: 24,
                                   ),
+                                  backgroundColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                   child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    constraints: const BoxConstraints(
-                                      maxHeight: 400,
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          // ignore: deprecated_member_use
+                                          AppColors.background.withOpacity(
+                                            0.95,
+                                          ),
+                                          // ignore: deprecated_member_use
+                                          AppColors.background.withOpacity(
+                                            0.85,
+                                          ),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          // ignore: deprecated_member_use
+                                          color: AppColors.primary.withOpacity(
+                                            0.4,
+                                          ),
+                                          blurRadius: 18,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
                                     ),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           LocaleKeys.language.tr(),
                                           style: GoogleFonts.poppins(
+                                            color: AppColors.textSecondary,
                                             fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                            fontWeight: FontWeight.w400,
                                           ),
                                         ),
+                                        const SizedBox(height: 20),
+                                        _languageButton(
+                                          context,
+                                          "English",
+                                          const Locale('en'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "Español (Spanish)",
+                                          const Locale('es'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "Français (French)",
+                                          const Locale('fr'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "العربية (Arabic)",
+                                          const Locale('ar'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "日本語 (Japanese)",
+                                          const Locale('ja'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "Deutsch (German)",
+                                          const Locale('de'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "Nederlands (Dutch)",
+                                          const Locale('nl'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "ไทย (Thai)",
+                                          const Locale('th'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "မြန်မာ (Burmese)",
+                                          const Locale('my'),
+                                        ),
+                                        _languageButton(
+                                          context,
+                                          "中文 (Chinese)",
+                                          const Locale('zh'),
+                                        ),
                                         const SizedBox(height: 12),
-                                        Expanded(
-                                          child: ListView(
-                                            children: [
-                                              _languageButton(
-                                                context,
-                                                'English',
-                                                const Locale('en'),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  AppColors.primary,
+                                              elevation: 0,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 24,
+                                                    vertical: 12,
+                                                  ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
                                               ),
-                                              _languageButton(
-                                                context,
-                                                'Burmese',
-                                                const Locale('my'),
+                                            ),
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: Text(
+                                              "Close",
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
                                               ),
-                                              _languageButton(
-                                                context,
-                                                'German',
-                                                const Locale('de'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Dutch',
-                                                const Locale('nl'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Chinese',
-                                                const Locale('zh'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Thai',
-                                                const Locale('th'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Spanish',
-                                                const Locale('es'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'French',
-                                                const Locale('fr'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Japanese',
-                                                const Locale('ja'),
-                                              ),
-                                              _languageButton(
-                                                context,
-                                                'Arabic',
-                                                const Locale('ar'),
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -401,7 +427,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                       : Text(
                                           "Log Out",
                                           style: GoogleFonts.poppins(
-                                            fontSize: 15,
+                                            fontSize: Responsive(context).body,
                                             color: Colors.white,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -424,18 +450,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _languageButton(BuildContext context, String label, Locale locale) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    return SizedBox(
+      width: double.infinity,
       child: MaterialButton(
         color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadiusGeometry.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onPressed: () {
           context.setLocale(locale);
           Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Language changed to $label',
+                style: GoogleFonts.poppins(color: Colors.white,fontSize: Responsive(context).body),
+              ),
+              backgroundColor: AppColors.primary,
+              duration: const Duration(seconds: 2),
+            ),
+          );
         },
-        child: Text(label),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
@@ -447,16 +487,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: AppColors.secondary),
+      leading: Icon(icon, color: AppColors.primary),
       title: Text(
         title,
         style: GoogleFonts.poppins(
-          fontSize: 14,
+          fontSize: Responsive(context).body,
           fontWeight: FontWeight.w500,
-          color: Colors.grey.shade800,
+          color: AppColors.textSecondary,
         ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      trailing: Icon(Icons.arrow_forward_ios, size: Responsive(context).body),
     );
   }
 }
