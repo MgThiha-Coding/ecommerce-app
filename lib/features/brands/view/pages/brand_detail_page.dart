@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 
 class BrandDetailPage extends ConsumerStatefulWidget {
@@ -30,26 +31,20 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         scrolledUnderElevation: 0,
         centerTitle: true,
         backgroundColor: const Color(0xFFFFC107),
-        leading: IconButton(onPressed: () {
-          Navigator.pop(context);
-        }, icon: const Icon(Icons.arrow_back)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         title: Text('Brand Details', style: GoogleFonts.poppins(fontSize: 14)),
       ),
       body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
-          ),
-        ),
         child: brandDetailAsync.when(
           data: (brandDetail) {
             if (brandDetail?.data != null) {
