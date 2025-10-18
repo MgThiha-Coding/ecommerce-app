@@ -128,30 +128,24 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                     crossAxisCount: fontSize.isTablet
                         ? 3
                         : fontSize.isDesktop
-                            ? 5
-                            : 2,
+                        ? 5
+                        : 2,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
                     childAspectRatio: fontSize.isMobile ? 1 / 1.6 : 1 / 1.4,
                   ),
                   itemBuilder: (context, index) {
                     final product = products[index];
+                    final productId = products[index].id;
                     return InkWell(
                       borderRadius: BorderRadius.circular(14),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ProductDetailPage(),
-                          ),
-                        );
-                      },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
+                              // ignore: deprecated_member_use
                               color: Colors.grey.withOpacity(0.15),
                               blurRadius: 8,
                               spreadRadius: 1,
@@ -175,10 +169,10 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                         width: double.infinity,
                                         errorBuilder: (_, __, ___) =>
                                             Image.asset(
-                                          AppImage.emptyContainer,
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                        ),
+                                              AppImage.emptyContainer,
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                            ),
                                       )
                                     : Image.asset(
                                         AppImage.emptyContainer,
@@ -230,7 +224,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (_) =>
-                                                const ProductDetailPage(),
+                                                ProductDetailPage(productId!),
                                           ),
                                         );
                                       },
@@ -238,8 +232,9 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                         elevation: 0,
                                         backgroundColor: AppColors.primary,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 8,
@@ -282,8 +277,8 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         crossAxisCount: responsive.isTablet
             ? 3
             : responsive.isDesktop
-                ? 5
-                : 2,
+            ? 5
+            : 2,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
         childAspectRatio: responsive.isMobile ? 1 / 1.5 : 1 / 1.3,

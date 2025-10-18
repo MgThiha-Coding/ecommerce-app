@@ -116,7 +116,7 @@ class ProductDetailNotifier extends StateNotifier<AsyncValue<ProductDetailRespon
   Future<void> getProductDetail(int productId) async {
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/v1/ecommerce/products/details/$productId',
+        'https://beta.picosbs.com/api/ecommerce/products/details/$productId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -131,7 +131,7 @@ class ProductDetailNotifier extends StateNotifier<AsyncValue<ProductDetailRespon
       }
     } on DioException catch (e, st) {
       state = AsyncValue.error(
-        e.response?.data['message'] ?? 'Check Internet',
+        e.response?.data['message'] ?? 'Check your connection!',
         st,
       );
     }

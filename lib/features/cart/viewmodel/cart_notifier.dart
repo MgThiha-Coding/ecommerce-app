@@ -40,7 +40,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization':'Bearer ${AppConfig.accessToken}',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
@@ -210,12 +210,13 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'Content-Type': 'application/json',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
+
       final isSuccess =
           response.data != null &&
           response.data['success'] == true &&
@@ -223,7 +224,6 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
 
       if (isSuccess) {
         final responseData = AddToCartResponse.fromJson(response.data);
-
         state = AsyncValue.data(responseData);
       } else {
         final msg = response.data['message'];
@@ -235,7 +235,7 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
           (e.type == DioExceptionType.connectionError ||
                   e.type == DioExceptionType.connectionTimeout ||
                   e.type == DioExceptionType.unknown
-              ? 'Check Internet'
+              ? 'Check your connection'
               : "Something went wrong, Please try again later"));
       state = AsyncValue.error(errorData, st);
     }

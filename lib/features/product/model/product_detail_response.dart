@@ -107,8 +107,7 @@ class Data {
       uom: json['uom'] != null ? Uom.fromJson(json['uom']) : null,
       brand: json['brand'] != null ? Brand.fromJson(json['brand']) : null,
       category: json['category'] != null ? Category.fromJson(json['category']) : null,
-      purchaseUom:
-          json['purchase_uom'] != null ? Uom.fromJson(json['purchase_uom']) : null,
+      purchaseUom: json['purchase_uom'] != null ? Uom.fromJson(json['purchase_uom']) : null,
     );
   }
 
@@ -142,7 +141,7 @@ class Data {
 }
 
 class ProductVariation {
-  int? variationId;
+  int? variationId; // Fix: maps from JSON 'id'
   int? productId;
   String? variationSku;
   dynamic variationTemplateValueId;
@@ -162,7 +161,7 @@ class ProductVariation {
 
   factory ProductVariation.fromJson(Map<String, dynamic> json) {
     return ProductVariation(
-      variationId: json['variation_id'] as int?,
+      variationId: json['id'] as int?, // FIXED
       productId: json['product_id'] as int?,
       variationSku: json['variation_sku'] as String?,
       variationTemplateValueId: json['variation_template_value_id'],
@@ -173,7 +172,7 @@ class ProductVariation {
   }
 
   Map<String, dynamic> toJson() => {
-        'variation_id': variationId,
+        'id': variationId, // FIXED
         'product_id': productId,
         'variation_sku': variationSku,
         'variation_template_value_id': variationTemplateValueId,

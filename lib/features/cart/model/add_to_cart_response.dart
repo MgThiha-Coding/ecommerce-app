@@ -24,18 +24,16 @@ class AddToCartResponse {
 
 class Data {
   final CartItem? cartItem;
-  final int? cartTotal;
+  final String? cartTotal;
   final int? itemsCount;
 
   Data({this.cartItem, this.cartTotal, this.itemsCount});
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
-      cartItem: json['cart_item'] != null
-          ? CartItem.fromJson(json['cart_item'])
-          : null,
-      cartTotal: json['cart_total'] as int?,
-      itemsCount: json['items_count'] as int?,
+      cartItem: json['cart_item'] != null ? CartItem.fromJson(json['cart_item']) : null,
+      cartTotal: json['cart_total'] != null ? json['cart_total'].toString() : null,
+      itemsCount: json['items_count'] is int ? json['items_count'] as int : int.tryParse(json['items_count']?.toString() ?? ''),
     );
   }
 
@@ -53,8 +51,8 @@ class CartItem {
   final int? cartId;
   final int? productId;
   final int? productVariantId;
-  final int? quantity;
-  final int? uomPrice;
+  final String? quantity;
+  final String? uomPrice;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? productFullName;
@@ -73,17 +71,15 @@ class CartItem {
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
-      id: json['id'] as int?,
-      cartId: json['cart_id'] as int?,
-      productId: json['product_id'] as int?,
-      productVariantId: json['product_variant_id'] as int?,
-      quantity: json['quantity'] as int?,
-      uomPrice: json['uom_price'] as int?,
+      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? ''),
+      cartId: json['cart_id'] is int ? json['cart_id'] as int : int.tryParse(json['cart_id']?.toString() ?? ''),
+      productId: json['product_id'] is int ? json['product_id'] as int : int.tryParse(json['product_id']?.toString() ?? ''),
+      productVariantId: json['product_variant_id'] is int ? json['product_variant_id'] as int : int.tryParse(json['product_variant_id']?.toString() ?? ''),
+      quantity: json['quantity']?.toString(),
+      uomPrice: json['uom_price']?.toString(),
       productFullName: json['product_full_name'] as String?,
-      createdAt:
-          json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
-      updatedAt:
-          json['updated_at'] != null ? DateTime.tryParse(json['updated_at']) : null,
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at']) : null,
     );
   }
 
