@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/search/viewmodel/product_search_notifier.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
@@ -71,11 +73,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final searchState = ref.watch(productSearchNotifierProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: AppColors.primary),
         scrolledUnderElevation: 0,
         centerTitle: true,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.background,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
@@ -153,6 +155,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             ),
             const SizedBox(width: 4),
+            /*
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
@@ -186,6 +189,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
               ),
             ),
+            */
           ],
         ),
       ),
@@ -193,49 +197,62 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   Widget _buildProductTile(ProductDataModel product) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: Colors.grey.shade200,
-        radius: 25,
-        child: ClipOval(
-          child: product.image != null && product.image!.isNotEmpty
-              ? Image.network(
-                  product.image!,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      AppImage.emptyContainer,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                )
-              : Image.asset(
-                  AppImage.emptyContainer,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
+    return Card(
+      child: ListTile(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(product.id!),
+            ),
+          );
+        },
+        leading: CircleAvatar(
+          backgroundColor: Colors.grey.shade200,
+          radius: 25,
+          child: ClipOval(
+            child: product.image != null && product.image!.isNotEmpty
+                ? Image.network(
+                    product.image!,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        AppImage.emptyContainer,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
+                : Image.asset(
+                    AppImage.emptyContainer,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+          ),
         ),
-      ),
-      title: Text(
-        product.name ?? 'Unknown Product',
-        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(
-        product.brandName ?? '',
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
-      ),
-      trailing: Text(
-        product.stockSumCurrentQuantity ?? '',
-        style: GoogleFonts.poppins(
-          color: Colors.green.shade700,
-          fontWeight: FontWeight.bold,
+        title: Text(
+          product.name ?? 'Unknown Product',
+          style: TextStyle(
+            fontFamily: "Poppins",
+            fontSize: Responsive(context).body,
+          ),
+        ),
+        subtitle: Text(
+          product.brandName ?? '',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        trailing: Text(
+          product.stockSumCurrentQuantity ?? '',
+          style: GoogleFonts.poppins(
+            color: Colors.green.shade700,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

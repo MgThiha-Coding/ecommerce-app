@@ -81,7 +81,7 @@ class ProductSearchNotifier
       };
 
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/v1/ecommerce/products',
+        'https://beta.picosbs.com/api/ecommerce/products',
         queryParameters: filters,
         options: Options(
           headers: {
