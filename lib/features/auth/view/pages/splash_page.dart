@@ -65,13 +65,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(AppImage.appLogo, scale: 14),
+              Image.asset(AppImage.appLogo, scale: 4),
               const SizedBox(height: 8),
               Text(
-                'Welcome to picoshop',
+                'Welcome to PicoShop',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -80,7 +80,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                 'Discover your favourites',
                 style: GoogleFonts.poppins(
                   fontSize: 12,
-                  color: Colors.white,
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w300,
                 ),
               ),

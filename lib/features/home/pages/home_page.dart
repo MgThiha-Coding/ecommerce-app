@@ -6,6 +6,7 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
@@ -133,7 +134,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: Responsive(context).body,
-                            color: AppColors.textSecondary
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const Icon(
@@ -144,14 +145,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ],
                     ),
                     Text(
-                      //  ref.watch(userProvider)?.email ?? "Guest",
-                      'Min Thiha Aung',
-                      style: TextStyle( 
-                         fontFamily: "Poppins",
-                         fontSize: Responsive(context).subHeading,
-                         color: AppColors.textPrimary,
-                         fontWeight: FontWeight.w500
-                      )
+                      ref.watch(userProvider)?.email ?? "Guest",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: Responsive(context).body,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),

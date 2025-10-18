@@ -45,7 +45,7 @@ class _AppTextFormFieldState extends State<AppTextField> {
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 10,
+          vertical: 12,
           horizontal: 10,
         ),
         suffixIcon: widget.addObscure
@@ -64,15 +64,18 @@ class _AppTextFormFieldState extends State<AppTextField> {
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-           borderSide: BorderSide(width: 1, color: AppColors.textPrimary),
+          borderSide: const BorderSide(width: 1, color: AppColors.textPrimary),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(width: 1, color: Color.fromARGB(255, 52, 141, 214)),
+          borderSide: const BorderSide(
+            width: 1,
+            color: Color.fromARGB(255, 52, 141, 214),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(width: 2, color:  AppColors.textPrimary),
+          borderSide: const BorderSide(width: 2, color: AppColors.textPrimary),
         ),
       ),
     );

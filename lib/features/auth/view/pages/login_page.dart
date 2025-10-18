@@ -53,6 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final responsive = Responsive(context);
     // watch login state from loginNotifier
     final loginAsync = ref.watch(loginNotifierProvider);
+    final fontSize = Responsive(context);
 
     ref.listen<AsyncValue<LoginResponse?>>(loginNotifierProvider, (prev, next) {
       next.whenOrNull(
@@ -132,43 +133,64 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               child: Column(
                 children: [
                   // Logo & Title
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(AppImage.appLogo, scale: 14),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Welcome to Pico Shop',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(AppImage.appLogo, scale: 6),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Welcome Back to Pico Shop',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: fontSize.body,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
 
                   const SizedBox(height: 30),
 
                   // Email Field
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      'Email',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: fontSize.body,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _emailController,
                     hintText: "Email",
                     validator: (value) =>
-                        value!.isEmpty ? "Email required" : null,
+                        value!.isEmpty ? "Please enter your email" : null,
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
 
                   // Password Field
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      'Password',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: fontSize.body,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _passwordController,
                     hintText: "Password",
                     addObscure: true,
                     validator: (value) {
-                      if (value!.isEmpty) return "Password required";
+                      if (value!.isEmpty) return "Please enter yoour password";
                       if (value.length < 6) {
-                        return "Min 6 characters";
+                        return "Password must be at least 6 characters";
                       }
                       return null;
                     },
@@ -182,29 +204,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     width: double.infinity,
                     child: AppButton(
                       title: "Sign In",
-                      onTap: login,
+                      onTap: () {
+                        if (_formKey.currentState!.validate()) {
+                          login();
+                        }
+                      },
                       backgroundColor: AppColors.primary,
                       labelColor: AppColors.background,
                       isLoading: loginAsync.isLoading ? true : false,
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Register
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Don't have an account?",
-                        style: GoogleFonts.poppins(color: Colors.white),
+                        style: TextStyle(
+                          fontSize: fontSize.subHeading,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: widget.toggle,
                         child: Text(
                           'Sign Up',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFFFC107),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: fontSize.subHeading,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -212,13 +241,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                   ),
                   const SizedBox(height: 40),
-
-                  // Footer
                   Text(
                     '© 2025 Pico SBS',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: fontSize.body,
                     ),
                   ),
                 ],

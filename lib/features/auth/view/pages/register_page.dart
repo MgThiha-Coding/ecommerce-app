@@ -109,7 +109,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       );
     });
 
+    final fontSize = Responsive(context);
+    Widget buildLabel(String text) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: fontSize.body,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Padding(
@@ -124,62 +140,70 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo & Title
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(AppImage.appLogo, scale: 14),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Welcome to Pico Shop',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(AppImage.appLogo, scale: 6),
                   ),
-
+                  
+                  const SizedBox(height: 12),
+                  Text(
+                    'Create Your Account',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: fontSize.body,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  
                   const SizedBox(height: 20),
-
+                  buildLabel('First Name'),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _firstNameController,
                     hintText: "First Name",
                     validator: (v) =>
-                        v == null || v.isEmpty ? "First Name required" : null,
+                        v == null || v.isEmpty ? "Please enter your first name" : null,
                   ),
 
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 4),
+                  buildLabel('Last Name'),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _lastNameController,
                     hintText: "Last Name",
                     validator: (v) =>
-                        v == null || v.isEmpty ? "Last Name required" : null,
+                        v == null || v.isEmpty ? "Pleae enter your last name" : null,
                   ),
 
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 4),
+                  buildLabel('Email'),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _emailController,
                     hintText: "Email",
                     validator: (v) =>
-                        v == null || v.isEmpty ? "Email required" : null,
+                        v == null || v.isEmpty ? "Please enter your email" : null,
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
 
                   // Phone Field
+                  buildLabel('Phone'),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _passwordController,
                     hintText: "Phone",
                     validator: (v) =>
-                        v == null || v.isEmpty ? "Phone number required" : null,
+                        v == null || v.isEmpty ? "Please enter your phone" : null,
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
 
                   // Password Field
+                  buildLabel('Password'),
+                  const SizedBox(height: 4),
                   AppTextField(
                     controller: _passwordController,
                     hintText: "Password",
@@ -195,7 +219,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     },
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
+
+                  buildLabel('Confirm Password'),
+                  const SizedBox(height: 4),
 
                   AppTextField(
                     controller: _confirmController,
@@ -223,26 +250,31 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       onTap: register,
                       backgroundColor: AppColors.primary,
                       labelColor: AppColors.background,
-                      isLoading: registerAsync.isLoading? true:false,
+                      isLoading: registerAsync.isLoading ? true : false,
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Log In
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Already have an account?",
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          fontSize: fontSize.subHeading,
+                          fontFamily: 'Poppins',
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       GestureDetector(
                         onTap: widget.toggle,
                         child: Text(
                           'Sign In',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFFFC107),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: fontSize.subHeading,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -251,12 +283,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Footer
                   Text(
                     '© 2025 Pico SBS',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: fontSize.body,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],

@@ -6,22 +6,36 @@ class LoginOrRegister extends StatefulWidget {
   const LoginOrRegister({super.key});
 
   @override
-  State<LoginOrRegister> createState() => _LoginOrRegisterState();
+  State<LoginOrRegister> createState() => _SignInOrSignUpState();
 }
 
-class _LoginOrRegisterState extends State<LoginOrRegister> {
+class _SignInOrSignUpState extends State<LoginOrRegister> {
+  final PageController _controller = PageController(initialPage: 0);
+
   bool isLogin = true;
 
   void toggle() {
     setState(() {
       isLogin = !isLogin;
+      _controller.animateToPage(
+        isLogin ? 0 : 1,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLogin
-        ? LoginPage(toggle: toggle)
-        : RegisterPage(toggle: toggle);
+    return Scaffold(
+      body: PageView(
+        controller: _controller,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          LoginPage(toggle: toggle),
+          RegisterPage(toggle: toggle),
+        ],
+      ),
+    );
   }
 }
