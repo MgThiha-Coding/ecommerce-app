@@ -70,7 +70,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           style: GoogleFonts.poppins(
             fontSize: fontSize.subHeading,
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
           ),
         ),
         centerTitle: true,

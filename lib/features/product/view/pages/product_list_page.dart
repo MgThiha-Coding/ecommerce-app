@@ -62,22 +62,18 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 6,
+        scrolledUnderElevation: 0,
+        elevation: 0,
         title: Text(
           LocaleKeys.availableProducts.tr(),
           style: GoogleFonts.poppins(
             fontSize: fontSize.subHeading,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search, color: AppColors.textPrimary),
-          ),
-        ],
+       
       ),
       body: SafeArea(
         child: RefreshIndicator(

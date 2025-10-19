@@ -406,6 +406,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                     payment: _selectedPayment!,
                     approveScreenshot: _approveScreenshot!,
                   );
+                  Navigator.pop(context);
                 }
               : () {
                   ScaffoldMessenger.of(context).showSnackBar(

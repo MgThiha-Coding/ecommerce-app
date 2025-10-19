@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,16 +21,15 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  FlutterError.onError = (details) => FlutterError.dumpErrorToConsole(details);
+
   final bool isTablet =
-      // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
   await SystemChrome.setPreferredOrientations(
     isTablet
         ? DeviceOrientation.values
         : [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
-  await _initializeApp();
+
   runApp(
     EasyLocalization(
       supportedLocales: const [
@@ -51,39 +52,44 @@ void main() async {
       child: const ProviderScope(child: MyApp()),
     ),
   );
+
+  // Initialize app in the background without blocking first frame
+  _initializeApp();
 }
 
 Future<void> _initializeApp() async {
   try {
-    await Future.wait([dotenv.load(fileName: '.env'), Hive.initFlutter()]);
-    // Register Hive adapters
-    _registerHiveAdapters();
-    // Open Hive boxes in parallel
     await Future.wait([
+      dotenv.load(fileName: '.env'),
+      Hive.initFlutter(),
+    ]);
+
+    _registerHiveAdapters();
+
+
+    await Future.wait([
+      _openBoxSafe<CartItemHiveModel>('cart'),
+    ]);
+
+   
+    await AppConfig.loadAccessToken();
+
+   
+    unawaited(Future.wait([
       _openBoxSafe<ProductHiveModel>('products'),
       _openBoxSafe<BrandHiveModel>('brands'),
       _openBoxSafe<CategoryHiveModel>('category'),
-      _openBoxSafe<CartItemHiveModel>('cart'),
-    ]);
-    await AppConfig.loadAccessToken();
+    ]));
   } catch (e, st) {
     debugPrint('Startup error: $e\n$st');
   }
 }
 
 void _registerHiveAdapters() {
-  try {
-    Hive.registerAdapter(ProductDataHiveAdapter());
-  } catch (_) {}
-  try {
-    Hive.registerAdapter(BrandDataHiveAdapter());
-  } catch (_) {}
-  try {
-    Hive.registerAdapter(CategoryDataHiveAdapter());
-  } catch (_) {}
-  try {
-    Hive.registerAdapter(CartItemHiveAdapter());
-  } catch (_) {}
+  Hive.registerAdapter(ProductDataHiveAdapter());
+  Hive.registerAdapter(BrandDataHiveAdapter());
+  Hive.registerAdapter(CategoryDataHiveAdapter());
+  Hive.registerAdapter(CartItemHiveAdapter());
 }
 
 Future<void> _openBoxSafe<T>(String boxName) async {

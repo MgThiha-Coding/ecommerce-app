@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
@@ -16,6 +17,7 @@ class WrapperPage extends StatefulWidget {
 
 class _WrapperPageState extends State<WrapperPage> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
   final List<Widget> _pages = const [
     HomePage(),
@@ -27,6 +29,7 @@ class _WrapperPageState extends State<WrapperPage> {
 
   void _onTabTapped(int index) {
     setState(() {
+      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
   }
@@ -37,13 +40,14 @@ class _WrapperPageState extends State<WrapperPage> {
 
     if (responsive.isMobile || responsive.isTablet) {
       return Scaffold(
-        body: AnimatedSwitcher(
+        body: PageTransitionSwitcher(
           duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeInOut,
-          switchOutCurve: Curves.easeInOut,
-          transitionBuilder: (child, animation) {
-            return FadeTransition(
-              opacity: animation,
+          reverse: _currentIndex < _previousIndex,
+          transitionBuilder: (child, animation, secondaryAnimation) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.horizontal,
               child: child,
             );
           },
@@ -65,14 +69,8 @@ class _WrapperPageState extends State<WrapperPage> {
           unselectedLabelStyle: const TextStyle(fontSize: 10),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view),
-              label: 'Products',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Search',
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Products'),
+            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
             BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ],
@@ -80,6 +78,7 @@ class _WrapperPageState extends State<WrapperPage> {
       );
     }
 
+    // Desktop layout with NavigationRail
     return SafeArea(
       child: Scaffold(
         body: Row(
@@ -98,6 +97,10 @@ class _WrapperPageState extends State<WrapperPage> {
                   label: Text('Products'),
                 ),
                 NavigationRailDestination(
+                  icon: Icon(Icons.search),
+                  label: Text('Search'),
+                ),
+                NavigationRailDestination(
                   icon: Icon(Icons.shopping_cart),
                   label: Text('Cart'),
                 ),
@@ -109,10 +112,17 @@ class _WrapperPageState extends State<WrapperPage> {
             ),
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(
-              child: AnimatedSwitcher(
+              child: PageTransitionSwitcher(
                 duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
+                reverse: _currentIndex < _previousIndex,
+                transitionBuilder: (child, animation, secondaryAnimation) {
+                  return SharedAxisTransition(
+                    animation: animation,
+                    secondaryAnimation: secondaryAnimation,
+                    transitionType: SharedAxisTransitionType.horizontal,
+                    child: child,
+                  );
+                },
                 child: _pages[_currentIndex],
               ),
             ),

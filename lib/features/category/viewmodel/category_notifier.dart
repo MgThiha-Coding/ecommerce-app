@@ -8,8 +8,7 @@ import 'package:picoshop_theme2/features/category/model/categories_detail_respon
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 
-class CategoryListNotifier
-    extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
+class CategoryListNotifier extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
   final Box<CategoryHiveModel> _localCache;
   final Dio _dio;
 
@@ -19,8 +18,8 @@ class CategoryListNotifier
   bool _isLoading = false;
 
   CategoryListNotifier(this._localCache)
-    : _dio = Dio(),
-      super(const AsyncValue.loading()) {
+      : _dio = Dio(),
+        super(const AsyncValue.loading()) {
     _init();
   }
 
@@ -57,17 +56,11 @@ class CategoryListNotifier
           },
         ),
       );
-
-      print('Category ${response.data}');
-
-    
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
+     
+      final isSuccess = response.statusCode == 200 && response.data['success'] == true;
 
       if (!isSuccess) {
-        final message =
-            response.data['message'] ??
-            "Something went wrong\nPlease try again";
+        final message = response.data['message'] ?? "Something went wrong\nPlease try again";
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
@@ -79,67 +72,50 @@ class CategoryListNotifier
         _isNoMore = true;
       } else {
         _onlineCategories.addAll(categories);
-        _localCache.clear();
-        /*
-        final limitedItems = categories.take(20).toList();
-        for (var category in limitedItems) {
-          if (_localCache.length >= 20) {
-            _localCache.delete(_localCache.keys.first);
-          }
-          _localCache.put(
-            category.id,
-            CategoryHiveModel.fromDataModel(category),
-          );
+        for (var category in categories) {
+          _localCache.put(category.id, CategoryHiveModel.fromDataModel(category));
         }
-        */
         _currentPage++;
       }
 
       final connectivityResult = await Connectivity().checkConnectivity();
-      // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineCategories));
       } else {
-       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-       state = AsyncValue.data(cached);
+        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
+        state = AsyncValue.data(cached);
       }
-    }  on DioException catch (e, st) {
+    } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-
       if (cached.isNotEmpty) {
         state = AsyncValue.data(cached);
       } else {
         _isNoMore = true;
-        if (e.type == DioExceptionType.connectionError ||
-            e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.unknown) {
-          state = AsyncValue.error('Check Internet', st);
-        } else {
-          state = AsyncValue.error(e.response?.data['message'], st);
-        }
+        final message = (e.response?.data is Map) ? e.response?.data['message'] : e.message;
+        state = AsyncValue.error(message, st);
       }
+    } finally {
+      _isLoading = false;
     }
   }
 }
 
 final categoryListNotifierProvider =
-    StateNotifierProvider<
-      CategoryListNotifier,
-      AsyncValue<List<CategoryDataModel>>
-    >((ref) {
-      final offlineCategories = Hive.box<CategoryHiveModel>('category');
-      return CategoryListNotifier(offlineCategories);
-    });
+    StateNotifierProvider<CategoryListNotifier, AsyncValue<List<CategoryDataModel>>>((ref) {
+  final offlineCategories = Hive.box<CategoryHiveModel>('category');
+  return CategoryListNotifier(offlineCategories);
+});
 
-class CategoryDetailNotifier
-    extends StateNotifier<AsyncValue<CategoryDetailResponse?>> {
+class CategoryDetailNotifier extends StateNotifier<AsyncValue<CategoryDetailResponse?>> {
   final Dio _dio;
+
   CategoryDetailNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.data(null));
-  Future<void> getCagetoryDetail(int id) async {
+      : _dio = dio ?? Dio(),
+        super(const AsyncValue.data(null));
+
+  Future<void> getCategoryDetail(int id) async {
     try {
       final response = await _dio.get(
         '${AppConfig.baseUrl}/v1/ecommerce/categories/details/$id',
@@ -151,29 +127,22 @@ class CategoryDetailNotifier
         ),
       );
 
-      final isSuccess =
-          response.data != null &&
-          response.data['success'] == true &&
-          response.statusCode == 200;
+      final isSuccess = response.statusCode == 200 && response.data['success'] == true;
+
       if (isSuccess) {
         final responseData = CategoryDetailResponse.fromJson(response.data);
         state = AsyncValue.data(responseData);
+      } else {
+        final message = response.data['message'] ?? 'Something went wrong';
+        state = AsyncValue.error(message, StackTrace.current);
       }
     } on DioException catch (e, st) {
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
-      } else {
-        final errorData = e.response?.data['message'];
-        state = AsyncValue.error(errorData, st);
-      }
+      final message = (e.response?.data is Map) ? e.response?.data['message'] : 'Check Internet';
+      state = AsyncValue.error(message, st);
     }
   }
 }
 
 final categoryDetailNotifierProvider =
-    StateNotifierProvider<
-      CategoryDetailNotifier,
-      AsyncValue<CategoryDetailResponse?>
-    >((ref) => CategoryDetailNotifier());
+    StateNotifierProvider<CategoryDetailNotifier, AsyncValue<CategoryDetailResponse?>>(
+        (ref) => CategoryDetailNotifier());

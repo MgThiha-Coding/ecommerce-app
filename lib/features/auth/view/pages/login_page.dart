@@ -135,11 +135,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // Logo & Title
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(AppImage.appLogo, scale: 6),
+                    child: Image.asset(AppImage.appLogo, scale: 4),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Welcome Back to Pico Shop',
+                    'Welcome to Pico Mart',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: fontSize.body,

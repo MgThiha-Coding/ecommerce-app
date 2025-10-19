@@ -143,7 +143,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(AppImage.appLogo, scale: 6),
+                    child: Image.asset(AppImage.appLogo, scale: 4),
                   ),
                   
                   const SizedBox(height: 12),

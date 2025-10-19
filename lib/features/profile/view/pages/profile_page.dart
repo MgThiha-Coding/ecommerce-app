@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
@@ -27,6 +28,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.initState();
   }
 
+  Future<void> logoutAndClearHive() async {
+    try {
+      // Close all Hive boxes
+      await Hive.close();
+
+      // Delete all Hive boxes
+      await Hive.deleteBoxFromDisk('products');
+      await Hive.deleteBoxFromDisk('brands');
+      await Hive.deleteBoxFromDisk('category');
+      await Hive.deleteBoxFromDisk('cart');
+
+      // Optional: reset any app config or token
+      // AppConfig.accessToken = null;
+
+      debugPrint('✅ All Hive boxes cleared successfully.');
+    } catch (e) {
+      debugPrint('Error clearing Hive boxes: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
@@ -38,6 +59,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (data != null) {
             final storage = ref.read(secureStorageProvider);
             await storage.clear();
+
             if (!mounted) return;
             Navigator.pushReplacement(
               context,
@@ -66,10 +88,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final user = ref.watch(userProvider);
 
-    final displayName =
-        (user?.name.isNotEmpty ?? false) ? user!.name : "Min Thih Aung";
-    final displayEmail =
-        (user?.email.isNotEmpty ?? false) ? user!.email : "Guest";
+    final displayName = (user?.name.isNotEmpty ?? false)
+        ? user!.name
+        : "Pico Mart";
+    final displayEmail = (user?.email.isNotEmpty ?? false)
+        ? user!.email
+        : "Guest";
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -120,7 +144,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildMenuCards(
-      Responsive responsive, AsyncValue<dynamic> logOutAsync) {
+    Responsive responsive,
+    AsyncValue<dynamic> logOutAsync,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Card(
@@ -150,8 +176,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 icon: Icons.local_shipping,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (_) => const ShippingMethodPage()),
+                  MaterialPageRoute(builder: (_) => const ShippingMethodPage()),
                 ),
               ),
               _buildMenuTile(
@@ -159,8 +184,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 icon: Icons.payment,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (_) => const PaymentMethodPage()),
+                  MaterialPageRoute(builder: (_) => const PaymentMethodPage()),
                 ),
               ),
               _buildMenuTile(
@@ -184,8 +208,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     onPressed: logOutAsync.isLoading
                         ? null
                         : () => ref
-                            .read(logOutNotifierProvider.notifier)
-                            .logOut(),
+                              .read(logOutNotifierProvider.notifier)
+                              .logOut(),
                     child: Ink(
                       decoration: BoxDecoration(
                         color: AppColors.primary,
@@ -193,10 +217,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                       child: Center(
                         child: logOutAsync.isLoading
-                            ? const SpinKitCircle(
-                                size: 20,
-                                color: Colors.white,
-                              )
+                            ? const SpinKitCircle(size: 20, color: Colors.white)
                             : Text(
                                 "Log Out",
                                 style: GoogleFonts.poppins(
@@ -239,18 +260,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   void _showAccountInfoDialog() {
     final user = ref.watch(userProvider);
-    final displayPhone =
-        (user?.phone.isNotEmpty ?? false) ? user!.phone : "Unknown";
-    final displayName =
-        (user?.name.isNotEmpty ?? false) ? user!.name : "Pico Shop User";
-    final displayEmail =
-        (user?.email.isNotEmpty ?? false) ? user!.email : "Unknown";
+    final displayPhone = (user?.phone.isNotEmpty ?? false)
+        ? user!.phone
+        : "Unknown";
+    final displayName = (user?.name.isNotEmpty ?? false)
+        ? user!.name
+        : "Pico Shop User";
+    final displayEmail = (user?.email.isNotEmpty ?? false)
+        ? user!.email
+        : "Unknown";
 
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -265,24 +291,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(displayName,
-                    style: GoogleFonts.poppins(
-                        fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(
+                  displayName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(displayEmail,
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: Colors.grey[700])),
+                Text(
+                  displayEmail,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[700],
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(displayPhone,
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: Colors.grey[700])),
+                Text(
+                  displayPhone,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[700],
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Close",
-                        style: GoogleFonts.poppins(color: Colors.blue)),
+                    child: Text(
+                      "Close",
+                      style: GoogleFonts.poppins(color: Colors.blue),
+                    ),
                   ),
                 ),
               ],
@@ -299,9 +339,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (context) {
         return Dialog(
           elevation: 10,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
           backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -325,21 +370,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(LocaleKeys.language.tr(),
-                    style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400)),
+                Text(
+                  LocaleKeys.language.tr(),
+                  style: GoogleFonts.poppins(
+                    color: AppColors.textSecondary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 _languageButton(context, "English", const Locale('en')),
-                _languageButton(context, "Español (Spanish)", const Locale('es')),
-                _languageButton(context, "Français (French)", const Locale('fr')),
-                _languageButton(context, "العربية (Arabic)", const Locale('ar')),
+                _languageButton(
+                  context,
+                  "Español (Spanish)",
+                  const Locale('es'),
+                ),
+                _languageButton(
+                  context,
+                  "Français (French)",
+                  const Locale('fr'),
+                ),
+                _languageButton(
+                  context,
+                  "العربية (Arabic)",
+                  const Locale('ar'),
+                ),
                 _languageButton(context, "日本語 (Japanese)", const Locale('ja')),
-                _languageButton(context, "Deutsch (German)", const Locale('de')),
-                _languageButton(context, "Nederlands (Dutch)", const Locale('nl')),
+                _languageButton(
+                  context,
+                  "Deutsch (German)",
+                  const Locale('de'),
+                ),
+                _languageButton(
+                  context,
+                  "Nederlands (Dutch)",
+                  const Locale('nl'),
+                ),
                 _languageButton(context, "ไทย (Thai)", const Locale('th')),
-                _languageButton(context, "မြန်မာ (Burmese)", const Locale('my')),
+                _languageButton(
+                  context,
+                  "မြန်မာ (Burmese)",
+                  const Locale('my'),
+                ),
                 _languageButton(context, "中文 (Chinese)", const Locale('zh')),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -348,14 +420,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: Text("Close",
-                        style: GoogleFonts.poppins(
-                            color: Colors.white, fontWeight: FontWeight.w500)),
+                    child: Text(
+                      "Close",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -377,9 +457,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Language changed to $label',
-                  style: GoogleFonts.poppins(
-                      color: Colors.white, fontSize: Responsive(context).body)),
+              content: Text(
+                'Language changed to $label',
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: Responsive(context).body,
+                ),
+              ),
               backgroundColor: AppColors.primary,
               duration: const Duration(seconds: 2),
             ),

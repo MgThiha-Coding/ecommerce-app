@@ -73,8 +73,8 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
       } else {
         _onlineProducts.addAll(products);
 
-        for (var product in products.take(20)) {
-          if (_localCache.length >= 20) _localCache.delete(_localCache.keys.first);
+        for (var product in products.take(8)) {
+          if (_localCache.length >= 8) _localCache.delete(_localCache.keys.first);
           if (product.id != null) _localCache.put(product.id, ProductHiveModel.fromDataModel(product));
         }
 

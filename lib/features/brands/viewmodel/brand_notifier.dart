@@ -74,7 +74,7 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
         _onlineBrands.addAll(brands);
         
         for (var brand in brands.take(20)) {
-          if (_localCache.length >= 20) {
+          if (_localCache.length >= 6) {
             _localCache.delete(_localCache.keys.first);
           }
           _localCache.put(brand.id, BrandHiveModel.fromDataModel(brand));

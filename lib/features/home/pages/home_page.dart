@@ -111,7 +111,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         backgroundColor: AppColors.background,
         elevation: 0,
         titleSpacing: 0,
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
+        //actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
         title: Consumer(
           builder: (context, ref, _) {
             return Row(
@@ -120,7 +120,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(width: 8),
                 CircleAvatar(
                   radius: 18,
-                  child: Image.asset(AppImage.person, fit: BoxFit.cover),
+                  child: Image.asset(AppImage.appLogo, fit: BoxFit.cover),
                 ),
                 const SizedBox(width: 12),
                 Column(
