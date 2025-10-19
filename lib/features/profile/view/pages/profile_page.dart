@@ -10,7 +10,6 @@ import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart'
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/payment/view/payment_method_page.dart';
-import 'package:picoshop_theme2/features/shipping/view/shipping_method_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -224,13 +223,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           title: LocaleKeys.shippingMethod.tr(),
                           icon: Icons.local_shipping,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ShippingMethodPage(),
-                              ),
-                            );
+                           
                           },
                         ),
                         _buildMenuTile(

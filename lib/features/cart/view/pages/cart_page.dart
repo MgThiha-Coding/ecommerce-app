@@ -2,12 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
+import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/shipping/view/shipping_method_page.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -201,6 +202,14 @@ class _CartPageState extends ConsumerState<CartPage> {
                                           color: AppColors.textSecondary,
                                         ),
                                       ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Subtotal: ${item.uomPrice * item.quantity}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: fontSize.caption,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   trailing: isLoading
@@ -327,43 +336,21 @@ class _CartPageState extends ConsumerState<CartPage> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                SizedBox(
+                  height: 45,
+                  width: double.infinity,
+                  child: AppButton(
+                    title: "Checkout",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateAddressPage(),
                         ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ShippingMethodPage(),
-                          ),
-                        );
-                      },
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Shipping",
-                            style: GoogleFonts.poppins(
-                              fontSize: fontSize.body,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                      );
+                    },
+                    backgroundColor: AppColors.primary,
+                    labelColor: AppColors.background,
                   ),
                 ),
               ],

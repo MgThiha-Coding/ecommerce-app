@@ -15,7 +15,7 @@ class CreateAddressNotifier
   Future<void> createAddress(CreateAddressRequest params) async {
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/v1/ecommerce/addresses',
+        'https://beta.picosbs.com/api/ecommerce/addresses',
         data: params.toJson(),
         options: Options(
           headers: {
