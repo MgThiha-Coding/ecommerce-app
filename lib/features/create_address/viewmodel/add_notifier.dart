@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import '../model/response/create_addresss_response.dart';
+import 'package:picoshop_theme2/features/create_address/model/response/address_response.dart';
 
-class AddressNotifier extends StateNotifier<AsyncValue<List<AddressData>>> {
+class AddressNotifier extends StateNotifier<AsyncValue<AddressResponse>> {
   final Dio _dio;
+
   AddressNotifier([Dio? dio])
       : _dio = dio ?? Dio(),
         super(const AsyncValue.loading());
@@ -23,9 +24,8 @@ class AddressNotifier extends StateNotifier<AsyncValue<List<AddressData>>> {
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'];
-        final addresses = data.map((e) => AddressData.fromJson(e)).toList();
-        state = AsyncValue.data(addresses);
+        final addressResponse = AddressResponse.fromJson(response.data);
+        state = AsyncValue.data(addressResponse);
       } else {
         state = AsyncValue.error(
           response.data['message'] ?? 'Failed to fetch addresses',
@@ -33,7 +33,7 @@ class AddressNotifier extends StateNotifier<AsyncValue<List<AddressData>>> {
         );
       }
     } on DioException catch (e, st) {
-      final error = e.response?.data['message'] ??
+      final error = e.response?.data?['message'] ??
           (e.type == DioExceptionType.connectionError ||
                   e.type == DioExceptionType.connectionTimeout ||
                   e.type == DioExceptionType.unknown
@@ -45,5 +45,6 @@ class AddressNotifier extends StateNotifier<AsyncValue<List<AddressData>>> {
 }
 
 final addressNotifierProvider =
-    StateNotifierProvider<AddressNotifier, AsyncValue<List<AddressData>>>(
-        (ref) => AddressNotifier());
+    StateNotifierProvider<AddressNotifier, AsyncValue<AddressResponse>>(
+  (ref) => AddressNotifier(),
+);

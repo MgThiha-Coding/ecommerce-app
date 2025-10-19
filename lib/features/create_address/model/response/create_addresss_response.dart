@@ -13,7 +13,9 @@ class CreateAddressResponse {
     return CreateAddressResponse(
       success: json['success'] ?? false,
       message: json['message'] ?? '',
-      data: json['data'] != null ? AddressData.fromJson(json['data']) : null,
+      data: json['data'] != null
+          ? AddressData.fromJson(json['data'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -27,6 +29,7 @@ class CreateAddressResponse {
 }
 
 class AddressData {
+  final int id;
   final String name;
   final String firstName;
   final String lastName;
@@ -41,9 +44,11 @@ class AddressData {
   final bool isDefault;
   final DateTime updatedAt;
   final DateTime createdAt;
-  final int id;
+  final String regionEnName;
+  final String townshipEnName;
 
   AddressData({
+    required this.id,
     required this.name,
     required this.firstName,
     required this.lastName,
@@ -58,11 +63,29 @@ class AddressData {
     required this.isDefault,
     required this.updatedAt,
     required this.createdAt,
-    required this.id,
+    required this.regionEnName,
+    required this.townshipEnName,
   });
 
   factory AddressData.fromJson(Map<String, dynamic> json) {
+    bool parseBool(dynamic value) {
+      if (value is bool) return value;
+      if (value is int) return value == 1;
+      if (value is String) return value == '1' || value.toLowerCase() == 'true';
+      return false;
+    }
+
+    DateTime parseDate(dynamic value) {
+      if (value == null) return DateTime.now();
+      try {
+        return DateTime.parse(value.toString());
+      } catch (_) {
+        return DateTime.now();
+      }
+    }
+
     return AddressData(
+      id: json['id'] ?? 0,
       name: json['name'] ?? '',
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
@@ -74,15 +97,17 @@ class AddressData {
       postalZipCode: json['postal_zip_code'] ?? '',
       country: json['country'] ?? '',
       phone: json['phone'] ?? '',
-      isDefault: json['is_default'] ?? false,
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      id: json['id'] ?? 0,
+      isDefault: parseBool(json['is_default']),
+      updatedAt: parseDate(json['updated_at']),
+      createdAt: parseDate(json['created_at']),
+      regionEnName: json['region_en_name'] ?? '',
+      townshipEnName: json['township_en_name'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'first_name': firstName,
       'last_name': lastName,
@@ -94,10 +119,11 @@ class AddressData {
       'postal_zip_code': postalZipCode,
       'country': country,
       'phone': phone,
-      'is_default': isDefault,
+      'is_default': isDefault ? 1 : 0,
       'updated_at': updatedAt.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
-      'id': id,
+      'region_en_name': regionEnName,
+      'township_en_name': townshipEnName,
     };
   }
 }

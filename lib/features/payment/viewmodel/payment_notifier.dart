@@ -13,7 +13,7 @@ class PaymentMethodNotifier
   Future<void> getPaymentMethod() async {
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/v1/ecommerce/payment-methods',
+        'https://beta.picosbs.com/api/ecommerce/payment-methods',
         options: Options(
           headers: {
             'Accept': 'application/json',

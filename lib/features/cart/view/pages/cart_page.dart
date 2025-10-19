@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
+import 'package:picoshop_theme2/features/create_address/view/pages/check_out_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
@@ -154,121 +154,183 @@ class _CartPageState extends ConsumerState<CartPage> {
                           ),
                         );
                       }
-                      return ListView.builder(
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          final isLoading =
-                              cartState.itemLoading[item.id] ?? false;
-                          final errorMsg = cartState.itemError[item.id];
-
-                          return Stack(
-                            children: [
-                              Card(
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  title: Text(
-                                    item.productName,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: fontSize.body,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Quantity: ${item.quantity}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: fontSize.caption,
-                                          color: AppColors.textSecondary,
-                                        ),
+                      final totalCost = cartItems.fold<double>(
+                        0,
+                        (sum, item) => sum + (item.uomPrice * item.quantity),
+                      );
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: cartItems.length,
+                              itemBuilder: (context, index) {
+                                final item = cartItems[index];
+                                final isLoading =
+                                    cartState.itemLoading[item.id] ?? false;
+                                final errorMsg = cartState.itemError[item.id];
+                                return Stack(
+                                  children: [
+                                    Card(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Price: ${item.uomPrice}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: fontSize.caption,
-                                          color: AppColors.textSecondary,
+                                      child: ListTile(
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Subtotal: ${item.uomPrice * item.quantity}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: fontSize.caption,
-                                          color: AppColors.textSecondary,
+                                        title: Text(
+                                          item.productName,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: fontSize.body,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.textPrimary,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: isLoading
-                                      ? SizedBox(
-                                          width: 80,
-                                          child: Center(
-                                            child: Text(
-                                              'Removing..',
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Quantity: ${item.quantity}',
                                               style: GoogleFonts.poppins(
                                                 fontSize: fontSize.caption,
                                                 color: AppColors.textSecondary,
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      : IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                          onPressed: () {
-                                            ref
-                                                .read(
-                                                  removeCartItemNotifierProvider
-                                                      .notifier,
-                                                )
-                                                .removeCartItem(item.id);
-                                          },
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Price: ${item.uomPrice}',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: fontSize.caption,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'Subtotal: ${item.uomPrice * item.quantity}',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: fontSize.caption,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ],
                                         ),
+                                        trailing: isLoading
+                                            ? SizedBox(
+                                                width: 80,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Removing..',
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize:
+                                                          fontSize.caption,
+                                                      color: AppColors
+                                                          .textSecondary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                                onPressed: () {
+                                                  ref
+                                                      .read(
+                                                        removeCartItemNotifierProvider
+                                                            .notifier,
+                                                      )
+                                                      .removeCartItem(item.id);
+                                                },
+                                              ),
+                                      ),
+                                    ),
+                                    if (errorMsg != null)
+                                      Positioned.fill(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade50
+                                                .withOpacity(0.95),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              errorMsg,
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: fontSize.caption,
+                                                color: Colors.red.shade700,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Total',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: fontSize.subHeading,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      totalCost.toStringAsFixed(2),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: fontSize.subHeading,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              if (errorMsg != null)
-                                Positioned.fill(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      // ignore: deprecated_member_use
-                                      color: Colors.red.shade50.withOpacity(
-                                        0.95,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        errorMsg,
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: fontSize.caption,
-                                          color: Colors.red.shade700,
-                                          fontWeight: FontWeight.w500,
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: 45,
+                                  child: AppButton(
+                                    title: "Checkout",
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CheckOutPage(),
                                         ),
-                                      ),
-                                    ),
+                                      );
+                                    },
+                                    backgroundColor: AppColors.primary,
+                                    labelColor: AppColors.background,
                                   ),
                                 ),
-                            ],
-                          );
-                        },
+                              ],
+                            ),
+                          ),
+                        ],
                       );
                     },
                     loading: () => ListView.builder(
@@ -334,23 +396,6 @@ class _CartPageState extends ConsumerState<CartPage> {
                         ),
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(
-                  height: 45,
-                  width: double.infinity,
-                  child: AppButton(
-                    title: "Checkout",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateAddressPage(),
-                        ),
-                      );
-                    },
-                    backgroundColor: AppColors.primary,
-                    labelColor: AppColors.background,
                   ),
                 ),
               ],
