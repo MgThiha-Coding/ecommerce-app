@@ -6,7 +6,7 @@ import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
-import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
+import 'package:picoshop_theme2/features/auth/view/pages/on_boarding_page.dart';
 import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -23,36 +23,52 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     Future.microtask(() async {
       final storage = ref.read(secureStorageProvider);
 
-      final userInfo = await storage.getUserInfo();
-      final userId = await storage.getUserId();
+      // Check if first launch
+      final isFirstLaunch = await storage.getFirstLaunchFlag() ?? true;
 
-      if (userInfo['name'] != null &&
-          userInfo['email'] != null &&
-          userId != null) {
-        ref.read(userProvider.notifier).state = UserModel(
-          id: userId,
-          name: userInfo['name'] ?? '',
-          email: userInfo['email'] ?? '',
-          phone: userInfo['phone'] ?? '',
-        );
-      }
+      // If not first launch, check login
+      if (!isFirstLaunch) {
+        final userInfo = await storage.getUserInfo();
+        final userId = await storage.getUserId();
 
-      final isLoggedIn = await storage.isLoggedIn();
+        if (userInfo['name'] != null &&
+            userInfo['email'] != null &&
+            userId != null) {
+          ref.read(userProvider.notifier).state = UserModel(
+            id: userId,
+            name: userInfo['name'] ?? '',
+            email: userInfo['email'] ?? '',
+            phone: userInfo['phone'] ?? '',
+          );
+        }
 
-      if (!mounted) return;
-      await Future.delayed(const Duration(seconds: 2));
-      if (isLoggedIn) {
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(builder: (context) => const WrapperPage()),
-        );
+        final isLoggedIn = await storage.isLoggedIn();
+
+        if (!mounted) return;
+        await Future.delayed(const Duration(seconds: 2));
+
+        if (isLoggedIn) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const WrapperPage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const OnboardingPage()),
+          );
+        }
       } else {
+        // First launch: set flag and go to onboarding
+        await storage.setFirstLaunchFlag(false);
+        if (!mounted) return;
+        await Future.delayed(const Duration(seconds: 2));
+        
         Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
           context,
-          MaterialPageRoute(builder: (context) => const LoginOrRegister()),
+          MaterialPageRoute(builder: (context) => const OnboardingPage()),
         );
+        
       }
     });
   }
