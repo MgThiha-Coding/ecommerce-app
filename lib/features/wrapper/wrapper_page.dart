@@ -1,12 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Badge;
 import 'package:animations/animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
+import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
 import 'package:picoshop_theme2/features/search/view/search_page.dart';
+import 'package:badges/badges.dart';
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key});
@@ -67,12 +71,50 @@ class _WrapperPageState extends State<WrapperPage> {
             fontWeight: FontWeight.bold,
           ),
           unselectedLabelStyle: const TextStyle(fontSize: 10),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Products'),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          items: [
+            const BottomNavigationBarItem(
+              icon: Icon(LineIcons.home),
+              label: 'Home',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(LineIcons.box),
+              label: 'Products',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(LineIcons.search),
+              label: 'Search',
+            ),
+
+            BottomNavigationBarItem(
+              icon: Consumer(
+                builder: (context, ref, _) {
+                  final cartCount = ref
+                      .watch(cartNotifierProvider)
+                      .maybeWhen(
+                        data: (items) => items.length,
+                        orElse: () => 0,
+                      );
+
+                  return Badge(
+                    showBadge: cartCount > 0,
+                    badgeContent: Text(
+                      '$cartCount',
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
+
+                    position: BadgePosition.topEnd(top: -10, end: -12),
+                    child: const Icon(LineIcons.shoppingCart),
+                  );
+                },
+              ),
+
+              label: 'Cart',
+            ),
+
+            const BottomNavigationBarItem(
+              icon: Icon(LineIcons.user),
+              label: 'Profile',
+            ),
           ],
         ),
       );
@@ -89,23 +131,23 @@ class _WrapperPageState extends State<WrapperPage> {
               labelType: NavigationRailLabelType.all,
               destinations: const [
                 NavigationRailDestination(
-                  icon: Icon(Icons.home),
+                  icon: Icon(LineIcons.home),
                   label: Text('Home'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.grid_view),
+                  icon: Icon(LineIcons.box),
                   label: Text('Products'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.search),
+                  icon: Icon(LineIcons.search),
                   label: Text('Search'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.shopping_cart),
+                  icon: Icon(LineIcons.shoppingCart),
                   label: Text('Cart'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.person),
+                  icon: Icon(LineIcons.user),
                   label: Text('Profile'),
                 ),
               ],

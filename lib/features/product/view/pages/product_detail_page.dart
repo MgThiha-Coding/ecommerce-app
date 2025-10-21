@@ -46,6 +46,12 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     }
   }
 
+  void refreshCartItem() {
+    setState(() {
+      ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // responsive fontsize
@@ -286,6 +292,10 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                           variationId: variationId,
                                         ),
                                       );
+                                  ref.invalidate(totalCartNotifierProvider);
+                                  ref
+                                      .read(cartNotifierProvider.notifier)
+                                      .fetchCart();
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -295,6 +305,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                     ),
                                   );
                                 }
+                                ref.invalidate(totalCartNotifierProvider);
                               },
                               backgroundColor: AppColors.primary,
                               labelColor: AppColors.background,

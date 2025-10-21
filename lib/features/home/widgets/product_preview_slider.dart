@@ -14,14 +14,14 @@ class BrandPreviewSlider extends ConsumerStatefulWidget {
 }
 
 class _BrandPreviewSliderState extends ConsumerState<BrandPreviewSlider> {
-  int _currentIndex = 0; // Track the active slide
+  int _currentIndex = 0; 
 
   @override
   Widget build(BuildContext context) {
     final brandListAsync = ref.watch(brandListNotifierProvider);
 
     return SizedBox(
-      height: 110, // Increase to fit carousel + dots
+      height: 115,
       width: double.infinity,
       child: brandListAsync.when(
         data: (brandList) {

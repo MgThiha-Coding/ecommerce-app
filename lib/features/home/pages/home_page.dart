@@ -10,8 +10,6 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
-import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
-import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
@@ -19,6 +17,7 @@ import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/product_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
 import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
+import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:picoshop_theme2/features/search/view/search_page.dart';
 import 'package:shimmer/shimmer.dart';
@@ -106,7 +105,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
-    final fontSize = Responsive(context);
+   // final fontSize = Responsive(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -163,6 +162,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             );
           },
         ),
+        actions: [ 
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> const CurrentLocationPage()));
+          }, icon: const Icon(LineIcons.mapMarker,color: AppColors.primary,))
+        ],
+       /*
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -227,6 +232,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
         ],
+        */
       ),
 
       body: SafeArea(
@@ -296,7 +302,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                 // Product Preview Section Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Center(
                     child: Text(
                       LocaleKeys.availableProducts.tr(),
@@ -377,7 +383,7 @@ class SearchBar extends StatelessWidget {
                   fontFamily: "Poppins",
                   fontSize: fontSize.body,
                 ),
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(LineIcons.search),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 0,
                   horizontal: 12,

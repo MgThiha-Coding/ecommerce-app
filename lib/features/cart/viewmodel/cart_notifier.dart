@@ -189,8 +189,9 @@ class AddToCartState {
 
 class AddToCartNotifier extends StateNotifier<AddToCartState> {
   final Dio _dio;
+  final Ref _ref;
 
-  AddToCartNotifier([Dio? dio])
+  AddToCartNotifier(this._ref, [Dio? dio])
     : _dio = dio ?? Dio(),
       super(AddToCartState(itemLoading: {}, itemError: {}, lastResponse: null));
 
@@ -229,6 +230,9 @@ class AddToCartNotifier extends StateNotifier<AddToCartState> {
           itemError: {...state.itemError}..remove(id),
           lastResponse: responseData,
         );
+
+        _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
+        _ref.read(cartNotifierProvider.notifier).refreshCart();
       } else {
         throw Exception(data?['message'] ?? "Failed to add to cart");
       }
@@ -256,7 +260,7 @@ class AddToCartNotifier extends StateNotifier<AddToCartState> {
 
 final addToCartNotifierProvider =
     StateNotifierProvider<AddToCartNotifier, AddToCartState>(
-      (ref) => AddToCartNotifier(),
+      (ref) => AddToCartNotifier(ref),
     );
 
 // remove cart notifier state

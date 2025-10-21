@@ -18,6 +18,7 @@ import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
 import 'package:picoshop_theme2/features/createorder/create_order.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CheckOutPage extends ConsumerStatefulWidget {
   const CheckOutPage({super.key});
@@ -64,7 +65,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Order placed successfully!")),
             );
-            Navigator.pop(context); // or navigate to order details
+            Navigator.pop(context);
           }
         },
         loading: () {},
@@ -102,14 +103,11 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
               ? double.tryParse(_selectedShipping!.amount) ?? 0.0
               : 0.0;
 
-          //final totalCost = itemTotal + shippingAmount;
-
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ===== Address Section =====
                 _buildSectionHeader("Delivery Address", responsive),
                 const SizedBox(height: 8),
                 _buildCreateAddressCard(responsive),
@@ -117,13 +115,13 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 _buildSelectAddressCard(responsive),
 
                 const SizedBox(height: 16),
-                // ===== Shipping Method Section =====
+
                 _buildSectionHeader("Shipping Method", responsive),
                 const SizedBox(height: 8),
                 _buildShippingCard(responsive),
 
                 const SizedBox(height: 16),
-                // ===== Payment Section =====
+
                 _buildSectionHeader("Payment Method", responsive),
                 const SizedBox(height: 8),
                 _buildPaymentCard(responsive),
@@ -131,7 +129,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 _buildScreenshotPicker(),
 
                 const SizedBox(height: 16),
-                // ===== Order Summary =====
+
                 _buildSectionHeader("Order Summary", responsive),
                 const SizedBox(height: 8),
 
@@ -144,56 +142,58 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
 
                 const SizedBox(height: 30),
 
-                // ===== Place Order Button =====
-                // button
-                AppButton(
-                  title: orderState is AsyncLoading
-                      ? "Placing Order..."
-                      : "Place Order",
-                  backgroundColor: AppColors.primary,
-                  labelColor: AppColors.background,
-                  onTap: () async {
-                    // Guard nulls first
-                    if (_selectedAddress == null ||
-                        _selectedPayment == null ||
-                        _selectedShipping == null ||
-                        _approveScreenshot == null ||
-                        cartItemsAsync.value == null ||
-                        cartItemsAsync.value!.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Please complete all selections and upload screenshot',
+                SizedBox(
+                  height: 40,
+                  width: double.infinity,
+                  child: AppButton(
+                    title: orderState is AsyncLoading
+                        ? "Placing Order..."
+                        : "Place Order",
+                    backgroundColor: AppColors.primary,
+                    labelColor: AppColors.background,
+                    isLoading: orderState.isLoading ? true : false,
+                    onTap: () async {
+                      if (_selectedAddress == null ||
+                          _selectedPayment == null ||
+                          _selectedShipping == null ||
+                          _approveScreenshot == null ||
+                          cartItemsAsync.value == null ||
+                          cartItemsAsync.value!.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please complete all selections and upload screenshot',
+                            ),
                           ),
+                        );
+                        return;
+                      }
+
+                      final ids = cartItemsAsync.value!
+                          .map((e) => e.id)
+                          .toList();
+
+                      final request = CreateOrderRequest(
+                        orderType: orderType,
+                        cartItemIds: ids,
+                        shipping: ShippingInfo(
+                          address: _selectedAddress!.addressLine1,
+                          township: _selectedAddress!.townshipEnName,
+                          region: _selectedAddress!.regionEnName,
+                          country: _selectedAddress!.country,
+                          phone: _selectedAddress!.phone,
                         ),
+                        shippingMethodId: _selectedShipping!.id,
+                        shippingAccountId: _selectedAddress!.id,
+                        paymentAccountId: _selectedPayment!.paymentAccount!.id,
+                        approveScreenshoot: _approveScreenshot!,
                       );
-                      return;
-                    }
 
-                    // Map cart item IDs
-                    final ids = cartItemsAsync.value!.map((e) => e.id).toList();
-
-                    final request = CreateOrderRequest(
-                      orderType: orderType,
-                      cartItemIds: ids,
-                      shipping: ShippingInfo(
-                        address: _selectedAddress!.addressLine1,
-                        township: _selectedAddress!.townshipEnName,
-                        region: _selectedAddress!.regionEnName,
-                        country: _selectedAddress!.country,
-                        phone: _selectedAddress!.phone,
-                      ),
-                      shippingMethodId: _selectedShipping!.id,
-                      shippingAccountId: _selectedAddress!.id,
-                      paymentAccountId: _selectedPayment!.paymentAccount!.id,
-                      approveScreenshoot: _approveScreenshot!,
-                    );
-
-                    // Call create order notifier
-                    await ref
-                        .read(createOrderNotifierProvider.notifier)
-                        .createOrder(request);
-                  },
+                      await ref
+                          .read(createOrderNotifierProvider.notifier)
+                          .createOrder(request);
+                    },
+                  ),
                 ),
 
                 // button
@@ -201,7 +201,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => _buildCheckoutShimmerLoading(),
         error: (err, _) => Center(child: Text("Error: $err")),
       ),
     );
@@ -451,4 +451,255 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       ],
     );
   }
+}
+
+
+
+Widget _buildCheckoutShimmerLoading() {
+  return Scaffold(
+    backgroundColor: Colors.grey[50],
+    appBar: AppBar(
+      backgroundColor: Colors.grey[50],
+      elevation: 0,
+      centerTitle: true,
+      title: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          width: 120,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    ),
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header Shimmer
+          _buildSectionHeaderShimmer(),
+          const SizedBox(height: 8),
+          
+          // Create Address Card Shimmer
+          _buildCardShimmer(
+            icon: Icons.location_on_outlined,
+            titleWidth: 120,
+            subtitleWidth: 150,
+          ),
+          const SizedBox(height: 8),
+          
+          // Select Address Card Shimmer
+          _buildCardShimmer(
+            icon: Icons.location_on_outlined,
+            titleWidth: 140,
+            subtitleWidth: 200,
+            hasSubtitle: true,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Shipping Method Header
+          _buildSectionHeaderShimmer(),
+          const SizedBox(height: 8),
+          
+          // Shipping Card Shimmer
+          _buildCardShimmer(
+            icon: Icons.local_shipping_outlined,
+            titleWidth: 130,
+            subtitleWidth: 100,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Payment Method Header
+          _buildSectionHeaderShimmer(),
+          const SizedBox(height: 8),
+          
+          // Payment Card Shimmer
+          _buildCardShimmer(
+            icon: Icons.payment_outlined,
+            titleWidth: 140,
+            subtitleWidth: 120,
+          ),
+          const SizedBox(height: 8),
+          
+          // Screenshot Picker Shimmer
+          _buildCardShimmer(
+            icon: Icons.photo,
+            titleWidth: 160,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Order Summary Header
+          _buildSectionHeaderShimmer(),
+          const SizedBox(height: 8),
+
+          // Order Summary Card Shimmer
+          _buildOrderSummaryShimmer(),
+
+          const SizedBox(height: 30),
+
+          // Place Order Button Shimmer
+          Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildSectionHeaderShimmer() {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: Container(
+      width: 120,
+      height: 16,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+    ),
+  );
+}
+
+Widget _buildCardShimmer({
+  required IconData icon,
+  required double titleWidth,
+  double subtitleWidth = 0,
+  bool hasSubtitle = false,
+}) {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: ListTile(
+        leading: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+        title: Container(
+          width: titleWidth,
+          height: 16,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        subtitle: hasSubtitle
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Container(
+                    width: subtitleWidth,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    width: subtitleWidth - 30,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    width: subtitleWidth - 50,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              )
+            : null,
+        trailing: Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildOrderSummaryShimmer() {
+  return Shimmer.fromColors(
+    baseColor: Colors.grey[300]!,
+    highlightColor: Colors.grey[100]!,
+    child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Column(
+          children: [
+            _buildSummaryRowShimmer(),
+            const SizedBox(height: 6),
+            _buildSummaryRowShimmer(),
+            const SizedBox(height: 6),
+            Container(
+              height: 1,
+              color: Colors.white,
+            ),
+            const SizedBox(height: 6),
+            _buildSummaryRowShimmer(isTotal: true),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildSummaryRowShimmer({bool isTotal = false}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Container(
+        width: isTotal ? 40 : 80,
+        height: 14,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      Container(
+        width: isTotal ? 100 : 80,
+        height: 14,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+    ],
+  );
 }
