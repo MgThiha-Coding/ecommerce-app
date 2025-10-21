@@ -38,7 +38,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
       validator: widget.validator,
       decoration: InputDecoration(
         hintText: widget.hintText,
-        hintStyle: TextStyle(),
+        hintStyle: const TextStyle(),
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(

@@ -62,6 +62,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             if (!mounted) return;
             Navigator.pushReplacement(
+              // ignore: use_build_context_synchronously
               context,
               MaterialPageRoute(builder: (_) => const LoginOrRegister()),
             );
@@ -353,7 +354,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               borderRadius: BorderRadius.circular(20),
               gradient: LinearGradient(
                 colors: [
+                  // ignore: deprecated_member_use
                   AppColors.background.withOpacity(0.95),
+                  // ignore: deprecated_member_use
                   AppColors.background.withOpacity(0.85),
                 ],
                 begin: Alignment.topLeft,
@@ -361,6 +364,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               boxShadow: [
                 BoxShadow(
+                  // ignore: deprecated_member_use
                   color: AppColors.primary.withOpacity(0.4),
                   blurRadius: 18,
                   offset: const Offset(0, 6),

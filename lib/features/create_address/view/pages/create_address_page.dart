@@ -114,7 +114,10 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 initialValue: _selectedType,
                 items: const [
                   DropdownMenuItem(value: 'pickup', child: Text('Pickup')),
-                  DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
+                  DropdownMenuItem(
+                    value: 'delivery',
+                    child: Text('Delivery'),
+                  ),
                 ],
                 onChanged: (val) => setState(() => _selectedType = val!),
                 decoration: InputDecoration(
@@ -136,7 +139,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 isDense: true,
               ),
               const SizedBox(height: 10),
-
+      
               // firstname field
               AppTextField(
                 controller: _firstNameController,
@@ -146,7 +149,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                     : null,
               ),
               const SizedBox(height: 10),
-
+      
               // lastname field
               AppTextField(
                 controller: _lastNameController,
@@ -156,23 +159,24 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                     : null,
               ),
               const SizedBox(height: 10),
-
+      
               // addressline1 field
               AppTextField(
                 controller: _addressLine1Controller,
                 hintText: 'Street / Road / Address',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Address is required' : null,
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Address is required'
+                    : null,
               ),
               const SizedBox(height: 10),
-
+      
               // addressline2 field
               AppTextField(
                 controller: _addressLine2Controller,
                 hintText: 'Apartment / Floor / Block',
               ),
               const SizedBox(height: 10),
-
+      
               // regionId field
               AppTextField(
                 controller: _regionIdController,
@@ -182,7 +186,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                     : null,
               ),
               const SizedBox(height: 10),
-
+      
               // township id field
               AppTextField(
                 controller: _townshipIdController,
@@ -192,26 +196,29 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                     : null,
               ),
               const SizedBox(height: 10),
-
+      
               // postalcode ( zip code ) field
               AppTextField(
                 controller: _postalCodeController,
                 hintText: 'Postal / ZIP Code',
               ),
               const SizedBox(height: 10),
-
+      
               // phone field
               AppTextField(
                 controller: _phoneController,
                 hintText: 'Phone Number',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Phone is required' : null,
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Phone is required'
+                    : null,
               ),
               const SizedBox(height: 20),
-
+      
               // create address button
               ElevatedButton(
-                onPressed: createAddressAsync.isLoading ? null : _submitAddress,
+                onPressed: createAddressAsync.isLoading
+                    ? null
+                    : _submitAddress,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   minimumSize: const Size.fromHeight(50),

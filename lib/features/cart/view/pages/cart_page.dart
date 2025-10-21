@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/features/create_address/view/pages/check_out_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
@@ -88,7 +89,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                     IconButton(
                       onPressed: () {},
                       icon: Icon(
-                        Icons.shopping_cart,
+                        LineIcons.shoppingCart,
                         color: AppColors.primary,
                         size: fontSize.value(
                           mobile: 24,
@@ -99,11 +100,11 @@ class _CartPageState extends ConsumerState<CartPage> {
                     ),
                     if (cartCount > 0)
                       Positioned(
-                        right: -1,
+                        right: 3,
                         top: 1,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
+                            horizontal: 3,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
@@ -111,13 +112,13 @@ class _CartPageState extends ConsumerState<CartPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 15,
+                            minWidth: 13,
+                            minHeight: 10,
                           ),
                           child: Text(
                             '$cartCount',
                             style: GoogleFonts.poppins(
-                              fontSize: fontSize.caption,
+                              fontSize: 7,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -258,6 +259,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50
+                                                // ignore: deprecated_member_use
                                                 .withOpacity(0.95),
                                             borderRadius: BorderRadius.circular(
                                               12,

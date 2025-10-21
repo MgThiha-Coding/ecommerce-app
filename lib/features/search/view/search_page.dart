@@ -78,10 +78,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         backgroundColor: AppColors.background,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
-        ),
         title: Text(
           'Search Products',
           style: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary),

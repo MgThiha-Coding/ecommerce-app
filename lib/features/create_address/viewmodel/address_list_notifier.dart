@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/create_address/model/response/address_response.dart';
 
-class AddressNotifier extends StateNotifier<AsyncValue<AddressResponse>> {
+class AddressListNotifier extends StateNotifier<AsyncValue<AddressResponse>> {
   final Dio _dio;
 
-  AddressNotifier([Dio? dio])
+  AddressListNotifier([Dio? dio])
       : _dio = dio ?? Dio(),
         super(const AsyncValue.loading());
 
   Future<void> getAddresses() async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/addresses',
+        'https://beta.picosbs.com/api/ecommerce/get/customer/addresses',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -44,7 +44,7 @@ class AddressNotifier extends StateNotifier<AsyncValue<AddressResponse>> {
   }
 }
 
-final addressNotifierProvider =
-    StateNotifierProvider<AddressNotifier, AsyncValue<AddressResponse>>(
-  (ref) => AddressNotifier(),
+final addressListNotifierProvider =
+    StateNotifierProvider<AddressListNotifier, AsyncValue<AddressResponse>>(
+  (ref) => AddressListNotifier(),
 );

@@ -23,6 +23,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   final bool isTablet =
+      // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
   await SystemChrome.setPreferredOrientations(
     isTablet

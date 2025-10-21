@@ -167,6 +167,7 @@ class _OrderCardState extends State<_OrderCard> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.03),
             blurRadius: 8,
             offset: const Offset(0, 3),
@@ -221,6 +222,7 @@ class _OrderCardState extends State<_OrderCard> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
                       color: _statusColor(o.status).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),

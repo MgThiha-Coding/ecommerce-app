@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- 🗺️ Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to autofill your delivery address.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We use your location to autofill your delivery address.</string>
 </dict>
 </plist>

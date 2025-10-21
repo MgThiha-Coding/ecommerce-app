@@ -32,10 +32,10 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   ShippingMethod? _selectedShipping;
   File? _approveScreenshot;
 
-  String orderType = "delivery"; // default, can be "pickup" if you allow toggle
-  List<int> cartItemIds = []; // will be populated from cart
-  ShippingInfo? shipping; // mapped from _selectedAddress
-  int? paymentAccountId; // mapped from _selectedPayment
+  String orderType = "delivery";
+  List<int> cartItemIds = [];
+  ShippingInfo? shipping;
+  int? paymentAccountId;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -52,7 +52,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final cartItemsAsync = ref.watch(cartNotifierProvider);
-    final orderNotifier = ref.watch(orderNotifierProvider.notifier);
     final orderState = ref.watch(orderNotifierProvider);
 
     ref.listen<AsyncValue<CreateOrderResponse?>>(createOrderNotifierProvider, (
@@ -103,7 +102,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
               ? double.tryParse(_selectedShipping!.amount) ?? 0.0
               : 0.0;
 
-          final totalCost = itemTotal + shippingAmount;
+          //final totalCost = itemTotal + shippingAmount;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

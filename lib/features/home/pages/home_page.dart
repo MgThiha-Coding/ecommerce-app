@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
@@ -9,6 +10,8 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
+import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
+import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
@@ -103,6 +106,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
+    final fontSize = Responsive(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -111,7 +115,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         backgroundColor: AppColors.background,
         elevation: 0,
         titleSpacing: 0,
-        //actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
         title: Consumer(
           builder: (context, ref, _) {
             return Row(
@@ -160,6 +163,70 @@ class _HomePageState extends ConsumerState<HomePage> {
             );
           },
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Consumer(
+              builder: (context, ref, _) {
+                final cartCount = ref
+                    .watch(cartNotifierProvider)
+                    .maybeWhen(data: (items) => items.length, orElse: () => 0);
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CartPage(),
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        LineIcons.shoppingCart,
+                        color: AppColors.primary,
+                        size: fontSize.value(
+                          mobile: 24,
+                          tablet: 25,
+                          desktop: 25,
+                        ),
+                      ),
+                    ),
+                    if (cartCount > 0)
+                      Positioned(
+                        right: 3,
+                        top: 1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade600,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 13,
+                            minHeight: 10,
+                          ),
+                          child: Text(
+                            '$cartCount',
+                            style: GoogleFonts.poppins(
+                              fontSize: 7,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
 
       body: SafeArea(
@@ -224,7 +291,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 // Featured Product Slider
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 13),
-                  child: ProductPreviewSlider(),
+                  child: BrandPreviewSlider(),
                 ),
 
                 // Product Preview Section Header

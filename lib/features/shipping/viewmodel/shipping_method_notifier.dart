@@ -23,7 +23,7 @@ class ShippingMethodNotifier
         ),
       );
 
-      print('Shipping method response test ${response.data}');
+     
 
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;

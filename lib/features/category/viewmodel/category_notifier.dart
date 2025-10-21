@@ -79,6 +79,7 @@ class CategoryListNotifier extends StateNotifier<AsyncValue<List<CategoryDataMod
       }
 
       final connectivityResult = await Connectivity().checkConnectivity();
+      // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
       if (isOnline) {

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/create_address/viewmodel/add_notifier.dart';
+import 'package:picoshop_theme2/features/create_address/viewmodel/address_list_notifier.dart';
 import 'package:picoshop_theme2/features/create_address/model/response/address_response.dart';
 
 class AddressListPage extends ConsumerStatefulWidget {
@@ -22,14 +22,14 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(addressNotifierProvider.notifier).getAddresses();
+      ref.read(addressListNotifierProvider.notifier).getAddresses();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final addressesAsync = ref.watch(addressNotifierProvider);
+    final addressesAsync = ref.watch(addressListNotifierProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -88,6 +88,7 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                     ),
                     boxShadow: [
                       BoxShadow(
+                        // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 3),

@@ -43,11 +43,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       await Future.delayed(const Duration(seconds: 2));
       if (isLoggedIn) {
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const WrapperPage()),
         );
       } else {
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const LoginOrRegister()),
         );
