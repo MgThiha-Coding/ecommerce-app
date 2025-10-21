@@ -52,7 +52,7 @@ class CartItemModel {
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     return CartItemModel(
       id: json['id'] as int? ?? 0,
-      productName: json['product_full_name'] as String? ?? '',
+      productName: json['product_name'] as String? ?? '',
       cartId: json['cart_id'] as int? ?? 0,
       productId: json['product_id'] as int? ?? 0,
       productVariantId: json['product_variant_id'] as int? ?? 0,
@@ -62,21 +62,19 @@ class CartItemModel {
       uomPrice: (json['uom_price'] is String)
           ? double.tryParse(json['uom_price']) ?? 0
           : (json['uom_price'] as num?)?.toDouble() ?? 0,
-      createdAt:
-          DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
-      updatedAt:
-          DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'product_full_name': productName,
+        'product_name': productName,
         'cart_id': cartId,
         'product_id': productId,
         'product_variant_id': productVariantId,
-        'quantity': quantity,
-        'uom_price': uomPrice,
+        'quantity': quantity.toStringAsFixed(2),
+        'uom_price': uomPrice.toStringAsFixed(2),
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };

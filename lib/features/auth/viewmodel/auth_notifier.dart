@@ -137,7 +137,7 @@ class RegisterNotifier extends BaseAuthNotifier<RegisterResponse> {
   @override
   Future<RegisterResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      '${AppConfig.baseUrl}/v1/register',
+      'https://beta.picosbs.com/api/v1/register',
       data: data,
       options: Options(
         headers: {
@@ -172,7 +172,7 @@ class VerifyCodeNotifier extends BaseAuthNotifier<VerifyCodeResponse> {
   @override
   Future<VerifyCodeResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      '${AppConfig.baseUrl}/v1/verify',
+      'https://beta.picosbs.com/api/v1/verify',
       data: data,
       options: Options(
         headers: {

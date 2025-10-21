@@ -10,6 +10,9 @@ import 'package:picoshop_theme2/features/create_address/model/response/address_r
 import 'package:picoshop_theme2/features/create_address/view/pages/address_list_page.dart';
 import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
 import 'package:picoshop_theme2/features/create_address/view/pages/shipping_method_list_page.dart';
+import 'package:picoshop_theme2/features/create_order/model/request/create_order_request.dart';
+import 'package:picoshop_theme2/features/create_order/model/response/create_order_response.dart';
+import 'package:picoshop_theme2/features/create_order/viewmodel/create_order_notifier.dart';
 import 'package:picoshop_theme2/features/payment/model/response/payment_method_response.dart';
 import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
@@ -29,6 +32,11 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   ShippingMethod? _selectedShipping;
   File? _approveScreenshot;
 
+  String orderType = "delivery"; // default, can be "pickup" if you allow toggle
+  List<int> cartItemIds = []; // will be populated from cart
+  ShippingInfo? shipping; // mapped from _selectedAddress
+  int? paymentAccountId; // mapped from _selectedPayment
+
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickScreenshot() async {
@@ -46,6 +54,28 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     final cartItemsAsync = ref.watch(cartNotifierProvider);
     final orderNotifier = ref.watch(orderNotifierProvider.notifier);
     final orderState = ref.watch(orderNotifierProvider);
+
+    ref.listen<AsyncValue<CreateOrderResponse?>>(createOrderNotifierProvider, (
+      previous,
+      next,
+    ) {
+      next.when(
+        data: (response) {
+          if (response != null && response.success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Order placed successfully!")),
+            );
+            Navigator.pop(context); // or navigate to order details
+          }
+        },
+        loading: () {},
+        error: (err, _) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(err.toString())));
+        },
+      );
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -114,8 +144,60 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 ),
 
                 const SizedBox(height: 30),
+
                 // ===== Place Order Button =====
-                _buildPlaceOrderButton(orderNotifier, orderState, totalCost),
+                // button
+                AppButton(
+                  title: orderState is AsyncLoading
+                      ? "Placing Order..."
+                      : "Place Order",
+                  backgroundColor: AppColors.primary,
+                  labelColor: AppColors.background,
+                  onTap: () async {
+                    // Guard nulls first
+                    if (_selectedAddress == null ||
+                        _selectedPayment == null ||
+                        _selectedShipping == null ||
+                        _approveScreenshot == null ||
+                        cartItemsAsync.value == null ||
+                        cartItemsAsync.value!.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Please complete all selections and upload screenshot',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Map cart item IDs
+                    final ids = cartItemsAsync.value!.map((e) => e.id).toList();
+
+                    final request = CreateOrderRequest(
+                      orderType: orderType,
+                      cartItemIds: ids,
+                      shipping: ShippingInfo(
+                        address: _selectedAddress!.addressLine1,
+                        township: _selectedAddress!.townshipEnName,
+                        region: _selectedAddress!.regionEnName,
+                        country: _selectedAddress!.country,
+                        phone: _selectedAddress!.phone,
+                      ),
+                      shippingMethodId: _selectedShipping!.id,
+                      shippingAccountId: _selectedAddress!.id,
+                      paymentAccountId: _selectedPayment!.paymentAccount!.id,
+                      approveScreenshoot: _approveScreenshot!,
+                    );
+
+                    // Call create order notifier
+                    await ref
+                        .read(createOrderNotifierProvider.notifier)
+                        .createOrder(request);
+                  },
+                ),
+
+                // button
               ],
             ),
           );
@@ -368,57 +450,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPlaceOrderButton(
-    OrderNotifier orderNotifier,
-    AsyncValue<Map<String, dynamic>?> orderState,
-    double totalCost,
-  ) {
-    final isEnabled =
-        _selectedAddress != null &&
-        _selectedPayment != null &&
-        _selectedShipping != null &&
-        _approveScreenshot != null &&
-        !orderState.isLoading;
-
-    return Opacity(
-      opacity: isEnabled ? 1.0 : 0.4,
-      child: SizedBox(
-        width: double.infinity,
-        height: 45,
-        child: AppButton(
-          title: orderState.isLoading ? "Placing Order..." : "Place Order",
-          backgroundColor: AppColors.primary,
-          labelColor: AppColors.background,
-          onTap: isEnabled
-              ? () async {
-                  await orderNotifier.createOrder(
-                    orderType: "deliver",
-                    cartItemIds: ref
-                        .read(cartNotifierProvider)
-                        .value!
-                        .map((e) => e.id)
-                        .toList(),
-                    address: _selectedAddress!,
-                    shipping: _selectedShipping!,
-                    payment: _selectedPayment!,
-                    approveScreenshot: _approveScreenshot!,
-                  );
-                  Navigator.pop(context);
-                }
-              : () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Please complete all selections and upload screenshot',
-                      ),
-                    ),
-                  );
-                },
-        ),
-      ),
     );
   }
 }

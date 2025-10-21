@@ -193,7 +193,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   buildLabel('Phone'),
                   const SizedBox(height: 4),
                   AppTextField(
-                    controller: _passwordController,
+                    controller: _phoneController,
                     hintText: "Phone",
                     validator: (v) =>
                         v == null || v.isEmpty ? "Please enter your phone" : null,

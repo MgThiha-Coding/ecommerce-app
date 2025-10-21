@@ -145,11 +145,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ],
                     ),
                     Text(
-                      ref.watch(userProvider)?.email ?? "Guest",
+                      ref.watch(userProvider)?.name ?? "Guest",
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: "Poppins",
-                        fontSize: Responsive(context).body,
+                        fontSize: Responsive(context).subHeading,
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),

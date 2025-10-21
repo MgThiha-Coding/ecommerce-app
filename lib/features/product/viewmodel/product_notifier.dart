@@ -76,13 +76,15 @@ class ProductListNotifier
         _onlineProducts.addAll(products);
 
         for (var product in products.take(8)) {
-          if (_localCache.length >= 8)
+          if (_localCache.length >= 8) {
             _localCache.delete(_localCache.keys.first);
-          if (product.id != null)
+          }
+          if (product.id != null) {
             _localCache.put(
               product.id,
               ProductHiveModel.fromDataModel(product),
             );
+          }
         }
 
         _currentPage++;

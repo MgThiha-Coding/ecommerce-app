@@ -141,7 +141,7 @@ class Data {
 }
 
 class ProductVariation {
-  int? variationId; // Fix: maps from JSON 'id'
+  int? variationId; 
   int? productId;
   String? variationSku;
   dynamic variationTemplateValueId;
@@ -172,7 +172,7 @@ class ProductVariation {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': variationId, // FIXED
+        'id': variationId,
         'product_id': productId,
         'variation_sku': variationSku,
         'variation_template_value_id': variationTemplateValueId,

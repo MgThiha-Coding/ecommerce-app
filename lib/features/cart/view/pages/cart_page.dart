@@ -172,16 +172,17 @@ class _CartPageState extends ConsumerState<CartPage> {
                                   children: [
                                     Card(
                                       margin: const EdgeInsets.symmetric(
-                                          vertical: 6),
+                                        vertical: 6,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: ListTile(
                                         contentPadding:
                                             const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
                                         title: Text(
                                           item.productName,
                                           style: GoogleFonts.poppins(
@@ -196,7 +197,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                           children: [
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Quantity: ${item.quantity}',
+                                              'Quantity: ${item.productName}',
                                               style: GoogleFonts.poppins(
                                                 fontSize: fontSize.caption,
                                                 color: AppColors.textSecondary,
@@ -258,8 +259,9 @@ class _CartPageState extends ConsumerState<CartPage> {
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50
                                                 .withOpacity(0.95),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           alignment: Alignment.center,
                                           child: Padding(
@@ -283,7 +285,9 @@ class _CartPageState extends ConsumerState<CartPage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [

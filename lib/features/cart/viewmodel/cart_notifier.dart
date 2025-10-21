@@ -2,33 +2,19 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
+// get cart item notifier state
 class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
-  final Box<CartItemHiveModel> _localCache;
   final Dio _dio;
 
   final List<CartItemModel> _onlineItems = [];
   bool _isLoading = false;
 
-  CartNotifier(this._localCache)
-    : _dio = Dio(),
-      super(const AsyncValue.loading()) {
-    _init();
-  }
-
-  Future<void> _init() async {
-    final cached = _localCache.values.map((e) => e.toCartItem()).toList();
-    if (cached.isNotEmpty) {
-      state = AsyncValue.data(cached);
-    } else {
-      await fetchCart();
-    }
-  }
+  CartNotifier() : _dio = Dio(), super(const AsyncValue.loading());
 
   Future<void> fetchCart() async {
     if (_isLoading) return;
@@ -63,16 +49,8 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
         ..clear()
         ..addAll(items);
 
-      _localCache.clear();
-      for (var item in items) {
-        _localCache.put(item.id, CartItemHiveModel.fromCartItem(item));
-      }
-
       state = AsyncValue.data(List.from(_onlineItems));
     } on DioException catch (e, st) {
-      final cached = _localCache.values.map((e) => e.toCartItem()).toList();
-      state = AsyncValue.data(cached);
-
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
@@ -88,19 +66,14 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
   Future<void> refreshCart() async {
     await fetchCart();
   }
-
-  void clearLocalCart() {
-    _localCache.clear();
-    state = const AsyncValue.data([]);
-  }
 }
 
 final cartNotifierProvider =
     StateNotifierProvider<CartNotifier, AsyncValue<List<CartItemModel>>>((ref) {
-      final offlineCart = Hive.box<CartItemHiveModel>('cart');
-      return CartNotifier(offlineCart);
+      return CartNotifier();
     });
 
+// total cart item notifier state or itemcount
 class TotalCartNotifier extends StateNotifier<AsyncValue<int>> {
   final Box<int> _localCache;
   final Dio _dio;
@@ -189,6 +162,7 @@ final totalCartNotifierProvider =
       return TotalCartNotifier(offlineTotal);
     });
 
+// add to cart notifier state
 class AddToCartState {
   final Map<int, bool> itemLoading;
   final Map<int, String?> itemError;
@@ -285,6 +259,7 @@ final addToCartNotifierProvider =
       (ref) => AddToCartNotifier(),
     );
 
+// remove cart notifier state
 class CartState {
   final Map<int, bool> itemLoading;
   final Map<int, String?> itemError;
@@ -310,7 +285,6 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
       super(CartState(itemLoading: {}, itemError: {}));
 
   Future<void> removeCartItem(int id) async {
-    // Mark the item as loading and clear previous error
     state = state.copyWith(
       itemLoading: {...state.itemLoading, id: true},
       itemError: {...state.itemError}..remove(id),
@@ -339,7 +313,6 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
         throw Exception(msg);
       }
 
-      // Remove loading state after success
       state = state.copyWith(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError}..remove(id),
