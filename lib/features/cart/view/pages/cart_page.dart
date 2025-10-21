@@ -178,6 +178,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 return Stack(
                                   children: [
                                     Card(
+                                      color: AppColors.background,
                                       margin: const EdgeInsets.symmetric(
                                         vertical: 6,
                                       ),
@@ -204,7 +205,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                           children: [
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Quantity: ${item.productName}',
+                                              'Quantity: ${item.quantity}',
                                               style: GoogleFonts.poppins(
                                                 fontSize: fontSize.caption,
                                                 color: AppColors.textSecondary,

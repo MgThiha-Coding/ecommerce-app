@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
@@ -14,6 +12,7 @@ import 'package:picoshop_theme2/features/order_history/view/order_history_list_p
 import 'package:picoshop_theme2/features/profile/view/pages/payment_method_page.dart';
 import 'package:picoshop_theme2/features/profile/view/pages/shipping_method_page.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
+import 'package:picoshop_theme2/shared/app_button.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -26,26 +25,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-  }
-
-  Future<void> logoutAndClearHive() async {
-    try {
-      // Close all Hive boxes
-      await Hive.close();
-
-      // Delete all Hive boxes
-      await Hive.deleteBoxFromDisk('products');
-      await Hive.deleteBoxFromDisk('brands');
-      await Hive.deleteBoxFromDisk('category');
-      await Hive.deleteBoxFromDisk('cart');
-
-      // Optional: reset any app config or token
-      // AppConfig.accessToken = null;
-
-      debugPrint('✅ All Hive boxes cleared successfully.');
-    } catch (e) {
-      debugPrint('Error clearing Hive boxes: $e');
-    }
   }
 
   @override
@@ -152,6 +131,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Card(
         elevation: 6,
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -199,36 +179,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: SizedBox(
                   width: double.infinity,
                   height: 45,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: logOutAsync.isLoading
-                        ? null
-                        : () => ref
-                              .read(logOutNotifierProvider.notifier)
-                              .logOut(),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: logOutAsync.isLoading
-                            ? const SpinKitCircle(size: 20, color: Colors.white)
-                            : Text(
-                                "Log Out",
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive(context).body,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
+                  child: AppButton(
+                    title: "Sign Out",
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (context) => const _LogoutConfirmDialog(),
+                      );
+                    },
+
+                    backgroundColor: AppColors.primary,
+                    labelColor: AppColors.background,
                   ),
                 ),
               ),
@@ -384,22 +346,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 _languageButton(context, "English", const Locale('en')),
-                _languageButton(
-                  context,
-                  "Español (Spanish)",
-                  const Locale('es'),
-                ),
-                _languageButton(
-                  context,
-                  "Français (French)",
-                  const Locale('fr'),
-                ),
-                _languageButton(
-                  context,
-                  "العربية (Arabic)",
-                  const Locale('ar'),
-                ),
-                _languageButton(context, "日本語 (Japanese)", const Locale('ja')),
+
                 _languageButton(
                   context,
                   "Deutsch (German)",
@@ -453,7 +400,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _languageButton(BuildContext context, String label, Locale locale) {
     return SizedBox(
       width: double.infinity,
+
       child: MaterialButton(
+        elevation: 0,
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onPressed: () {
@@ -473,12 +422,119 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           );
         },
-        child: Text(
-          label,
-          style: GoogleFonts.poppins(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoutConfirmDialog extends ConsumerWidget {
+  const _LogoutConfirmDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final responsive = Responsive(context);
+    return Dialog(
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 65,
+              height: 65,
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: Colors.red.shade400,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            Text(
+              "Sign Out?",
+              style: TextStyle(
+                fontSize: responsive.body,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                fontFamily: "Poppins",
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Are you sure you want to sign out?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: responsive.body,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.grey.shade100,
+                      foregroundColor: Colors.grey.shade700,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(
+                        fontSize: responsive.body,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                Expanded(
+                  child: AppButton(
+                    title: "Sign Out",
+                    onTap: () async {
+                      if (!ref.read(logOutNotifierProvider).isLoading) {
+                        ref.read(logOutNotifierProvider.notifier).logOut();
+                      }
+                    },
+                    isLoading: ref.watch(logOutNotifierProvider).isLoading,
+                    backgroundColor: AppColors.primary,
+                    labelColor: AppColors.background,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
