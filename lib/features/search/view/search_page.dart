@@ -8,6 +8,7 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/search/viewmodel/product_search_notifier.dart';
+import 'package:picoshop_theme2/shared/app_text_field.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -18,20 +19,19 @@ class SearchPage extends ConsumerStatefulWidget {
 
 class _SearchPageState extends ConsumerState<SearchPage> {
   final _searchController = TextEditingController();
+
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
 
-  final String _selectedFilter = 'product';
+  String _selectedFilter = 'product';
 
   @override
   void initState() {
     super.initState();
-
-    // Infinite scroll listener
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        ref.read(productSearchNotifierProvider.notifier).loadMore();
+        ref.read(combinedProductSearchProvider.notifier).loadMore();
       }
     });
   }
@@ -48,29 +48,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       final keyword = _searchController.text.trim();
+      final notifier = ref.read(combinedProductSearchProvider.notifier);
+
       if (keyword.isEmpty) {
-        ref.read(productSearchNotifierProvider.notifier).resetSearch();
+        notifier.reset();
         return;
       }
 
-      final notifier = ref.read(productSearchNotifierProvider.notifier);
-
-      switch (_selectedFilter) {
-        case 'brand':
-          notifier.search(brand: keyword);
-          break;
-        case 'category':
-          notifier.search(category: keyword);
-          break;
-        default:
-          notifier.search(name: keyword);
-      }
+      notifier.search(keyword: keyword, filterType: _selectedFilter);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchState = ref.watch(productSearchNotifierProvider);
+    final searchState = ref.watch(combinedProductSearchProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -85,7 +76,68 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       body: Column(
         children: [
-          _buildSearchBar(),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: SizedBox(
+              height: 40,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AppTextField(
+                      controller: _searchController,
+                      hintText: 'Search by $_selectedFilter...',
+                      validator: (_) => null,
+                      addObscure: false,
+                      onChanged: (_) => _onSearchChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedFilter,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'product',
+                            child: Text(
+                              'Product',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'brand',
+                            child: Text(
+                              'Brand',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'category',
+                            child: Text(
+                              'Category',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _selectedFilter = value);
+                            _onSearchChanged();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const Divider(height: 1),
           Expanded(
             child: searchState.when(
@@ -100,94 +152,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const _AnimatedSearchingText(),
               error: (e, _) => Center(
                 child: Text(
-                  e.toString(),
+                  'Something went wrong',
                   style: GoogleFonts.poppins(color: Colors.red),
                 ),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                onChanged: (_) => _onSearchChanged(),
-                decoration: InputDecoration(
-                  hintText: 'Search by $_selectedFilter...',
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  hintStyle: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.green.shade600,
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 6,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            /*
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedFilter,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'product',
-                      child: Text('Product', style: TextStyle(fontSize: 12)),
-                    ),
-                    DropdownMenuItem(
-                      value: 'brand',
-                      child: Text('Brand', style: TextStyle(fontSize: 12)),
-                    ),
-                    DropdownMenuItem(
-                      value: 'category',
-                      child: Text('Category', style: TextStyle(fontSize: 12)),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedFilter = value);
-                      _onSearchChanged();
-                    }
-                  },
-                ),
-              ),
-            ),
-            */
-          ],
-        ),
       ),
     );
   }
@@ -213,14 +187,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        AppImage.emptyContainer,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      );
-                    },
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      AppImage.emptyContainer,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
                   )
                 : Image.asset(
                     AppImage.emptyContainer,
@@ -267,6 +239,81 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AnimatedSearchingText extends StatefulWidget {
+  const _AnimatedSearchingText({Key? key}) : super(key: key);
+
+  @override
+  State<_AnimatedSearchingText> createState() => _AnimatedSearchingTextState();
+}
+
+class _AnimatedSearchingTextState extends State<_AnimatedSearchingText>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat();
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAnimatedDots(Color color) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        int activeDot = (_animation.value * 3).floor();
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (int i = 0; i < 3; i++)
+              AnimatedOpacity(
+                opacity: i <= activeDot ? 1 : 0.2,
+                duration: const Duration(milliseconds: 250),
+                child: Text(
+                  '.',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: Responsive(context).body,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const color = AppColors.textSecondary;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Searching',
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w500,
+            fontSize: Responsive(context).body,
+          ),
+        ),
+        _buildAnimatedDots(color),
+      ],
     );
   }
 }

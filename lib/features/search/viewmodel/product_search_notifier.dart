@@ -1,138 +1,157 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
+import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
+import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 
-/// Product Search Notifier 
-class ProductSearchNotifier
-    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
   final Dio _dio;
-  final List<ProductDataModel> _searchResults = [];
+  final Box<ProductHiveModel> _productCache;
+  final List<ProductDataModel> _results = [];
   int _currentPage = 1;
-  bool _isNoMore = false;
   bool _isLoading = false;
+  bool _isNoMore = false;
 
-  String _nameQuery = '';
-  String _brandQuery = '';
-  String _categoryQuery = '';
+  String _keyword = '';
+  String _filterType = 'product';
 
-  ProductSearchNotifier() : _dio = Dio(), super(const AsyncValue.data([]));
+  CombinedProductSearchNotifier(this._productCache)
+      : _dio = Dio(),
+        super(const AsyncValue.data([]));
 
   bool get isNoMore => _isNoMore;
   bool get isLoading => _isLoading;
 
-  Future<void> resetSearch() async {
-    _searchResults.clear();
+  Future<void> reset() async {
+    _results.clear();
     _currentPage = 1;
     _isNoMore = false;
-    _nameQuery = '';
-    _brandQuery = '';
-    _categoryQuery = '';
+    _keyword = '';
     state = const AsyncValue.data([]);
   }
 
-  Future<void> search({
-    String? name,
-    String? brand,
-    String? category,
-    String? keyword,
-  }) async {
-    final kw = keyword?.trim() ?? '';
-
-    _nameQuery = name?.trim() ?? (kw.isNotEmpty ? kw : '');
-    _brandQuery = brand?.trim() ?? (kw.isNotEmpty ? kw : '');
-    _categoryQuery = category?.trim() ?? (kw.isNotEmpty ? kw : '');
-
-    _searchResults.clear();
+  Future<void> search({required String keyword, required String filterType}) async {
+    _keyword = keyword.trim();
+    _filterType = filterType;
+    _results.clear();
     _currentPage = 1;
     _isNoMore = false;
 
-    if (_nameQuery.isEmpty && _brandQuery.isEmpty && _categoryQuery.isEmpty) {
-      await resetSearch();
+    if (_keyword.isEmpty) {
+      await reset();
       return;
     }
 
     state = const AsyncValue.loading();
-
-    await _fetchSearchPage();
+    await _fetchPage();
   }
 
   Future<void> loadMore() async {
-    if (_isLoading || _isNoMore) return;
-    if (_nameQuery.isEmpty && _brandQuery.isEmpty && _categoryQuery.isEmpty) {
-      return;
-    }
-    await _fetchSearchPage();
+    if (_isLoading || _isNoMore || _keyword.isEmpty) return;
+    await _fetchPage();
   }
 
-  Future<void> _fetchSearchPage() async {
+  Future<void> _fetchPage() async {
     _isLoading = true;
-
     try {
-      final Map<String, dynamic> filters = {
-        'page': _currentPage,
-        if (_nameQuery.isNotEmpty)
-          'filter[products.name][\$like]': '%$_nameQuery%',
-        if (_brandQuery.isNotEmpty)
-          'filter[products.brand][\$like]': '%$_brandQuery%',
-        if (_categoryQuery.isNotEmpty)
-          'filter[products.category][\$like]': '%$_categoryQuery%',
-      };
+      List<int> filterIds = [];
 
-      final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/products',
-        queryParameters: filters,
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
-
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
-
-      if (!isSuccess) {
-        final msg = response.data['message'] ?? "Search failed. Try again.";
-        state = AsyncValue.error(msg, StackTrace.current);
-        return;
+      if (_filterType == 'brand') {
+        final brandResp = await _dio.get(
+          'https://beta.picosbs.com/api/ecommerce/brands',
+          queryParameters: {'search': _keyword},
+          options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+        );
+        final brands = BrandListResponse.fromJson(brandResp.data).data?.data ?? [];
+        filterIds = brands.map((b) => b.id).toList();
+        if (filterIds.isEmpty) {
+          _isNoMore = true;
+          state = AsyncValue.data([]);
+          return;
+        }
+      } else if (_filterType == 'category') {
+        final catResp = await _dio.get(
+          'https://beta.picosbs.com/api/ecommerce/categories',
+          queryParameters: {'search': _keyword},
+          options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+        );
+        final categories = CategoriesListResponse.fromJson(catResp.data).data.data;
+        filterIds = categories.map((c) => c.id).toList();
+        if (filterIds.isEmpty) {
+          _isNoMore = true;
+          state = AsyncValue.data([]);
+          return;
+        }
       }
 
-      final parsed = ProductListResponse.fromJson(response.data);
-      final products = parsed.data?.data ?? [];
+      final Map<String, dynamic> query = {'page': _currentPage};
+      if (_filterType == 'product') {
+        query['filter[products.name][\$like]'] = '%$_keyword%';
+      } else if (_filterType == 'brand') {
+        query['filter[products.brand_id][\$in]'] = filterIds.join(',');
+      } else if (_filterType == 'category') {
+        query['filter[products.category_id][\$in]'] = filterIds.join(',');
+      }
+
+      final resp = await _dio.get(
+        'https://beta.picosbs.com/api/ecommerce/products',
+        queryParameters: query,
+        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+      );
+
+      final parsed = ProductListResponse.fromJson(resp.data);
+      var products = parsed.data?.data ?? [];
+
       if (products.isEmpty) {
         _isNoMore = true;
       } else {
-        _searchResults.addAll(products);
+        products.sort((a, b) {
+          final nameA = a.name?.toLowerCase() ?? '';
+          final nameB = b.name?.toLowerCase() ?? '';
+          final kw = _keyword.toLowerCase();
+          if (nameA.startsWith(kw) && !nameB.startsWith(kw)) return -1;
+          if (!nameA.startsWith(kw) && nameB.startsWith(kw)) return 1;
+          if (nameA.contains(kw) && !nameB.contains(kw)) return -1;
+          if (!nameA.contains(kw) && nameB.contains(kw)) return 1;
+          return nameA.compareTo(nameB);
+        });
+
+        _results.addAll(products);
         _currentPage++;
+
+        for (var product in products.take(8)) {
+          if (_productCache.length >= 8 && product.id != null) {
+            _productCache.delete(_productCache.keys.first);
+          }
+          if (product.id != null) {
+            _productCache.put(product.id, ProductHiveModel.fromDataModel(product));
+          }
+        }
       }
 
-      final connectivity = await Connectivity().checkConnectivity();
-      // ignore: unrelated_type_equality_checks
-      final isOnline = connectivity != ConnectivityResult.none;
-
-      if (isOnline) {
-        state = AsyncValue.data(List.from(_searchResults));
-      } else {
-        state = AsyncValue.data(List.from(_searchResults));
-      }
+      state = AsyncValue.data(List.from(_results));
     } on DioException catch (e, st) {
-      final msg = e.type == DioExceptionType.connectionError
-          ? 'Check Internet Connection'
-          : e.message ?? 'Something went wrong';
-      state = AsyncValue.error(msg, st);
+      final cached = _productCache.values.map((e) => e.toDataModel()).toList();
+      if (cached.isNotEmpty) {
+        state = AsyncValue.data(cached);
+      } else {
+        state = AsyncValue.error(
+          e.response?.data['message'] ?? 'Check Internet',
+          st,
+        );
+      }
     } finally {
       _isLoading = false;
     }
   }
 }
 
-final productSearchNotifierProvider =
-    StateNotifierProvider<
-      ProductSearchNotifier,
-      AsyncValue<List<ProductDataModel>>
-    >((ref) {
-      return ProductSearchNotifier();
-    });
+final combinedProductSearchProvider =
+    StateNotifierProvider<CombinedProductSearchNotifier, AsyncValue<List<ProductDataModel>>>((ref) {
+  final offlineProducts = Hive.box<ProductHiveModel>('products');
+  return CombinedProductSearchNotifier(offlineProducts);
+});
