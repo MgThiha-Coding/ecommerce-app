@@ -5,7 +5,6 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
@@ -25,18 +24,20 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(productDetailNotifierProvider.notifier)
-          .getProductDetail(widget.productId);
+      final notifier = ref.read(productDetailNotifierProvider.notifier);
+      notifier.reset();
+      notifier.getProductDetail(widget.productId);
     });
   }
 
+  // increase itemcount
   void increment() {
     setState(() {
       itemCount++;
     });
   }
 
+  // decrease itemcount
   void decrement() {
     if (itemCount > 1) {
       setState(() {
@@ -47,41 +48,13 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // responsive fontsize
     final fontSize = Responsive(context);
+    // product details data provider
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
-    final addToCartAsync = ref.watch(addToCartNotifierProvider);
-
-    ref.listen<AsyncValue<AddToCartResponse?>>(addToCartNotifierProvider, (
-      previous,
-      next,
-    ) {
-      next.when(
-        data: (data) {
-          if (data != null &&
-              data.message != null &&
-              data.message!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(data.message!),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        },
-        loading: () {},
-        error: (error, stack) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error.toString()),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Colors.red,
-            ),
-          );
-        },
-      );
-    });
 
     return Scaffold(
+      // app primary background
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
@@ -89,36 +62,45 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         centerTitle: true,
         title: Text(
           'Product Details',
-          style: GoogleFonts.poppins(
+          style: TextStyle(
+            fontFamily: "Poppins",
             fontSize: fontSize.subHeading,
-            fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
+
       body: productDetailAsync.when(
         data: (data) {
           if (data?.data == null) {
+            // empty State
             return Center(
               child: Text(
                 'No product details available.',
-                style: GoogleFonts.poppins(
-                  color: Colors.grey,
+                style: TextStyle(
+                  fontFamily: "Poppins",
                   fontSize: fontSize.body,
+                  color: AppColors.textSecondary,
                 ),
               ),
             );
           }
 
+          // produdut detail data providers
           final product = data!.data!;
           final productImage = product.productImage;
-          final productName = product.name ?? '';
-          final productType = product.productType ?? '';
-          final brandName = product.brandName ?? '';
-          final categoryName = product.categoryName ?? '';
-          final price = product.defaultPrice ?? '';
-          final uom = product.uomName ?? '';
-          final stock = product.stockSumCurrentQuantity ?? '';
+          final productName = product.name ?? 'Unnamed Product';
+          final productType = product.productType ?? 'Type not specified';
+          final brandName =
+              product.brandName ?? 'Brand information not available';
+          final categoryName = product.categoryName ?? 'Category not specified';
+          final price = product.defaultPrice ?? 'Price not available';
+          final uom = product.uomName ?? 'Unit not specified';
+          final stock =
+              (double.tryParse(product.stockSumCurrentQuantity ?? '0') ?? 0)
+                  .toInt();
+
           final productId = product.id;
           final variationId =
               product.productVariations != null &&
@@ -126,14 +108,20 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
               ? product.productVariations!.first.variationId
               : null;
 
+          // add to cart loading state by each item
+          final addToCartState = ref.watch(addToCartNotifierProvider);
+          final isItemLoading = addToCartState.itemLoading[productId] == true;
+
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Product Image & lable section
                 Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
+                    // Product Image
                     AspectRatio(
                       aspectRatio: 1,
                       child: ClipRRect(
@@ -159,6 +147,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               ),
                       ),
                     ),
+                    // Product Name Label
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -189,11 +178,33 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                     ),
                   ],
                 ),
+
+                // Description Section
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        'Price',
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: fontSize.subHeading,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      Text(
+                        price.isEmpty ? "No Price Provided" : price,
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: fontSize.subHeading,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
                       Wrap(
                         spacing: 10,
                         runSpacing: 6,
@@ -205,105 +216,94 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      Text(
-                        'Price',
-                        style: GoogleFonts.poppins(
-                          fontSize: fontSize.subHeading,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        price.isEmpty ? "No Price Provided" : price,
-                        style: GoogleFonts.poppins(
-                          fontSize: fontSize.subHeading,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+
                       Text(
                         'Stock',
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(
+                          fontFamily: "Poppins",
                           fontSize: fontSize.subHeading,
-                          fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         '$stock available',
-                        style: GoogleFonts.poppins(
+                        style: TextStyle(
+                          fontFamily: "Poppins",
                           fontSize: fontSize.body,
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 10),
+
                       Row(
                         children: [
-                          IconButton(
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
-                              shape: const CircleBorder(),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.grey[200],
+                                    shape: const CircleBorder(),
+                                  ),
+                                  onPressed: decrement,
+                                  icon: const Icon(Icons.remove),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    itemCount.toString(),
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: fontSize.subHeading,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.grey[200],
+                                    shape: const CircleBorder(),
+                                  ),
+                                  onPressed: increment,
+                                  icon: const Icon(Icons.add),
+                                ),
+                              ],
                             ),
-                            onPressed: decrement,
-                            icon: const Icon(Icons.remove),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              itemCount.toString(),
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: fontSize.subHeading,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
+                          Expanded(
+                            child: AppButton(
+                              title: "Add To Cart",
+                              onTap: () {
+                                if (variationId != null) {
+                                  ref
+                                      .read(addToCartNotifierProvider.notifier)
+                                      .addToCart(
+                                        AddToCartRequest(
+                                          productId: productId!,
+                                          purchaseQty: itemCount,
+                                          variationId: variationId,
+                                        ),
+                                      );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Product variation not available",
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              backgroundColor: AppColors.primary,
+                              labelColor: AppColors.background,
+                              isLoading: isItemLoading,
                             ),
-                          ),
-                          IconButton(
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
-                              shape: const CircleBorder(),
-                            ),
-                            onPressed: increment,
-                            icon: const Icon(Icons.add),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      SizedBox(
-                        height: 50,
-                        width: double.infinity,
-                        child: AppButton(
-                          title: "Add To Cart",
-                          onTap: () {
-                            if (variationId != null) {
-                              ref
-                                  .read(addToCartNotifierProvider.notifier)
-                                  .addtoCart(
-                                    AddToCartRequest(
-                                      productId: productId!,
-                                      purchaseQty: itemCount,
-                                      variationId: variationId,
-                                    ),
-                                  );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Product variation not available",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          backgroundColor: AppColors.primary,
-                          labelColor: AppColors.background,
-                          isLoading: addToCartAsync.isLoading ? true : false,
-                        ),
-                      ),
                     ],
                   ),
                 ),

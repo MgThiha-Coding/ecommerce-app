@@ -41,8 +41,8 @@ class Responsive {
   double get iconLarge => value(mobile: 32, tablet: 36, desktop: 40);
 
   double get authHorizontalPadding {
-    if (screenWidth >= 1400) return 400;
-    if (screenWidth >= 1024) return 200;
+    if (screenWidth >= 1400) return 600;
+    if (screenWidth >= 1024) return 100;
     if (screenWidth >= 768) return 50;
     return 15;
   }

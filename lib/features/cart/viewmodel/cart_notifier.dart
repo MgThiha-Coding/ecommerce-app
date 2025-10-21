@@ -189,15 +189,45 @@ final totalCartNotifierProvider =
       return TotalCartNotifier(offlineTotal);
     });
 
-class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
+class AddToCartState {
+  final Map<int, bool> itemLoading;
+  final Map<int, String?> itemError;
+  final AddToCartResponse? lastResponse;
+
+  AddToCartState({
+    required this.itemLoading,
+    required this.itemError,
+    this.lastResponse,
+  });
+
+  AddToCartState copyWith({
+    Map<int, bool>? itemLoading,
+    Map<int, String?>? itemError,
+    AddToCartResponse? lastResponse,
+  }) {
+    return AddToCartState(
+      itemLoading: itemLoading ?? this.itemLoading,
+      itemError: itemError ?? this.itemError,
+      lastResponse: lastResponse ?? this.lastResponse,
+    );
+  }
+}
+
+class AddToCartNotifier extends StateNotifier<AddToCartState> {
   final Dio _dio;
 
   AddToCartNotifier([Dio? dio])
     : _dio = dio ?? Dio(),
-      super(const AsyncValue.data(null));
+      super(AddToCartState(itemLoading: {}, itemError: {}, lastResponse: null));
 
-  Future<void> addtoCart(AddToCartRequest params) async {
-    state = const AsyncValue.loading();
+  Future<void> addToCart(AddToCartRequest params) async {
+    final id = params.productId;
+
+    state = state.copyWith(
+      itemLoading: {...state.itemLoading, id: true},
+      itemError: {...state.itemError}..remove(id),
+    );
+
     try {
       final response = await _dio.post(
         'https://beta.picosbs.com/api/ecommerce/cart',
@@ -216,100 +246,44 @@ class AddToCartNotifier extends StateNotifier<AsyncValue<AddToCartResponse?>> {
         ),
       );
 
-      final isSuccess =
-          response.data != null &&
-          response.data['success'] == true &&
-          response.statusCode == 200;
+      final data = response.data;
+      if (response.statusCode == 200 && data?['success'] == true) {
+        final responseData = AddToCartResponse.fromJson(data);
 
-      if (isSuccess) {
-        final responseData = AddToCartResponse.fromJson(response.data);
-        state = AsyncValue.data(responseData);
+        state = state.copyWith(
+          itemLoading: {...state.itemLoading}..remove(id),
+          itemError: {...state.itemError}..remove(id),
+          lastResponse: responseData,
+        );
       } else {
-        final msg = response.data['message'];
-        state = AsyncValue.error(msg, StackTrace.current);
+        throw Exception(data?['message'] ?? "Failed to add to cart");
       }
-    } on DioException catch (e, st) {
-      final errorData =
-          (e.response?.data['message'] ??
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ??
           (e.type == DioExceptionType.connectionError ||
                   e.type == DioExceptionType.connectionTimeout ||
                   e.type == DioExceptionType.unknown
-              ? 'Check your connection'
-              : "Something went wrong, Please try again later"));
-      state = AsyncValue.error(errorData, st);
+              ? 'Check your internet connection.'
+              : 'Something went wrong. Please try again.');
+
+      state = state.copyWith(
+        itemLoading: {...state.itemLoading}..remove(id),
+        itemError: {...state.itemError, id: message},
+      );
+    } catch (e) {
+      state = state.copyWith(
+        itemLoading: {...state.itemLoading}..remove(id),
+        itemError: {...state.itemError, id: e.toString()},
+      );
     }
   }
 }
 
 final addToCartNotifierProvider =
-    StateNotifierProvider<AddToCartNotifier, AsyncValue<AddToCartResponse?>>(
+    StateNotifierProvider<AddToCartNotifier, AddToCartState>(
       (ref) => AddToCartNotifier(),
     );
-
-/*
-class CartState {
-  final Map<int, bool> itemLoading;
-
-  CartState({required this.itemLoading});
-
-  CartState copyWith({Map<int, bool>? itemLoading}) {
-    return CartState(itemLoading: itemLoading ?? this.itemLoading);
-  }
-}
-
-class RemoveCartItemNotifier
-    extends StateNotifier<AsyncValue<RemoveCartItemResponse?>> {
-  final Dio _dio;
-  RemoveCartItemNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.data(null));
-
-  Future<void> removeCartItem(int id) async {
-   
-    try {
-      final response = await _dio.delete(
-        'https://beta.picosbs.com/api/ecommerce/cart',
-        queryParameters: {'cart_item_id': id},
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
-      final isSuccess =
-          response.data != null &&
-          response.data['success'] == true &&
-          response.statusCode == 200;
-      if (isSuccess) {
-        final responseData = RemoveCartItemResponse.fromJson(response.data);
-        state = AsyncValue.data(responseData);
-      } else {
-        final msg = response.data['message'];
-        state = AsyncValue.error(msg, StackTrace.current);
-      }
-    } on DioException catch (e, st) {
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
-      } else {
-        final errorData =
-            e.response?.data['message'] ??
-            "Something went wrong,Please try again later";
-        state = AsyncValue.error(errorData, st);
-      }
-    }
-  }
-}
-
-final removeCartItemNotifierProvider =
-    StateNotifierProvider<
-      RemoveCartItemNotifier,
-      AsyncValue<RemoveCartItemResponse?>
-    >((ref) => RemoveCartItemNotifier());
-*/
 
 class CartState {
   final Map<int, bool> itemLoading;
@@ -332,8 +306,8 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
   final Dio _dio;
 
   RemoveCartItemNotifier([Dio? dio])
-      : _dio = dio ?? Dio(),
-        super(CartState(itemLoading: {}, itemError: {}));
+    : _dio = dio ?? Dio(),
+      super(CartState(itemLoading: {}, itemError: {}));
 
   Future<void> removeCartItem(int id) async {
     // Mark the item as loading and clear previous error
@@ -372,7 +346,8 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
       );
     } on DioException catch (e, _) {
       final errorData =
-          e.response?.data['message'] ?? "Something went wrong. Please try again.";
+          e.response?.data['message'] ??
+          "Something went wrong. Please try again.";
 
       state = state.copyWith(
         itemLoading: {...state.itemLoading}..remove(id),
@@ -386,7 +361,8 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
     }
   }
 }
+
 final removeCartItemNotifierProvider =
     StateNotifierProvider<RemoveCartItemNotifier, CartState>(
-  (ref) => RemoveCartItemNotifier(),
-);
+      (ref) => RemoveCartItemNotifier(),
+    );

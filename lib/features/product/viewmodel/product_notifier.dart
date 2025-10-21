@@ -8,7 +8,8 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
-class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+class ProductListNotifier
+    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
   final Box<ProductHiveModel> _localCache;
   final Dio _dio;
   final List<ProductDataModel> _onlineProducts = [];
@@ -17,8 +18,8 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
   bool _isLoading = false;
 
   ProductListNotifier(this._localCache)
-      : _dio = Dio(),
-        super(const AsyncValue.loading()) {
+    : _dio = Dio(),
+      super(const AsyncValue.loading()) {
     _init();
   }
 
@@ -56,7 +57,8 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
         ),
       );
 
-      final isSuccess = response.statusCode == 200 && response.data['success'] == true;
+      final isSuccess =
+          response.statusCode == 200 && response.data['success'] == true;
       if (!isSuccess) {
         state = AsyncValue.error(
           response.data['message'] ?? 'Something went wrong',
@@ -74,8 +76,13 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
         _onlineProducts.addAll(products);
 
         for (var product in products.take(8)) {
-          if (_localCache.length >= 8) _localCache.delete(_localCache.keys.first);
-          if (product.id != null) _localCache.put(product.id, ProductHiveModel.fromDataModel(product));
+          if (_localCache.length >= 8)
+            _localCache.delete(_localCache.keys.first);
+          if (product.id != null)
+            _localCache.put(
+              product.id,
+              ProductHiveModel.fromDataModel(product),
+            );
         }
 
         _currentPage++;
@@ -84,14 +91,21 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
       final connectivityResult = await Connectivity().checkConnectivity();
       final isOnline = connectivityResult != ConnectivityResult.none;
 
-      state = AsyncValue.data(isOnline ? List.from(_onlineProducts) : _localCache.values.map((e) => e.toDataModel()).toList());
+      state = AsyncValue.data(
+        isOnline
+            ? List.from(_onlineProducts)
+            : _localCache.values.map((e) => e.toDataModel()).toList(),
+      );
     } on DioException catch (e, st) {
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
       if (cached.isNotEmpty) {
         state = AsyncValue.data(cached);
       } else {
         _isNoMore = true;
-        state = AsyncValue.error(e.response?.data['message'] ?? 'Check Internet', st);
+        state = AsyncValue.error(
+          e.response?.data['message'] ?? 'Check Internet',
+          st,
+        );
       }
     } finally {
       _isLoading = false;
@@ -99,19 +113,26 @@ class ProductListNotifier extends StateNotifier<AsyncValue<List<ProductDataModel
   }
 }
 
-final productNotifierProvider = StateNotifierProvider<ProductListNotifier, AsyncValue<List<ProductDataModel>>>(
-  (ref) {
-    final offlineProducts = Hive.box<ProductHiveModel>('products');
-    return ProductListNotifier(offlineProducts);
-  },
-);
+final productNotifierProvider =
+    StateNotifierProvider<
+      ProductListNotifier,
+      AsyncValue<List<ProductDataModel>>
+    >((ref) {
+      final offlineProducts = Hive.box<ProductHiveModel>('products');
+      return ProductListNotifier(offlineProducts);
+    });
 
-class ProductDetailNotifier extends StateNotifier<AsyncValue<ProductDetailResponse?>> {
+class ProductDetailNotifier
+    extends StateNotifier<AsyncValue<ProductDetailResponse?>> {
   final Dio _dio;
 
   ProductDetailNotifier([Dio? dio])
-      : _dio = dio ?? Dio(),
-        super(const AsyncValue.data(null));
+    : _dio = dio ?? Dio(),
+      super(const AsyncValue.data(null));
+
+  void reset() {
+    state = const AsyncValue.loading();
+  }
 
   Future<void> getProductDetail(int productId) async {
     try {
@@ -125,7 +146,8 @@ class ProductDetailNotifier extends StateNotifier<AsyncValue<ProductDetailRespon
         ),
       );
 
-      final isSuccess = response.statusCode == 200 && response.data['success'] == true;
+      final isSuccess =
+          response.statusCode == 200 && response.data['success'] == true;
       if (isSuccess) {
         state = AsyncValue.data(ProductDetailResponse.fromJson(response.data));
       }
@@ -138,6 +160,8 @@ class ProductDetailNotifier extends StateNotifier<AsyncValue<ProductDetailRespon
   }
 }
 
-final productDetailNotifierProvider = StateNotifierProvider<ProductDetailNotifier, AsyncValue<ProductDetailResponse?>>(
-  (ref) => ProductDetailNotifier(),
-);
+final productDetailNotifierProvider =
+  StateNotifierProvider.autoDispose<
+    ProductDetailNotifier,
+    AsyncValue<ProductDetailResponse?>
+  >((ref) => ProductDetailNotifier());

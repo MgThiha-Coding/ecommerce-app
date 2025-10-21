@@ -53,33 +53,26 @@ void main() async {
     ),
   );
 
-  // Initialize app in the background without blocking first frame
   _initializeApp();
 }
 
 Future<void> _initializeApp() async {
   try {
-    await Future.wait([
-      dotenv.load(fileName: '.env'),
-      Hive.initFlutter(),
-    ]);
+    await Future.wait([dotenv.load(fileName: '.env'), Hive.initFlutter()]);
 
     _registerHiveAdapters();
 
+    await Future.wait([_openBoxSafe<CartItemHiveModel>('cart')]);
 
-    await Future.wait([
-      _openBoxSafe<CartItemHiveModel>('cart'),
-    ]);
-
-   
     await AppConfig.loadAccessToken();
 
-   
-    unawaited(Future.wait([
-      _openBoxSafe<ProductHiveModel>('products'),
-      _openBoxSafe<BrandHiveModel>('brands'),
-      _openBoxSafe<CategoryHiveModel>('category'),
-    ]));
+    unawaited(
+      Future.wait([
+        _openBoxSafe<ProductHiveModel>('products'),
+        _openBoxSafe<BrandHiveModel>('brands'),
+        _openBoxSafe<CategoryHiveModel>('category'),
+      ]),
+    );
   } catch (e, st) {
     debugPrint('Startup error: $e\n$st');
   }

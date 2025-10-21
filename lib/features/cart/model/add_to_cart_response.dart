@@ -3,7 +3,11 @@ class AddToCartResponse {
   final String? message;
   final Data? data;
 
-  AddToCartResponse({this.success, this.message, this.data});
+  AddToCartResponse({
+    this.success,
+    this.message,
+    this.data,
+  });
 
   factory AddToCartResponse.fromJson(Map<String, dynamic> json) {
     return AddToCartResponse(
@@ -13,13 +17,11 @@ class AddToCartResponse {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data?.toJson(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'success': success,
+        'message': message,
+        'data': data?.toJson(),
+      };
 }
 
 class Data {
@@ -27,22 +29,32 @@ class Data {
   final String? cartTotal;
   final int? itemsCount;
 
-  Data({this.cartItem, this.cartTotal, this.itemsCount});
+  Data({
+    this.cartItem,
+    this.cartTotal,
+    this.itemsCount,
+  });
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
-      cartItem: json['cart_item'] != null ? CartItem.fromJson(json['cart_item']) : null,
-      cartTotal: json['cart_total'] != null ? json['cart_total'].toString() : null,
-      itemsCount: json['items_count'] is int ? json['items_count'] as int : int.tryParse(json['items_count']?.toString() ?? ''),
+      cartItem: json['cart_item'] != null
+          ? CartItem.fromJson(json['cart_item'])
+          : null,
+      cartTotal: json['cart_total']?.toString(),
+      itemsCount: _parseInt(json['items_count']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'cart_item': cartItem?.toJson(),
-      'cart_total': cartTotal,
-      'items_count': itemsCount,
-    };
+  Map<String, dynamic> toJson() => {
+        'cart_item': cartItem?.toJson(),
+        'cart_total': cartTotal,
+        'items_count': itemsCount,
+      };
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
   }
 }
 
@@ -53,9 +65,9 @@ class CartItem {
   final int? productVariantId;
   final String? quantity;
   final String? uomPrice;
+  final String? productFullName;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final String? productFullName;
 
   CartItem({
     this.id,
@@ -64,36 +76,39 @@ class CartItem {
     this.productVariantId,
     this.quantity,
     this.uomPrice,
+    this.productFullName,
     this.createdAt,
     this.updatedAt,
-    this.productFullName,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? ''),
-      cartId: json['cart_id'] is int ? json['cart_id'] as int : int.tryParse(json['cart_id']?.toString() ?? ''),
-      productId: json['product_id'] is int ? json['product_id'] as int : int.tryParse(json['product_id']?.toString() ?? ''),
-      productVariantId: json['product_variant_id'] is int ? json['product_variant_id'] as int : int.tryParse(json['product_variant_id']?.toString() ?? ''),
+      id: Data._parseInt(json['id']),
+      cartId: Data._parseInt(json['cart_id']),
+      productId: Data._parseInt(json['product_id']),
+      productVariantId: Data._parseInt(json['product_variant_id']),
       quantity: json['quantity']?.toString(),
       uomPrice: json['uom_price']?.toString(),
       productFullName: json['product_full_name'] as String?,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at']) : null,
+      createdAt: _parseDate(json['created_at']),
+      updatedAt: _parseDate(json['updated_at']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'cart_id': cartId,
-      'product_id': productId,
-      'product_variant_id': productVariantId,
-      'quantity': quantity,
-      'uom_price': uomPrice,
-      'product_full_name': productFullName,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-    };
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'cart_id': cartId,
+        'product_id': productId,
+        'product_variant_id': productVariantId,
+        'quantity': quantity,
+        'uom_price': uomPrice,
+        'product_full_name': productFullName,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

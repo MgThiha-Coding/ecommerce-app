@@ -73,7 +73,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         ),
         centerTitle: true,
-       
       ),
       body: SafeArea(
         child: RefreshIndicator(
