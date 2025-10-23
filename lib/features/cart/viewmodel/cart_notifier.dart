@@ -1,27 +1,63 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
-// get cart item notifier state
-class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
-  final Dio _dio;
+mixin RefreshTokenMixin {
+  final Dio _refreshDio = Dio();
+  final SecureStorage _storage = SecureStorage();
 
+  Future<Response<dynamic>?> refreshAndRetry(
+    Future<Response<dynamic>> Function(String accessToken) retryCallback,
+  ) async {
+    final refreshToken = await _storage.getRefreshToken();
+    if (refreshToken == null) return null;
+    try {
+      final refreshRes = await _refreshDio.post(
+        '${AppConfig.baseUrl}/v1/refresh-token',
+        data: {'refresh_token': refreshToken},
+        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+      );
+      final accessToken = refreshRes.data['data']['accessToken'];
+      final newRefreshToken = refreshRes.data['data']['refreshToken'];
+      final userId = refreshRes.data['data']['user']['id'].toString();
+      AppConfig.updateAccessToken(accessToken);
+      await _storage.saveAuthData(
+        accessToken: accessToken,
+        refreshToken: newRefreshToken,
+        userId: userId,
+      );
+      return await retryCallback(accessToken);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+// Get Cart Item State
+class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
+    with RefreshTokenMixin {
+  final Dio _dio;
   final List<CartItemModel> _onlineItems = [];
   bool _isLoading = false;
 
-  CartNotifier() : _dio = Dio(), super(const AsyncValue.loading());
+  CartNotifier([Dio? dio])
+    : _dio = dio ?? Dio(),
+      super(const AsyncValue.loading());
 
+  // fetch cart
   Future<void> fetchCart() async {
     if (_isLoading) return;
     _isLoading = true;
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/api/ecommerce/cart',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -30,10 +66,8 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
           },
         ),
       );
-
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
-
       if (!isSuccess) {
         final message =
             response.data['message'] ??
@@ -41,16 +75,41 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
-
       final parsed = CartItemResponse.fromJson(response.data);
       final items = parsed.data;
-
       _onlineItems
         ..clear()
         ..addAll(items);
-
       state = AsyncValue.data(List.from(_onlineItems));
     } on DioException catch (e, st) {
+      if (e.response?.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.get(
+            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+        if (refreshed != null) {
+          final isSuccess =
+              refreshed.statusCode == 200 && refreshed.data['success'] == true;
+          if (isSuccess) {
+            final parsed = CartItemResponse.fromJson(refreshed.data);
+            final items = parsed.data;
+            _onlineItems
+              ..clear()
+              ..addAll(items);
+            state = AsyncValue.data(List.from(_onlineItems));
+            _isLoading = false;
+            return;
+          }
+        }
+      }
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
@@ -63,6 +122,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
     }
   }
 
+  // refresh cart
   Future<void> refreshCart() async {
     await fetchCart();
   }
@@ -73,11 +133,11 @@ final cartNotifierProvider =
       return CartNotifier();
     });
 
-// total cart item notifier state or itemcount
-class TotalCartNotifier extends StateNotifier<AsyncValue<int>> {
+//  get total cart item state ( itemcount )
+class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
+    with RefreshTokenMixin {
   final Box<int> _localCache;
   final Dio _dio;
-
   int? _onlineTotal;
   bool _isLoading = false;
 
@@ -98,42 +158,62 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>> {
   Future<void> fetchTotalCart() async {
     if (_isLoading) return;
     _isLoading = true;
-
     try {
       final response = await _dio.get(
         '${AppConfig.baseUrl}/ecommerce/cart/total',
         options: Options(
           headers: {
             'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
             'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
-
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
-
       if (!isSuccess) {
         final message =
             response.data['message'] ??
             "Something went wrong\nPlease try again";
         state = AsyncValue.error(message, StackTrace.current);
+        _isLoading = false;
         return;
       }
-
       final parsed = TotalCartItemResponse.fromJson(response.data);
       _onlineTotal = parsed.data;
-
       _localCache.put('total', _onlineTotal!);
-
       state = AsyncValue.data(_onlineTotal!);
     } on DioException catch (e, st) {
-      // fallback to cache
+      if (e.response?.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.get(
+            '${AppConfig.baseUrl}/ecommerce/cart/total',
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+        if (refreshed != null) {
+          final isSuccess =
+              refreshed.statusCode == 200 && refreshed.data['success'] == true;
+          if (isSuccess) {
+            final parsed = TotalCartItemResponse.fromJson(refreshed.data);
+            _onlineTotal = parsed.data;
+            _localCache.put('total', _onlineTotal!);
+            state = AsyncValue.data(_onlineTotal!);
+            _isLoading = false;
+            return;
+          }
+        }
+      }
       final cached = _localCache.get('total');
       if (cached != null) {
         state = AsyncValue.data(cached);
       }
-
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
@@ -162,7 +242,7 @@ final totalCartNotifierProvider =
       return TotalCartNotifier(offlineTotal);
     });
 
-// add to cart notifier state
+// add to cart state
 class AddToCartState {
   final Map<int, bool> itemLoading;
   final Map<int, String?> itemError;
@@ -187,7 +267,8 @@ class AddToCartState {
   }
 }
 
-class AddToCartNotifier extends StateNotifier<AddToCartState> {
+class AddToCartNotifier extends StateNotifier<AddToCartState>
+    with RefreshTokenMixin {
   final Dio _dio;
   final Ref _ref;
 
@@ -197,15 +278,13 @@ class AddToCartNotifier extends StateNotifier<AddToCartState> {
 
   Future<void> addToCart(AddToCartRequest params) async {
     final id = params.productId;
-
     state = state.copyWith(
       itemLoading: {...state.itemLoading, id: true},
       itemError: {...state.itemError}..remove(id),
     );
-
     try {
       final response = await _dio.post(
-        'https://beta.picosbs.com/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/api/ecommerce/cart',
         data: {
           "product_id": params.productId,
           "purchase_qty": params.purchaseQty,
@@ -220,23 +299,51 @@ class AddToCartNotifier extends StateNotifier<AddToCartState> {
           },
         ),
       );
-
       final data = response.data;
       if (response.statusCode == 200 && data?['success'] == true) {
         final responseData = AddToCartResponse.fromJson(data);
-
         state = state.copyWith(
           itemLoading: {...state.itemLoading}..remove(id),
           itemError: {...state.itemError}..remove(id),
           lastResponse: responseData,
         );
-
         _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
         _ref.read(cartNotifierProvider.notifier).refreshCart();
       } else {
         throw Exception(data?['message'] ?? "Failed to add to cart");
       }
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.post(
+            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            data: {
+              "product_id": params.productId,
+              "purchase_qty": params.purchaseQty,
+              "variation_id": params.variationId,
+            },
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'Content-Type': 'application/json',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+        if (refreshed != null && refreshed.data?['success'] == true) {
+          final responseData = AddToCartResponse.fromJson(refreshed.data);
+          state = state.copyWith(
+            itemLoading: {...state.itemLoading}..remove(id),
+            itemError: {...state.itemError}..remove(id),
+            lastResponse: responseData,
+          );
+          _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
+          _ref.read(cartNotifierProvider.notifier).refreshCart();
+          return;
+        }
+      }
       final message =
           e.response?.data?['message'] ??
           (e.type == DioExceptionType.connectionError ||
@@ -244,7 +351,6 @@ class AddToCartNotifier extends StateNotifier<AddToCartState> {
                   e.type == DioExceptionType.unknown
               ? 'Check your internet connection.'
               : 'Something went wrong. Please try again.');
-
       state = state.copyWith(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError, id: message},
@@ -263,7 +369,6 @@ final addToCartNotifierProvider =
       (ref) => AddToCartNotifier(ref),
     );
 
-// remove cart notifier state
 class CartState {
   final Map<int, bool> itemLoading;
   final Map<int, String?> itemError;
@@ -281,11 +386,14 @@ class CartState {
   }
 }
 
-class RemoveCartItemNotifier extends StateNotifier<CartState> {
+class RemoveCartItemNotifier extends StateNotifier<CartState>
+    with RefreshTokenMixin {
   final Dio _dio;
+  final Ref? _ref;
 
-  RemoveCartItemNotifier([Dio? dio])
+  RemoveCartItemNotifier([Dio? dio, Ref? ref])
     : _dio = dio ?? Dio(),
+      _ref = ref,
       super(CartState(itemLoading: {}, itemError: {}));
 
   Future<void> removeCartItem(int id) async {
@@ -293,10 +401,9 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
       itemLoading: {...state.itemLoading, id: true},
       itemError: {...state.itemError}..remove(id),
     );
-
     try {
       final response = await _dio.delete(
-        'https://beta.picosbs.com/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/api/ecommerce/cart',
         queryParameters: {'cart_item_id': id},
         options: Options(
           headers: {
@@ -306,26 +413,52 @@ class RemoveCartItemNotifier extends StateNotifier<CartState> {
           },
         ),
       );
-
       final isSuccess =
           response.data != null &&
           response.data['success'] == true &&
           response.statusCode == 200;
-
       if (!isSuccess) {
         final msg = response.data['message'] ?? "Failed to remove item";
         throw Exception(msg);
       }
-
       state = state.copyWith(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError}..remove(id),
       );
+      if (_ref != null) {
+        _ref.read(cartNotifierProvider.notifier).refreshCart();
+        _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
+      }
     } on DioException catch (e, _) {
+      if (e.response?.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.delete(
+            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            queryParameters: {'cart_item_id': id},
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+        if (refreshed != null && refreshed.data?['success'] == true) {
+          state = state.copyWith(
+            itemLoading: {...state.itemLoading}..remove(id),
+            itemError: {...state.itemError}..remove(id),
+          );
+          if (_ref != null) {
+            _ref.read(cartNotifierProvider.notifier).refreshCart();
+            _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
+          }
+          return;
+        }
+      }
       final errorData =
           e.response?.data['message'] ??
           "Something went wrong. Please try again.";
-
       state = state.copyWith(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError, id: errorData},
