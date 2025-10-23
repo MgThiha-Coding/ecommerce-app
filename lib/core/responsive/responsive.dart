@@ -26,9 +26,9 @@ class Responsive {
 
   // Text sizes
   double get heading => value(mobile: 18, tablet: 22, desktop: 26);
-  double get subHeading => value(mobile: 14, tablet: 16, desktop: 18);
-  double get body => value(mobile: 12, tablet: 14, desktop: 16);
-  double get caption => value(mobile: 10, tablet: 12, desktop: 14);
+  double get subHeading => value(mobile: 14, tablet: 14, desktop: 18);
+  double get body => value(mobile: 12, tablet: 12, desktop: 16);
+  double get caption => value(mobile: 10, tablet: 10, desktop: 14);
 
   // Padding/margin
   double get paddingSmall => value(mobile: 8, tablet: 12, desktop: 16);
@@ -40,10 +40,22 @@ class Responsive {
   double get iconMedium => value(mobile: 24, tablet: 28, desktop: 32);
   double get iconLarge => value(mobile: 32, tablet: 36, desktop: 40);
 
+  // get started button onboarding page
+  double get buttonHeight => value(mobile: 30, tablet: 28, desktop: 30);
+  double get buttonWidth => value(mobile: 120, tablet: 100, desktop: 30);
+
+  // nav label
+  double get navLabel => value(mobile: 10, tablet: 10, desktop: 14);
+   double get navIcon => value(mobile: 10, tablet: 18, desktop: 30);
+
+  // AuthPage
+  double get authButtonHeight => value(mobile: 40, tablet: 40, desktop: 30);
+
+
   double get authHorizontalPadding {
     if (screenWidth >= 1400) return 600;
     if (screenWidth >= 1024) return 100;
-    if (screenWidth >= 768) return 50;
+    if (screenWidth >= 768) return 100;
     return 15;
   }
 }

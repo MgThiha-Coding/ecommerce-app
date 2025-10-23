@@ -123,7 +123,7 @@ class LoginNotifier extends BaseAuthNotifier<LoginResponse> {
   @override
   Future<LoginResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      '${AppConfig.baseUrl}/api/v1/central/login',
+      '${AppConfig.baseUrl}/v1/central/login',
       data: data,
       options: Options(
         headers: {

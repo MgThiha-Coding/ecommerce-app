@@ -148,7 +148,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  Responsive(context).isMobile?
+                  const SizedBox(height: 30):const SizedBox(height: 15,),
 
                   // Email Field
                   Align(
@@ -200,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                   // Login Button
                   SizedBox(
-                    height: 50,
+                    height: Responsive(context).authButtonHeight,
                     width: double.infinity,
                     child: AppButton(
                       title: "Sign In",
@@ -240,7 +241,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
+
+                  Responsive(context).isMobile
+                      ? const SizedBox(height: 40)
+                      : const SizedBox(height: 20),
+
                   Text(
                     '© 2025 Pico SBS',
                     style: TextStyle(

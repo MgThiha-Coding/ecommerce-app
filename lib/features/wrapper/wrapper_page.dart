@@ -42,7 +42,7 @@ class _WrapperPageState extends State<WrapperPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
 
-    if (responsive.isMobile || responsive.isTablet) {
+    if (responsive.isMobile) {
       return Scaffold(
         body: PageTransitionSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -129,26 +129,41 @@ class _WrapperPageState extends State<WrapperPage> {
               selectedIndex: _currentIndex,
               onDestinationSelected: _onTabTapped,
               labelType: NavigationRailLabelType.all,
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                  icon: Icon(LineIcons.home),
-                  label: Text('Home'),
+                  icon: Icon(LineIcons.home, size: responsive.navIcon),
+                  label: Text(
+                    'Home',
+                    style: TextStyle(fontSize: responsive.navLabel),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(LineIcons.box),
-                  label: Text('Products'),
+                  icon: Icon(LineIcons.box, size: responsive.navIcon),
+                  label: Text(
+                    'Products',
+                    style: TextStyle(fontSize: responsive.navLabel),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(LineIcons.search),
-                  label: Text('Search'),
+                  icon: Icon(LineIcons.search, size: responsive.navIcon),
+                  label: Text(
+                    'Search',
+                    style: TextStyle(fontSize: responsive.navLabel),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(LineIcons.shoppingCart),
-                  label: Text('Cart'),
+                  icon: Icon(LineIcons.shoppingCart, size: responsive.navIcon),
+                  label: Text(
+                    'Cart',
+                    style: TextStyle(fontSize: responsive.navLabel),
+                  ),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(LineIcons.user),
-                  label: Text('Profile'),
+                  icon: Icon(LineIcons.user, size: responsive.navIcon),
+                  label: Text(
+                    'Profile',
+                    style: TextStyle(fontSize: responsive.navLabel),
+                  ),
                 ),
               ],
             ),

@@ -120,11 +120,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: products.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: fontSize.isTablet
-                        ? 3
-                        : fontSize.isDesktop
-                        ? 5
-                        : 2,
+                    crossAxisCount: Responsive(context).isMobile? 3 : 4 ,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
                     childAspectRatio: fontSize.isMobile ? 1 / 1.6 : 1 / 1.4,
@@ -185,7 +181,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                     product.name ?? '',
                                     style: GoogleFonts.poppins(
                                       fontSize: fontSize.body,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: Responsive(context).isMobile? FontWeight.w600:FontWeight.w400,
                                       color: AppColors.textPrimary,
                                     ),
                                     maxLines: 1,
@@ -212,6 +208,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                   ),
                                   SizedBox(height: fontSize.isMobile ? 6 : 10),
                                   SizedBox(
+                                    height: Responsive(context).isMobile? 25 : 30,
                                     width: double.infinity,
                                     child: ElevatedButton(
                                       onPressed: () {

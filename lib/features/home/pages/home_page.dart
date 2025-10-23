@@ -105,7 +105,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
-   // final fontSize = Responsive(context);
+    // final fontSize = Responsive(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -125,36 +125,40 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: Image.asset(AppImage.appLogo, fit: BoxFit.cover),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${LocaleKeys.welcome.tr()} ',
+                              style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: Responsive(context).body,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.waving_hand,
+                              color: AppColors.primary,
+                              size: 16,
+                            ),
+                          ],
+                        ),
                         Text(
-                          '${LocaleKeys.welcome.tr()} ',
+                          ref.watch(userProvider)?.name ?? "Guest",
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: "Poppins",
-                            fontSize: Responsive(context).body,
-                            color: AppColors.textSecondary,
+                            fontSize: Responsive(context).subHeading,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const Icon(
-                          Icons.waving_hand,
-                          color: AppColors.primary,
-                          size: 16,
-                        ),
                       ],
-                    ),
-                    Text(
-                      ref.watch(userProvider)?.name ?? "Guest",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: Responsive(context).subHeading,
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ],
                 ),
@@ -162,77 +166,19 @@ class _HomePageState extends ConsumerState<HomePage> {
             );
           },
         ),
-        actions: [ 
-          IconButton(onPressed: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> const CurrentLocationPage()));
-          }, icon: const Icon(LineIcons.mapMarker,color: AppColors.primary,))
-        ],
-       /*
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Consumer(
-              builder: (context, ref, _) {
-                final cartCount = ref
-                    .watch(cartNotifierProvider)
-                    .maybeWhen(data: (items) => items.length, orElse: () => 0);
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CartPage(),
-                          ),
-                        );
-                      },
-                      icon: Icon(
-                        LineIcons.shoppingCart,
-                        color: AppColors.primary,
-                        size: fontSize.value(
-                          mobile: 24,
-                          tablet: 25,
-                          desktop: 25,
-                        ),
-                      ),
-                    ),
-                    if (cartCount > 0)
-                      Positioned(
-                        right: 3,
-                        top: 1,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 3,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade600,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 13,
-                            minHeight: 10,
-                          ),
-                          child: Text(
-                            '$cartCount',
-                            style: GoogleFonts.poppins(
-                              fontSize: 7,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CurrentLocationPage(),
+                ),
+              );
+            },
+            icon: const Icon(LineIcons.mapMarker, color: AppColors.primary),
           ),
         ],
-        */
       ),
 
       body: SafeArea(
@@ -240,12 +186,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           backgroundColor: Colors.white,
           onRefresh: _resetAll,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: Responsive(context).isMobile? const EdgeInsets.all(8.0):const EdgeInsets.all(16),
             child: ListView(
               controller: _scrollController,
               children: [
                 // SearchBar
-                const SearchBar(),
+                Responsive(context).isMobile
+                    ? const SearchBar()
+                    : const SizedBox(height: 55, child: SearchBar()),
 
                 // Brand Preview Section Header & BrandList
                 SectionHeader(LocaleKeys.brand.tr(), () {
@@ -263,7 +211,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ? _buildEmptyState(
                             'Brand list is currently unavailable.',
                           )
-                        : brandPreview(context, brandList.take(5).toList()),
+                        : brandPreview(context, brandList.take(16).toList()),
                     loading: () => _buildShimmer(height: 80),
                     error: (error, _) => _buildEmptyState(error.toString()),
                   ),
@@ -287,7 +235,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           )
                         : categoryPreview(
                             context,
-                            categoryList.take(5).toList(),
+                            categoryList.take(16).toList(),
                           ),
                     loading: () => _buildShimmer(height: 110),
                     error: (error, _) => _buildEmptyState(error.toString()),
@@ -321,7 +269,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ? _buildEmptyState(
                             'Product list is currently unavailable.',
                           )
-                        : productPreview(context, productList.take(5).toList()),
+                        : productPreview(context, productList.take(18).toList()),
                     loading: () => _buildShimmer(height: 180),
                     error: (error, _) => _buildEmptyState(error.toString()),
                   ),

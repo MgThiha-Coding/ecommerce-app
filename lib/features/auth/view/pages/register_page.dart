@@ -140,13 +140,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo & Title
-                  
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(AppImage.appLogo, scale: 4),
                   ),
-                  
+
                   const SizedBox(height: 12),
+
                   Text(
                     'Create Your Account',
                     style: TextStyle(
@@ -156,15 +156,16 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
                   buildLabel('First Name'),
                   const SizedBox(height: 4),
                   AppTextField(
                     controller: _firstNameController,
                     hintText: "First Name",
-                    validator: (v) =>
-                        v == null || v.isEmpty ? "Please enter your first name" : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? "Please enter your first name"
+                        : null,
                   ),
 
                   const SizedBox(height: 4),
@@ -173,8 +174,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   AppTextField(
                     controller: _lastNameController,
                     hintText: "Last Name",
-                    validator: (v) =>
-                        v == null || v.isEmpty ? "Pleae enter your last name" : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? "Pleae enter your last name"
+                        : null,
                   ),
 
                   const SizedBox(height: 4),
@@ -183,8 +185,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   AppTextField(
                     controller: _emailController,
                     hintText: "Email",
-                    validator: (v) =>
-                        v == null || v.isEmpty ? "Please enter your email" : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? "Please enter your email"
+                        : null,
                   ),
 
                   const SizedBox(height: 4),
@@ -195,8 +198,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   AppTextField(
                     controller: _phoneController,
                     hintText: "Phone",
-                    validator: (v) =>
-                        v == null || v.isEmpty ? "Please enter your phone" : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? "Please enter your phone"
+                        : null,
                   ),
 
                   const SizedBox(height: 4),
@@ -243,7 +247,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
                   // Register Button
                   SizedBox(
-                    height: 50,
+                    height: Responsive(context).authButtonHeight,
                     width: double.infinity,
                     child: AppButton(
                       title: "Sign Up",
@@ -281,7 +285,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
+
+                  Responsive(context).isMobile
+                      ? const SizedBox(height: 40)
+                      : const SizedBox(height: 20),
 
                   Text(
                     '© 2025 Pico SBS',

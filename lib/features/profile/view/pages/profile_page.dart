@@ -181,7 +181,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 padding: const EdgeInsets.all(12.0),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 45,
+                  height: Responsive(context).authButtonHeight,
                   child: AppButton(
                     title: "Sign Out",
                     onTap: () {
@@ -243,6 +243,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
