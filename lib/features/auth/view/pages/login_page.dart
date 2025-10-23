@@ -142,7 +142,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     'Welcome to Pico Mart',
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: fontSize.body,
+                      fontSize: fontSize.subHeading,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),

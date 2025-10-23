@@ -15,7 +15,7 @@ class CurrentLocationPage extends StatefulWidget {
 
 class _CurrentLocationPageState extends State<CurrentLocationPage> {
   final MapController _mapController = MapController();
-  LatLng _currentLocation = LatLng(0, 0);
+  LatLng _currentLocation = const LatLng(0, 0);
   bool _loading = true;
 
   int _selectedMapStyle = 0;

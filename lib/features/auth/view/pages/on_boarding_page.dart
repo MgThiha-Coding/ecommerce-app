@@ -20,7 +20,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   final List<Map<String, String>> _pages = [
     {
-      'title': 'လုပ်ငန်းတိုင်းအတွက် အသင့်တော်ဆုံး Pico SBS ကိုသုံး',
+      'title': '  လုပ်ငန်းတိုင်းအတွက် အသင့်တော်ဆုံး Pico SBS ကိုသုံး',
       'subtitle': 'One System for All Business.',
       'image': AppImage.appLogo,
     },
@@ -53,9 +53,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     await storage.setFirstLaunchFlag(false);
 
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginOrRegister()),
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoginOrRegister(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
     );
   }
 
@@ -78,7 +88,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(AppImage.appLogo, scale: 3),
+                        Image.asset(page['image']!, scale: 3),
                         const SizedBox(height: 24),
                         Text(
                           page['title']!,
@@ -86,8 +96,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 5,
                           style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                            fontSize: Responsive(context).subHeading,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -98,7 +108,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 5,
                           style: GoogleFonts.poppins(
-                            fontSize: 14,
+                            fontSize: Responsive(context).body,
                             fontWeight: FontWeight.w300,
                             color: AppColors.textSecondary,
                           ),
@@ -133,7 +143,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: SizedBox(
-                  width: 100,
+                  width: 130,
                   child: ElevatedButton(
                     onPressed: _nextPage,
                     style: ElevatedButton.styleFrom(

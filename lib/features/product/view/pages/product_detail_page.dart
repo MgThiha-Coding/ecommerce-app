@@ -28,6 +28,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       notifier.reset();
       notifier.getProductDetail(widget.productId);
     });
+    
   }
 
   // increase itemcount
@@ -58,6 +59,19 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     final fontSize = Responsive(context);
     // product details data provider
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
+    ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
+      final lastResponse = next.lastResponse;
+      if (lastResponse != null && lastResponse.success!) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(lastResponse.message ?? "Added to cart"),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        });
+      }
+    });
 
     return Scaffold(
       // app primary background
@@ -278,6 +292,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               ],
                             ),
                           ),
+
                           Expanded(
                             child: AppButton(
                               title: "Add To Cart",
@@ -314,6 +329,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 12),
                     ],
                   ),

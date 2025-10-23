@@ -38,12 +38,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (data != null) {
             final storage = ref.read(secureStorageProvider);
             await storage.clear();
+            await context.setLocale(const Locale('en'));
 
             if (!mounted) return;
-            Navigator.pushReplacement(
-              // ignore: use_build_context_synchronously
+            Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const LoginOrRegister()),
+              (route) => false,
             );
           }
         },

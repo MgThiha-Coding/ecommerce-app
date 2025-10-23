@@ -96,10 +96,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
             storage.isLoggedIn();
             AppConfig.updateAccessToken(accessToken);
 
-            Navigator.pushReplacement(
-              // ignore: use_build_context_synchronously
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const WrapperPage()),
+              MaterialPageRoute(builder: (_) => const WrapperPage()),
+              (route) => false,
             );
           }
         },
@@ -131,7 +131,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset(AppImage.appLogo, scale: 14),
-    
+
               const SizedBox(height: 30),
               Text(
                 'OTP Verification',
@@ -182,7 +182,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   inactiveColor: Colors.grey[400],
                 ),
               ),
-    
+
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
@@ -203,9 +203,9 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   ),
                 ),
               ),
-    
+
               const SizedBox(height: 16),
-    
+
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -217,9 +217,9 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   isLoading: verifyAsync.isLoading ? true : false,
                 ),
               ),
-    
+
               const SizedBox(height: 20),
-    
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

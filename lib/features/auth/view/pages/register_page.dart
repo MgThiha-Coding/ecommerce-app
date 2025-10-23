@@ -151,7 +151,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     'Create Your Account',
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: fontSize.body,
+                      fontSize: fontSize.subHeading,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),

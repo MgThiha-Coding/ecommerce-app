@@ -13,12 +13,21 @@ import 'package:picoshop_theme2/features/auth/model/response/register_response.d
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 import 'package:picoshop_theme2/features/auth/model/response/log_out_response.dart';
 
+// Refersh Token
 abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
   final Dio _dio;
   final SecureStorage _storage;
 
   BaseAuthNotifier(this._storage, [Dio? dio])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+          ),
       super(const AsyncValue.data(null));
 
   Future<T?> request(Map<String, dynamic> data);
@@ -26,6 +35,7 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
   Future<void> call(Map<String, dynamic> data) async {
     state = const AsyncValue.loading();
     try {
+      // first request
       final response = await request(data);
       if (response != null) {
         state = AsyncValue.data(response);
@@ -33,9 +43,12 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
         state = AsyncValue.error('Request failed', StackTrace.current);
       }
     } on DioException catch (e, st) {
+      // if status code 401 : access token invalid , refersh token by adding stored access token in authdata
       if (e.response?.statusCode == 401) {
+        // refresh token
         final refreshed = await _refreshAndRetry(data);
         if (refreshed != null) {
+          // and emit result to state
           state = AsyncValue.data(refreshed);
           return;
         }
@@ -46,8 +59,10 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.unknown) {
+        // dio exception error
         state = AsyncValue.error('Check internet connection', st);
       } else {
+        // error message from api response
         state = AsyncValue.error(
           e.response?.data?['message'] ?? 'Unexpected error',
           st,
@@ -56,22 +71,27 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
     }
   }
 
+  // refresh token
   Future<T?> _refreshAndRetry(Map<String, dynamic> data) async {
+    // get saved refersh token from secureStorage
     final refreshToken = await _storage.getRefreshToken();
+    // if token is null , stop here
     if (refreshToken == null) return null;
 
     try {
+      // refresh token and receive new token
       final refreshRes = await _dio.post(
         '${AppConfig.baseUrl}/v1/refresh-token',
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         data: {"refresh_token": refreshToken},
       );
 
+      // received new tokens and data
       final accessToken = refreshRes.data['data']['accessToken'];
       final newRefreshToken = refreshRes.data['data']['refreshToken'];
       final userId = refreshRes.data['data']['user']['id'].toString();
 
-      // Save new tokens
+      // and update the securestorage
       AppConfig.updateAccessToken(accessToken);
       await _storage.saveAuthData(
         accessToken: accessToken,
@@ -79,6 +99,7 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
         userId: userId,
       );
 
+      // return value
       return await request(data);
     } catch (_) {
       return null;
@@ -86,7 +107,7 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
   }
 }
 
-/// LOGIN
+// Login State
 class LoginNotifier extends BaseAuthNotifier<LoginResponse> {
   LoginNotifier(SecureStorage storage, [Dio? dio]) : super(storage, dio);
 
@@ -102,7 +123,7 @@ class LoginNotifier extends BaseAuthNotifier<LoginResponse> {
   @override
   Future<LoginResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/central/login',
+      '${AppConfig.baseUrl}/api/v1/central/login',
       data: data,
       options: Options(
         headers: {
@@ -126,7 +147,7 @@ final loginNotifierProvider =
       (ref) => LoginNotifier(ref.read(secureStorageProvider)),
     );
 
-// REGISTER
+// Register State
 class RegisterNotifier extends BaseAuthNotifier<RegisterResponse> {
   RegisterNotifier(SecureStorage storage, [Dio? dio]) : super(storage, dio);
 
@@ -137,7 +158,7 @@ class RegisterNotifier extends BaseAuthNotifier<RegisterResponse> {
   @override
   Future<RegisterResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/register',
+      '${AppConfig.baseUrl}/api/v1/register',
       data: data,
       options: Options(
         headers: {
@@ -161,7 +182,7 @@ final registerNotifierProvider =
       (ref) => RegisterNotifier(ref.read(secureStorageProvider)),
     );
 
-// VERIFY CODE
+// Verify Code State
 class VerifyCodeNotifier extends BaseAuthNotifier<VerifyCodeResponse> {
   VerifyCodeNotifier(SecureStorage storage, [Dio? dio]) : super(storage, dio);
 
@@ -172,7 +193,7 @@ class VerifyCodeNotifier extends BaseAuthNotifier<VerifyCodeResponse> {
   @override
   Future<VerifyCodeResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/verify',
+      '${AppConfig.baseUrl}/api/v1/verify',
       data: data,
       options: Options(
         headers: {
@@ -191,6 +212,7 @@ class VerifyCodeNotifier extends BaseAuthNotifier<VerifyCodeResponse> {
     return null;
   }
 
+  // Resent Verify Code
   Future<void> resentVerifyCode(String emailOrPhone) async {
     await call({"email_or_phone": emailOrPhone});
   }
@@ -201,17 +223,18 @@ final verifyCodeNotifierProvider =
       (ref) => VerifyCodeNotifier(ref.read(secureStorageProvider)),
     );
 
+// Logout State
 class LogOutNotifier extends BaseAuthNotifier<LogOutResponse> {
   LogOutNotifier(SecureStorage storage, [Dio? dio]) : super(storage, dio);
 
   Future<void> logOut() async {
-    await call({}); // Keep method name unchanged
+    await call({});
   }
 
   @override
   Future<LogOutResponse?> request(Map<String, dynamic> data) async {
     final response = await _dio.post(
-      'https://beta.picosbs.com/api/v1/logout',
+      '${AppConfig.baseUrl}/api/v1/logout',
       options: Options(
         headers: {
           'Accept': 'application/json',
@@ -235,7 +258,7 @@ final logOutNotifierProvider =
       (ref) => LogOutNotifier(ref.read(secureStorageProvider)),
     );
 
-// GET DEVICE NAME
+// Get Device Name
 Future<String?> getDeviceName() async {
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 

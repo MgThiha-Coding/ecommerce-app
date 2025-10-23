@@ -70,7 +70,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
         filterIds = brands.map((b) => b.id).toList();
         if (filterIds.isEmpty) {
           _isNoMore = true;
-          state = AsyncValue.data([]);
+          state = const AsyncValue.data([]);
           return;
         }
       } else if (_filterType == 'category') {
@@ -83,7 +83,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
         filterIds = categories.map((c) => c.id).toList();
         if (filterIds.isEmpty) {
           _isNoMore = true;
-          state = AsyncValue.data([]);
+          state = const AsyncValue.data([]);
           return;
         }
       }

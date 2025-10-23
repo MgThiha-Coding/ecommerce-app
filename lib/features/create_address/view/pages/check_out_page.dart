@@ -643,7 +643,7 @@ Widget _buildCardShimmer({
         trailing: Container(
           width: 16,
           height: 16,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
           ),

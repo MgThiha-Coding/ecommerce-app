@@ -403,7 +403,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 items: const [
                   DropdownMenuItem(value: 'pickup', child: Text('Pickup')),
                   DropdownMenuItem(value: 'delivery', child: Text('Delivery')),
@@ -460,7 +460,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.map, color: AppColors.primary),
+                        const Icon(Icons.map, color: AppColors.primary),
                         const SizedBox(width: 10),
                         Text(
                           'Location on Map',

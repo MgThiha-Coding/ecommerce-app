@@ -47,9 +47,9 @@ void main() async {
       ],
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
-      fallbackLocale: const Locale('en'),
+      fallbackLocale: const Locale('my'),
       saveLocale: true,
-      startLocale: const Locale('my'),
+      startLocale: const Locale('en'),
       child: const ProviderScope(child: MyApp()),
     ),
   );
