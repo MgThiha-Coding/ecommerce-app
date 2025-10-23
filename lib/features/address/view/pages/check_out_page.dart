@@ -6,17 +6,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/create_address/model/response/address_response.dart';
-import 'package:picoshop_theme2/features/create_address/view/pages/address_list_page.dart';
-import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
-import 'package:picoshop_theme2/features/create_address/view/pages/shipping_method_list_page.dart';
-import 'package:picoshop_theme2/features/create_order/model/request/create_order_request.dart';
-import 'package:picoshop_theme2/features/create_order/model/response/create_order_response.dart';
-import 'package:picoshop_theme2/features/create_order/viewmodel/create_order_notifier.dart';
+import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
+import 'package:picoshop_theme2/features/address/view/pages/create_address_page.dart';
+import 'package:picoshop_theme2/features/address/view/pages/shipping_method_list_page.dart';
+import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
+import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
+import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.dart';
 import 'package:picoshop_theme2/features/payment/model/response/payment_method_response.dart';
 import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
-import 'package:picoshop_theme2/features/createorder/create_order.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -53,7 +52,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final cartItemsAsync = ref.watch(cartNotifierProvider);
-    final orderState = ref.watch(orderNotifierProvider);
+    final orderState = ref.watch(createOrderNotifierProvider);
 
     ref.listen<AsyncValue<CreateOrderResponse?>>(createOrderNotifierProvider, (
       previous,

@@ -252,9 +252,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/create_address/model/request/create_address_request.dart';
-import 'package:picoshop_theme2/features/create_address/model/response/create_addresss_response.dart';
-import 'package:picoshop_theme2/features/create_address/viewmodel/create_address_notifier.dart';
+import 'package:picoshop_theme2/features/address/model/request/create_address_request.dart';
+import 'package:picoshop_theme2/features/address/model/response/create_addresss_response.dart';
+import 'package:picoshop_theme2/features/address/viewmodel/create_address_notifier.dart';
 import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
 import 'package:picoshop_theme2/shared/app_text_field.dart';
 import 'package:latlong2/latlong.dart';
@@ -328,6 +328,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
         });
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Address detection failed: ${e.toString()}')),
       );

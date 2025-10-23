@@ -61,6 +61,7 @@ class LocationNotifier extends StateNotifier<AsyncValue<UserLocation?>> {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
+        // ignore: deprecated_member_use
         desiredAccuracy: LocationAccuracy.high,
       );
 

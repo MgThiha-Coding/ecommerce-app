@@ -48,27 +48,32 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         await Future.delayed(const Duration(seconds: 2));
 
         if (isLoggedIn) {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const WrapperPage()),
+            (route) => false,
           );
         } else {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const OnboardingPage()),
+            (route) => false,
           );
         }
       } else {
         // First launch: set flag and go to onboarding
         await storage.setFirstLaunchFlag(false);
         if (!mounted) return;
-        await Future.delayed(const Duration(seconds: 2));
-        
-        Navigator.pushReplacement(
+        await Future.delayed(const Duration(microseconds: 1000));
+
+        Navigator.pushAndRemoveUntil(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const OnboardingPage()),
+          (route) => false,
         );
-        
       }
     });
   }

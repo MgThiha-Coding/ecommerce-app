@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/create_order/model/request/create_order_request.dart';
-import 'package:picoshop_theme2/features/create_order/model/response/create_order_response.dart';
+import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
+import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
 
 class CreateOrderNotifier
     extends StateNotifier<AsyncValue<CreateOrderResponse?>> {

@@ -97,6 +97,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
             AppConfig.updateAccessToken(accessToken);
 
             Navigator.pushAndRemoveUntil(
+              // ignore: use_build_context_synchronously
               context,
               MaterialPageRoute(builder: (_) => const WrapperPage()),
               (route) => false,

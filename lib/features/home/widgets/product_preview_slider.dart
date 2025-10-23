@@ -52,7 +52,7 @@ class _BrandPreviewSliderState extends ConsumerState<BrandPreviewSlider> {
               CarouselSlider.builder(
                 itemCount: displayList.length,
                 itemBuilder: (context, index, realIndex) {
-                  final name = displayList[index].name ?? "Unnamed Brand";
+                  final name = displayList[index].name;
                   final description =
                       displayList[index].description ??
                       "No description available";

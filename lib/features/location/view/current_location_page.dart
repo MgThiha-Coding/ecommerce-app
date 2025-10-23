@@ -69,6 +69,7 @@ class _CurrentLocationPageState extends State<CurrentLocationPage> {
       }
 
       Position position = await Geolocator.getCurrentPosition(
+        // ignore: deprecated_member_use
         desiredAccuracy: LocationAccuracy.high,
       );
 
@@ -169,6 +170,7 @@ class _CurrentLocationPageState extends State<CurrentLocationPage> {
             onPressed: () async {
               try {
                 Position position = await Geolocator.getCurrentPosition(
+                  // ignore: deprecated_member_use
                   desiredAccuracy: LocationAccuracy.high,
                 );
                 LatLng newLocation = LatLng(
@@ -243,6 +245,7 @@ Widget _buildMapShimmerLoading() {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.grey.withOpacity(0.2),
                     blurRadius: 10,
                     spreadRadius: 2,
