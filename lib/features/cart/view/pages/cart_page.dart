@@ -27,11 +27,13 @@ class _CartPageState extends ConsumerState<CartPage> {
     );
   }
 
+  /*
   @override
   void didPopNext() {
     ref.read(cartNotifierProvider.notifier).fetchCart();
     ref.invalidate(totalCartNotifierProvider);
   }
+  */
 
   Future<void> _onRefresh() async {
     await ref.read(cartNotifierProvider.notifier).fetchCart();

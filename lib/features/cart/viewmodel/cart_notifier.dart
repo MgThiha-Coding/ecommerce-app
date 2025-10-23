@@ -10,7 +10,13 @@ import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
 
 mixin RefreshTokenMixin {
-  final Dio _refreshDio = Dio();
+  final Dio _refreshDio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+    ),
+  );
   final SecureStorage _storage = SecureStorage();
 
   Future<Response<dynamic>?> refreshAndRetry(
@@ -48,7 +54,15 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
   bool _isLoading = false;
 
   CartNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+          ),
       super(const AsyncValue.loading());
 
   // fetch cart
@@ -142,7 +156,13 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
   bool _isLoading = false;
 
   TotalCartNotifier(this._localCache)
-    : _dio = Dio(),
+    : _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      ),
       super(const AsyncValue.loading()) {
     _init();
   }
@@ -273,7 +293,15 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
   final Ref _ref;
 
   AddToCartNotifier(this._ref, [Dio? dio])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+          ),
       super(AddToCartState(itemLoading: {}, itemError: {}, lastResponse: null));
 
   Future<void> addToCart(AddToCartRequest params) async {
@@ -392,7 +420,15 @@ class RemoveCartItemNotifier extends StateNotifier<CartState>
   final Ref? _ref;
 
   RemoveCartItemNotifier([Dio? dio, Ref? ref])
-    : _dio = dio ?? Dio(),
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+          ),
       _ref = ref,
       super(CartState(itemLoading: {}, itemError: {}));
 
