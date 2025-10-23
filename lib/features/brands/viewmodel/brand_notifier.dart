@@ -8,22 +8,33 @@ import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
-class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
+// Brand List State ( Online and offline hybrid )
+class BrandListNotifier
+    extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
+  // Local Hive Model ( offline )
   final Box<BrandHiveModel> _localCache;
   final Dio _dio;
+  // Brand Data Model ( online )
   final List<BrandDataModel> _onlineBrands = [];
   int _currentPage = 1;
   bool _isNoMore = false;
   bool _isLoading = false;
 
   BrandListNotifier(this._localCache)
-      : _dio = Dio(),
-        super(const AsyncValue.loading()) {
+    : _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      ),
+      super(const AsyncValue.loading()) {
     _init();
   }
 
   bool get isNoMore => _isNoMore;
 
+  // emit local data from localCache
   Future<void> _init() async {
     final cached = _localCache.values.map((e) => e.toDataModel()).toList();
     if (cached.isNotEmpty) {
@@ -33,6 +44,7 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
     }
   }
 
+  // reset the pagination
   Future<void> reset() async {
     _onlineBrands.clear();
     _currentPage = 1;
@@ -40,27 +52,30 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
     await getNextPage();
   }
 
+  // fetch brand list
   Future<void> getNextPage() async {
     if (_isNoMore || _isLoading) return;
     _isLoading = true;
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/brands',
+        '${AppConfig.baseUrl}/api/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'X-API-Token':
-                AppConfig.xApiToken,
+            'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
 
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
+
+      // error state
       if (!isSuccess) {
         final message =
-            response.data['message'] ?? "Something went wrong\nPlease try again";
+            response.data['message'] ??
+            "Something went wrong\nPlease try again";
         state = AsyncValue.error(message, StackTrace.current);
         return;
       }
@@ -72,9 +87,9 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
         _isNoMore = true;
       } else {
         _onlineBrands.addAll(brands);
-        
-        for (var brand in brands.take(20)) {
-          if (_localCache.length >= 6) {
+        // save 16 items to local ( purpose for UI consistentcy )
+        for (var brand in brands.take(16)) {
+          if (_localCache.length >= 16) {
             _localCache.delete(_localCache.keys.first);
           }
           _localCache.put(brand.id, BrandHiveModel.fromDataModel(brand));
@@ -86,6 +101,7 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
       // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
+      // devide by connectivty
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineBrands));
       } else {
@@ -101,7 +117,7 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
         if (e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.unknown) {
-          state = AsyncValue.error('Check Internet', st);
+          state = AsyncValue.error('Check your connection”', st);
         } else {
           state = AsyncValue.error(e.response?.data['message'], st);
         }
@@ -113,22 +129,33 @@ class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> 
 }
 
 final brandListNotifierProvider =
-    StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel>>>(
-        (ref) {
-  final offlineBrands = Hive.box<BrandHiveModel>('brands');
-  return BrandListNotifier(offlineBrands);
-});
+    StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel>>>((
+      ref,
+    ) {
+      final offlineBrands = Hive.box<BrandHiveModel>('brands');
+      return BrandListNotifier(offlineBrands);
+    });
 
-class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
+// Brand Detail State ( online only )
+class BrandDetailNotifier
+    extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
   final Dio _dio;
   BrandDetailNotifier([Dio? dio])
-      : _dio = dio ?? Dio(),
-        super(const AsyncValue.data(null));
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+          ),
+      super(const AsyncValue.data(null));
 
   Future<void> getBrandDetail(int id) async {
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/v1/ecommerce/brands/details/$id',
+        '${AppConfig.baseUrl}/ecommerce/brands/details/$id',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -147,7 +174,7 @@ class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+        state = AsyncValue.error('Check your connection”', st);
       } else {
         state = AsyncValue.error(e.response?.data['message'], st);
       }
@@ -156,5 +183,7 @@ class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>
 }
 
 final brandDetailNotifierProvider =
-    StateNotifierProvider<BrandDetailNotifier, AsyncValue<BrandDetailResponse?>>(
-        (ref) => BrandDetailNotifier());
+    StateNotifierProvider<
+      BrandDetailNotifier,
+      AsyncValue<BrandDetailResponse?>
+    >((ref) => BrandDetailNotifier());
