@@ -41,8 +41,8 @@ class Responsive {
   double get iconLarge => value(mobile: 32, tablet: 36, desktop: 40);
 
   // get started button onboarding page
-  double get buttonHeight => value(mobile: 30, tablet: 28, desktop: 30);
-  double get buttonWidth => value(mobile: 120, tablet: 100, desktop: 30);
+  double get buttonHeight => value(mobile: 33, tablet: 28, desktop: 30);
+  double get buttonWidth => value(mobile: 130, tablet: 100, desktop: 30);
 
   // nav label
   double get navLabel => value(mobile: 10, tablet: 10, desktop: 14);

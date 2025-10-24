@@ -120,7 +120,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: products.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Responsive(context).isMobile? 3 : 4 ,
+                    crossAxisCount: Responsive(context).isMobile? 2 : 4 ,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
                     childAspectRatio: fontSize.isMobile ? 1 / 1.6 : 1 / 1.4,
@@ -208,7 +208,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                   ),
                                   SizedBox(height: fontSize.isMobile ? 6 : 10),
                                   SizedBox(
-                                    height: Responsive(context).isMobile? 25 : 30,
+                                    height: Responsive(context).isMobile? 35 : 30,
                                     width: double.infinity,
                                     child: ElevatedButton(
                                       onPressed: () {

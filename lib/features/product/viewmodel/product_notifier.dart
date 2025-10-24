@@ -164,7 +164,7 @@ class ProductDetailNotifier
 }
 
 final productDetailNotifierProvider =
-  StateNotifierProvider.autoDispose<
-    ProductDetailNotifier,
-    AsyncValue<ProductDetailResponse?>
-  >((ref) => ProductDetailNotifier());
+    StateNotifierProvider.autoDispose<
+      ProductDetailNotifier,
+      AsyncValue<ProductDetailResponse?>
+    >((ref) => ProductDetailNotifier());

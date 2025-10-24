@@ -19,62 +19,61 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ULTRA FAST: Initialize only what's CRITICAL for first paint
   await EasyLocalization.ensureInitialized();
 
+  // Set orientation synchronously
   final bool isTablet =
       // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
-  await SystemChrome.setPreferredOrientations(
-    isTablet
-        ? DeviceOrientation.values
-        : [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  SystemChrome.setPreferredOrientations(
+    isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
 
+  // Initialize Hive & open CRITICAL boxes only
+  await Hive.initFlutter();
+  _registerHiveAdapters();
+  await _openCriticalBoxes(); // Only boxes needed immediately
+
+  // Start app IMMEDIATELY - don't wait for non-critical stuff
   runApp(
     EasyLocalization(
-      supportedLocales: const [
-        Locale('en'),
-        Locale('es'),
-        Locale('fr'),
-        Locale('ar'),
-        Locale('ja'),
-        Locale('de'),
-        Locale('nl'),
-        Locale('th'),
-        Locale('my'),
-        Locale('zh'),
-      ],
+      supportedLocales: const [Locale('en'), Locale('my')],
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
-      fallbackLocale: const Locale('my'),
-      saveLocale: true,
-      startLocale: const Locale('en'),
+      fallbackLocale: const Locale('en'),
       child: const ProviderScope(child: MyApp()),
     ),
   );
 
-  _initializeApp();
+  // Initialize non-critical boxes in background
+  unawaited(_initializeNonCriticalInBackground());
 }
 
-Future<void> _initializeApp() async {
+Future<void> _openCriticalBoxes() async {
+  // Only open boxes that are needed IMMEDIATELY on app start
+  await Future.wait([
+    _openBoxSafe<CartItemHiveModel>('cart'), // If cart needed for badge, etc.
+  ]);
+}
+
+Future<void> _initializeNonCriticalInBackground() async {
   try {
-    await Future.wait([dotenv.load(fileName: '.env'), Hive.initFlutter()]);
+    // Load env file in background
+    await dotenv.load(fileName: '.env');
 
-    _registerHiveAdapters();
-
-    await Future.wait([_openBoxSafe<CartItemHiveModel>('cart')]);
-
+    // Load access token in background
     await AppConfig.loadAccessToken();
 
-    unawaited(
-      Future.wait([
-        _openBoxSafe<ProductHiveModel>('products'),
-        _openBoxSafe<BrandHiveModel>('brands'),
-        _openBoxSafe<CategoryHiveModel>('category'),
-      ]),
-    );
-  } catch (e, st) {
-    debugPrint('Startup error: $e\n$st');
+    // Open non-critical boxes that can load lazily
+    await Future.wait([
+      _openBoxSafe<ProductHiveModel>('products'),
+      _openBoxSafe<BrandHiveModel>('brands'),
+      _openBoxSafe<CategoryHiveModel>('category'),
+    ]);
+  } catch (e) {
+    debugPrint('Background init error: $e');
   }
 }
 
@@ -89,40 +88,35 @@ Future<void> _openBoxSafe<T>(String boxName) async {
   try {
     await Hive.openBox<T>(boxName);
   } catch (e) {
-    debugPrint('Failed to open box "$boxName": $e');
+    debugPrint('Box $boxName error: $e');
+    // Recover from corruption
+    try {
+      await Hive.deleteBoxFromDisk(boxName);
+      await Hive.openBox<T>(boxName);
+    } catch (e2) {
+      debugPrint('Failed to recover box $boxName: $e2');
+    }
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-      home: const SplashPage(),
-    );
-  }
-}
 
-class ErrorApp extends StatelessWidget {
-  const ErrorApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text(
-            'Something went wrong. Please restart the app.',
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-        ),
+      // CRITICAL: White background to prevent black flash
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+        primaryColor: Colors.white,
       ),
+
+      home: const SplashPage(),
     );
   }
 }

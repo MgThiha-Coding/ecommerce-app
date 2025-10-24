@@ -71,7 +71,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
     _isLoading = true;
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/ecommerce/cart',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -99,7 +99,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
       if (e.response?.statusCode == 401) {
         final refreshed = await refreshAndRetry((token) async {
           return await _dio.get(
-            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            '${AppConfig.baseUrl}/ecommerce/cart',
             options: Options(
               headers: {
                 'Accept': 'application/json',
@@ -312,7 +312,7 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
     );
     try {
       final response = await _dio.post(
-        '${AppConfig.baseUrl}/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/ecommerce/cart',
         data: {
           "product_id": params.productId,
           "purchase_qty": params.purchaseQty,
@@ -344,7 +344,7 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
       if (e.response?.statusCode == 401) {
         final refreshed = await refreshAndRetry((token) async {
           return await _dio.post(
-            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            '${AppConfig.baseUrl}/ecommerce/cart',
             data: {
               "product_id": params.productId,
               "purchase_qty": params.purchaseQty,
@@ -439,7 +439,7 @@ class RemoveCartItemNotifier extends StateNotifier<CartState>
     );
     try {
       final response = await _dio.delete(
-        '${AppConfig.baseUrl}/api/ecommerce/cart',
+        '${AppConfig.baseUrl}/ecommerce/cart',
         queryParameters: {'cart_item_id': id},
         options: Options(
           headers: {
@@ -469,7 +469,7 @@ class RemoveCartItemNotifier extends StateNotifier<CartState>
       if (e.response?.statusCode == 401) {
         final refreshed = await refreshAndRetry((token) async {
           return await _dio.delete(
-            '${AppConfig.baseUrl}/api/ecommerce/cart',
+            '${AppConfig.baseUrl}/ecommerce/cart',
             queryParameters: {'cart_item_id': id},
             options: Options(
               headers: {
