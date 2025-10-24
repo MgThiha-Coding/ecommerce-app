@@ -17,6 +17,8 @@ class AppColors {
 
   // app main background color and card color
   static const Color background = Colors.white;
+  // static const Color background = Color(0xFFFFF9E5); // Pale yellowish-white
+
   static const Color card = Colors.white;
 
   // search bar fill color

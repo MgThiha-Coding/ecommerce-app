@@ -186,7 +186,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           backgroundColor: Colors.white,
           onRefresh: _resetAll,
           child: Padding(
-            padding: Responsive(context).isMobile? const EdgeInsets.all(8.0):const EdgeInsets.all(16),
+            padding: Responsive(context).isMobile
+                ? const EdgeInsets.all(8.0)
+                : const EdgeInsets.all(16),
             child: ListView(
               controller: _scrollController,
               children: [
@@ -263,13 +265,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                 ),
                 SizedBox(
-                  height: 180,
+                  height: 200,
                   child: productListAsync.when(
                     data: (productList) => productList.isEmpty
                         ? _buildEmptyState(
                             'Product list is currently unavailable.',
                           )
-                        : productPreview(context, productList.take(18).toList()),
+                        : productPreview(
+                            context,
+                            productList.take(18).toList(),
+                          ),
                     loading: () => _buildShimmer(height: 180),
                     error: (error, _) => _buildEmptyState(error.toString()),
                   ),
