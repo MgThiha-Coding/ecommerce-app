@@ -5,9 +5,10 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
   final String? hintText;
+  final String? labelText;
   final bool addObscure;
   final String? Function(String?)? validator;
-  final void Function(String)? onChanged; 
+  final void Function(String)? onChanged;
   final TextInputType? keyboardType;
 
   const AppTextField({
@@ -18,6 +19,7 @@ class AppTextField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.keyboardType,
+    this.labelText,
   });
 
   @override
@@ -43,6 +45,11 @@ class _AppTextFormFieldState extends State<AppTextField> {
       onChanged: widget.onChanged,
       keyboardType: widget.keyboardType,
       decoration: InputDecoration(
+        labelText: widget.labelText,
+        labelStyle: TextStyle(
+          color: Colors.black,
+          fontSize: responsive.subHeading,
+        ),
         hintText: widget.hintText,
         hintStyle: TextStyle(
           color: Colors.black,

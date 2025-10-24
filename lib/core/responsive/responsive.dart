@@ -49,7 +49,7 @@ class Responsive {
    double get navIcon => value(mobile: 10, tablet: 18, desktop: 30);
 
   // AuthPage
-  double get authButtonHeight => value(mobile: 40, tablet: 40, desktop: 30);
+  double get authButtonHeight => value(mobile: 50, tablet: 40, desktop: 30);
 
 
   double get authHorizontalPadding {

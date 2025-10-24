@@ -23,7 +23,7 @@ class LocalTownshipNotifier
 
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}https://beta.picosbs.com/api/ecommerce/region/local/$regionId/township',
+        '${AppConfig.baseUrl}/ecommerce/region/local/$regionId/township',
 
         options: Options(
           headers: {

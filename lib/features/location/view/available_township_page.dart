@@ -58,8 +58,13 @@ class _AvailableTownshipPageState extends ConsumerState<AvailableTownshipPage> {
               itemBuilder: (context, index) {
                 final townshipMmName = data[index].mmName;
                 final townshipEnName = data[index].enName;
+                final township = data[index];
                 return Card(
+                
                   child: ListTile(
+                    onTap: (){
+                      Navigator.pop(context,township);
+                    },
                     title: Text(townshipMmName),
                     subtitle: Text(townshipEnName),
                   ),
