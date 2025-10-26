@@ -359,7 +359,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               ),
               const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return SizedBox(
@@ -425,7 +425,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   },
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Flexible(

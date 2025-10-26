@@ -226,6 +226,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         );
       },
       child: Card(
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: const Icon(
@@ -262,6 +263,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         if (result != null) setState(() => _selectedAddress = result);
       },
       child: Card(
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: const Icon(
@@ -308,6 +310,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         if (result != null) setState(() => _selectedShipping = result);
       },
       child: Card(
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: const Icon(
@@ -348,6 +351,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         if (result != null) setState(() => _selectedPayment = result);
       },
       child: Card(
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
@@ -379,6 +383,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     return GestureDetector(
       onTap: _pickScreenshot,
       child: Card(
+        color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
           leading: const Icon(Icons.photo, color: AppColors.primary),
@@ -406,6 +411,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     double totalCost,
   ) {
     return Card(
+      color: AppColors.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
