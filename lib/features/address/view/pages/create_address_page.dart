@@ -54,7 +54,9 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
 
   void _submitAddress() {
     if (_formKey.currentState?.validate() ?? false) {
-      ref.read(createAddressNotifierProvider.notifier).createAddress(
+      ref
+          .read(createAddressNotifierProvider.notifier)
+          .createAddress(
             CreateAddressRequest(
               type: _selectedType,
               firstName: _firstNameController.text,
@@ -128,8 +130,9 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
           },
           loading: () {},
           error: (err, _) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(err.toString())));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(err.toString())));
           },
         );
       },
@@ -169,8 +172,10 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   hintText: 'Select Address Type',
                   filled: true,
                   fillColor: Colors.grey.shade100,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -197,16 +202,18 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 controller: _firstNameController,
                 labelText: 'First Name',
                 hintText: 'Enter your first name',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'First Name is required' : null,
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'First Name is required'
+                    : null,
               ),
               const SizedBox(height: 10),
               AppTextField(
                 controller: _lastNameController,
                 labelText: 'Last Name',
                 hintText: 'Enter your last name',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Last Name is required' : null,
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Last Name is required'
+                    : null,
               ),
               const SizedBox(height: 16),
 
@@ -219,7 +226,24 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 10),
+              AppTextField(
+                controller: _addressLine1Controller,
+                labelText: 'Street Address',
+                hintText: 'e.g., 123 Main St',
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Please enter your address'
+                    : null,
+              ),
+              const SizedBox(height: 10),
+              AppTextField(
+                controller: _addressLine2Controller,
+                labelText: 'Apartment, Floor, or Block',
+                hintText: 'Optional',
+              ),
+              const SizedBox(height: 10),
+              /*
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -321,6 +345,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   ],
                 ),
               ),
+              */
               const SizedBox(height: 16),
 
               // Location Details
@@ -333,48 +358,72 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              regionState.when(
-                data: (regions) {
-                  return DropdownButtonFormField<RegionItem>(
-                    value: _selectedRegion,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Select Region',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                    items: regions.map((region) {
-                      return DropdownMenuItem<RegionItem>(
-                        value: region,
-                        child: Text(region.enName ?? region.mmName ?? '-'),
-                      );
-                    }).toList(),
-                    onChanged: (region) async {
-                      if (region == null) return;
-                      setState(() {
-                        _selectedRegion = region;
-                        _regionIdController.text = region.id.toString();
-                      });
-                      final selectedTownship = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              AvailableTownshipPage(region.id),
-                        ),
-                      );
-                      if (selectedTownship != null) {
-                        setState(() {
-                          _townshipIdController.text =
-                              selectedTownship.id.toString();
-                          _townshipNameController.text = selectedTownship.enName;
-                        });
-                      }
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Text('Error: $err'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SizedBox(
+                      width: constraints.maxWidth,
+                      child: regionState.when(
+                        data: (regions) {
+                          return DropdownButtonFormField<RegionItem>(
+                            value: _selectedRegion,
+                            isExpanded: true,
+                            dropdownColor: Colors.white,
+                            focusColor: Colors.white,
+                            decoration: const InputDecoration(
+                              labelText: 'Select Region',
+                              border: OutlineInputBorder(),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
+                            items: regions.map((region) {
+                              return DropdownMenuItem<RegionItem>(
+                                value: region,
+                                child: Text(
+                                  region.enName ?? region.mmName ?? '-',
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (region) async {
+                              if (region == null) return;
+                              setState(() {
+                                _selectedRegion = region;
+                                _regionIdController.text = region.id.toString();
+                              });
+
+                              final selectedTownship = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AvailableTownshipPage(region.id),
+                                ),
+                              );
+
+                              if (selectedTownship != null) {
+                                setState(() {
+                                  _townshipIdController.text = selectedTownship
+                                      .id
+                                      .toString();
+                                  _townshipNameController.text =
+                                      selectedTownship.enName;
+                                });
+                              }
+                            },
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (err, _) => Text('Error: $err'),
+                      ),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 10),
               Row(
@@ -390,7 +439,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   Flexible(
                     child: AppTextField(
                       controller: _townshipIdController,
-                      labelText: 'Township ID',
+                      labelText: 'ID',
                       validator: (val) => (val == null || val.isEmpty)
                           ? 'Township ID is required'
                           : null,

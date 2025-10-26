@@ -31,7 +31,7 @@ class _RegionDropdownState extends ConsumerState<RegionDropdown> {
     return regionState.when(
       data: (regions) {
         return DropdownButtonFormField<RegionItem>(
-          value: _selectedRegion,
+          initialValue: _selectedRegion,
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Select Region',

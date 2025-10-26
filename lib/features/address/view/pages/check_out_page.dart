@@ -452,8 +452,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   }
 }
 
-
-
 Widget _buildCheckoutShimmerLoading() {
   return Scaffold(
     backgroundColor: Colors.grey[50],
@@ -482,7 +480,7 @@ Widget _buildCheckoutShimmerLoading() {
           // Section Header Shimmer
           _buildSectionHeaderShimmer(),
           const SizedBox(height: 8),
-          
+
           // Create Address Card Shimmer
           _buildCardShimmer(
             icon: Icons.location_on_outlined,
@@ -490,7 +488,7 @@ Widget _buildCheckoutShimmerLoading() {
             subtitleWidth: 150,
           ),
           const SizedBox(height: 8),
-          
+
           // Select Address Card Shimmer
           _buildCardShimmer(
             icon: Icons.location_on_outlined,
@@ -504,7 +502,7 @@ Widget _buildCheckoutShimmerLoading() {
           // Shipping Method Header
           _buildSectionHeaderShimmer(),
           const SizedBox(height: 8),
-          
+
           // Shipping Card Shimmer
           _buildCardShimmer(
             icon: Icons.local_shipping_outlined,
@@ -517,7 +515,7 @@ Widget _buildCheckoutShimmerLoading() {
           // Payment Method Header
           _buildSectionHeaderShimmer(),
           const SizedBox(height: 8),
-          
+
           // Payment Card Shimmer
           _buildCardShimmer(
             icon: Icons.payment_outlined,
@@ -525,12 +523,9 @@ Widget _buildCheckoutShimmerLoading() {
             subtitleWidth: 120,
           ),
           const SizedBox(height: 8),
-          
+
           // Screenshot Picker Shimmer
-          _buildCardShimmer(
-            icon: Icons.photo,
-            titleWidth: 160,
-          ),
+          _buildCardShimmer(icon: Icons.photo, titleWidth: 160),
 
           const SizedBox(height: 16),
 
@@ -666,10 +661,7 @@ Widget _buildOrderSummaryShimmer() {
             const SizedBox(height: 6),
             _buildSummaryRowShimmer(),
             const SizedBox(height: 6),
-            Container(
-              height: 1,
-              color: Colors.white,
-            ),
+            Container(height: 1, color: Colors.white),
             const SizedBox(height: 6),
             _buildSummaryRowShimmer(isTotal: true),
           ],
