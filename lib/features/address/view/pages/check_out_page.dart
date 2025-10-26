@@ -80,6 +80,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
+        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
         title: Text(

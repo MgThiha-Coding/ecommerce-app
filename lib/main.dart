@@ -25,12 +25,18 @@ void main() async {
     isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
 
-
   await Hive.initFlutter();
   _registerHiveAdapters();
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('my')],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('de'), // German
+        Locale('nl'), // Dutch
+        Locale('th'), // Thai
+        Locale('my'), // Burmese
+        Locale('zh'), // Chinese],
+      ],
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
       fallbackLocale: const Locale('en'),
@@ -42,7 +48,6 @@ void main() async {
 
 Future<void> _initializeNonCriticalInBackground() async {
   try {
-  
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
     await Future.wait([
