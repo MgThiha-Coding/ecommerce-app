@@ -32,11 +32,15 @@ void main() async {
       supportedLocales: const [
         Locale('en'), // English
         Locale('de'), // German
+        Locale('es'), // Spanish
+        Locale('fr'), // French
+        Locale('ja'), // Japanese
         Locale('nl'), // Dutch
         Locale('th'), // Thai
         Locale('my'), // Burmese
-        Locale('zh'), // Chinese],
+        Locale('zh'), // Chinese Simplified
       ],
+
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
       fallbackLocale: const Locale('en'),

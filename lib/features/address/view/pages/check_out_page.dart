@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
+import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
@@ -84,7 +86,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Checkout',
+          LocaleKeys.checkout.tr(),
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
@@ -108,7 +110,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionHeader("Delivery Address", responsive),
+                _buildSectionHeader(LocaleKeys.deliveryAddress.tr(), responsive),
                 const SizedBox(height: 8),
                 _buildCreateAddressCard(responsive),
                 const SizedBox(height: 8),
@@ -116,13 +118,13 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
 
                 const SizedBox(height: 16),
 
-                _buildSectionHeader("Shipping Method", responsive),
+                _buildSectionHeader(LocaleKeys.shippingMethod.tr(), responsive),
                 const SizedBox(height: 8),
                 _buildShippingCard(responsive),
 
                 const SizedBox(height: 16),
 
-                _buildSectionHeader("Payment Method", responsive),
+                _buildSectionHeader(LocaleKeys.paymentMethod.tr(), responsive),
                 const SizedBox(height: 8),
                 _buildPaymentCard(responsive),
                 const SizedBox(height: 8),
@@ -235,7 +237,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             color: AppColors.primary,
           ),
           title: Text(
-            'Create Address',
+            LocaleKeys.createAddress.tr(),
             style: GoogleFonts.poppins(
               fontSize: responsive.body,
               color: AppColors.textSecondary,
@@ -273,7 +275,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           ),
           title: Text(
             _selectedAddress == null
-                ? 'Select Saved Address'
+                ? LocaleKeys.selectSavedAddress.tr()
                 : '${_selectedAddress!.firstName} ${_selectedAddress!.lastName}',
             style: GoogleFonts.poppins(
               fontSize: Responsive(context).body,
@@ -320,7 +322,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           ),
           title: Text(
             _selectedShipping == null
-                ? 'Select Shipping Method'
+                ? LocaleKeys.selectShippingMethod.tr()
                 : _selectedShipping!.name,
             style: GoogleFonts.poppins(
               fontSize: Responsive(context).body,
@@ -358,7 +360,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
           title: Text(
             _selectedPayment == null
-                ? 'Select Payment Method'
+                ? LocaleKeys.selectShippingMethod.tr()
                 : _selectedPayment!.name,
             style: GoogleFonts.poppins(
               fontSize: Responsive(context).body,
@@ -390,7 +392,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           leading: const Icon(Icons.photo, color: AppColors.primary),
           title: Text(
             _approveScreenshot == null
-                ? "Upload Payment Screenshot"
+                ? LocaleKeys.uploadPaymentScreenshot.tr()
                 : "Screenshot Selected",
             style: GoogleFonts.poppins(
               fontSize: 14,

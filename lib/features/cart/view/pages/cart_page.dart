@@ -328,7 +328,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 SizedBox(
                                   height: 45,
                                   child: AppButton(
-                                    title: "Checkout",
+                                    title: LocaleKeys.checkout.tr(),
                                     onTap: () {
                                       Navigator.push(
                                         context,

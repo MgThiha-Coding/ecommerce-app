@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
@@ -70,7 +72,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         centerTitle: true,
         backgroundColor: AppColors.background,
         title: Text(
-          'Search Products',
+          LocaleKeys.searchProduct.tr(),
           style: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary),
         ),
       ),

@@ -337,63 +337,76 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  LocaleKeys.language.tr(),
-                  style: GoogleFonts.poppins(
-                    color: AppColors.textSecondary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _languageButton(context, "English", const Locale('en')),
-
-                _languageButton(
-                  context,
-                  "Deutsch (German)",
-                  const Locale('de'),
-                ),
-                _languageButton(
-                  context,
-                  "Nederlands (Dutch)",
-                  const Locale('nl'),
-                ),
-                _languageButton(context, "ไทย (Thai)", const Locale('th')),
-                _languageButton(
-                  context,
-                  "မြန်မာ (Burmese)",
-                  const Locale('my'),
-                ),
-                _languageButton(context, "中文 (Chinese)", const Locale('zh')),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "Close",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    LocaleKeys.language.tr(),
+                    style: GoogleFonts.poppins(
+                      color: AppColors.textSecondary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  _languageButton(context, "English", const Locale('en')),
+                  _languageButton(
+                    context,
+                    "Deutsch (German)",
+                    const Locale('de'),
+                  ),
+                  _languageButton(
+                    context,
+                    "Español (Spanish)",
+                    const Locale('es'),
+                  ),
+                  _languageButton(
+                    context,
+                    "Français (French)",
+                    const Locale('fr'),
+                  ),
+                  _languageButton(context, "日本語 (Japanese)", const Locale('ja')),
+                  _languageButton(
+                    context,
+                    "Nederlands (Dutch)",
+                    const Locale('nl'),
+                  ),
+                  _languageButton(context, "ไทย (Thai)", const Locale('th')),
+                  _languageButton(
+                    context,
+                    "မြန်မာ (Burmese)",
+                    const Locale('my'),
+                  ),
+                  _languageButton(context, "中文 (Chinese)", const Locale('zh')),
+              
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        "Close",
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

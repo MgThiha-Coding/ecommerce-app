@@ -1,26 +1,54 @@
 // DO NOT EDIT. This is code generated via package:easy_localization/generate.dart
 
-// ignore_for_file: constant_identifier_names
-
-abstract class  LocaleKeys {
-  static const seeAll = 'seeAll';
+abstract class LocaleKeys {
   static const welcome = 'welcome';
   static const welcomeToPicoShop = 'welcomeToPicoShop';
   static const caption = 'caption';
+  static const seeAll = 'seeAll';
   static const availableProducts = 'availableProducts';
+  static const seeDetails = 'seeDetails';
+  static const searchProduct = 'searchProduct';
+  static const search = 'search';
+  static const brand = 'brand';
+  static const category = 'category';
+  static const cart = 'cart';
+  static const checkout = 'checkout';
+  static const createAddress = 'createAddress';
+  static const selectSavedAddress = 'selectSavedAddress';
+  static const selectShippingMethod = 'selectShippingMethod';
+  static const selectPaymentMethod = 'selectPaymentMethod';
+  static const uploadPaymentScreenshot = 'uploadPaymentScreenshot';
+  static const deliveryAddress = 'deliveryAddress';
+  static const shippingMethod = 'shippingMethod';
+  static const paymentMethod = 'paymentMethod';
+  static const orderSummary = 'orderSummary';
+  static const placeOrder = 'placeOrder';
+  static const addShippingAddress = 'addShippingAddress';
+  static const personalDetails = 'personalDetails';
+  static const firstName = 'firstName';
+  static const lastName = 'lastName';
+  static const addressDetails = 'addressDetails';
+  static const streetAddress = 'streetAddress';
+  static const apartmentFloor = 'apartmentFloor';
+  static const locationDetails = 'locationDetails';
+  static const selectRegion = 'selectRegion';
+  static const townshipName = 'townshipName';
+  static const townshipId = 'townshipId';
+  static const postalCode = 'postalCode';
+  static const contactInformation = 'contactInformation';
+  static const phoneNumber = 'phoneNumber';
+  static const saveAddress = 'saveAddress';
+  static const selectAddress = 'selectAddress';
+  static const continueKey = 'continue';
+  static const orderHistory = 'orderHistory';
+  static const signOut = 'signOut';
+  static const signUp = 'signUp';
+  static const verifyCode = 'verifyCode';
   static const home = 'home';
   static const product = 'product';
-  static const cart = 'cart';
-  static const search = 'search';
   static const profile = 'profile';
   static const accountInfo = 'accountInfo';
-  static const orderHistory = 'orderHistory';
-  static const paymentMethod = 'paymentMethod';
-  static const shippingMethod = 'shippingMethod';
   static const settings = 'settings';
   static const language = 'language';
   static const theme = 'theme';
-  static const brand = 'brand';
-  static const category = 'category';
-
 }
