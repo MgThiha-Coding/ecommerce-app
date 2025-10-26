@@ -10,8 +10,6 @@ import 'package:picoshop_theme2/core/localization/codegen_loader.g.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
-import 'package:picoshop_theme2/features/cart/local/cart_item_hive_adapater.dart';
-import 'package:picoshop_theme2/features/cart/local/cart_item_hive_model.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
@@ -19,11 +17,7 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ULTRA FAST: Initialize only what's CRITICAL for first paint
   await EasyLocalization.ensureInitialized();
-
-  // Set orientation synchronously
   final bool isTablet =
       // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
@@ -31,12 +25,9 @@ void main() async {
     isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
 
-  // Initialize Hive & open CRITICAL boxes only
+
   await Hive.initFlutter();
   _registerHiveAdapters();
-  await _openCriticalBoxes(); // Only boxes needed immediately
-
-  // Start app IMMEDIATELY - don't wait for non-critical stuff
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('my')],
@@ -46,27 +37,14 @@ void main() async {
       child: const ProviderScope(child: MyApp()),
     ),
   );
-
-  // Initialize non-critical boxes in background
   unawaited(_initializeNonCriticalInBackground());
-}
-
-Future<void> _openCriticalBoxes() async {
-  // Only open boxes that are needed IMMEDIATELY on app start
-  await Future.wait([
-    _openBoxSafe<CartItemHiveModel>('cart'), // If cart needed for badge, etc.
-  ]);
 }
 
 Future<void> _initializeNonCriticalInBackground() async {
   try {
-    // Load env file in background
+  
     await dotenv.load(fileName: '.env');
-
-    // Load access token in background
     await AppConfig.loadAccessToken();
-
-    // Open non-critical boxes that can load lazily
     await Future.wait([
       _openBoxSafe<ProductHiveModel>('products'),
       _openBoxSafe<BrandHiveModel>('brands'),
@@ -81,7 +59,6 @@ void _registerHiveAdapters() {
   Hive.registerAdapter(ProductDataHiveAdapter());
   Hive.registerAdapter(BrandDataHiveAdapter());
   Hive.registerAdapter(CategoryDataHiveAdapter());
-  Hive.registerAdapter(CartItemHiveAdapter());
 }
 
 Future<void> _openBoxSafe<T>(String boxName) async {
@@ -89,7 +66,6 @@ Future<void> _openBoxSafe<T>(String boxName) async {
     await Hive.openBox<T>(boxName);
   } catch (e) {
     debugPrint('Box $boxName error: $e');
-    // Recover from corruption
     try {
       await Hive.deleteBoxFromDisk(boxName);
       await Hive.openBox<T>(boxName);

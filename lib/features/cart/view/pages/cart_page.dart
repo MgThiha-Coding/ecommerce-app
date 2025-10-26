@@ -26,8 +26,8 @@ class _CartPageState extends ConsumerState<CartPage> {
       (_) => ref.read(cartNotifierProvider.notifier).fetchCart(),
     );
   }
-
-  /*
+ 
+ /*
   @override
   void didPopNext() {
     ref.read(cartNotifierProvider.notifier).fetchCart();

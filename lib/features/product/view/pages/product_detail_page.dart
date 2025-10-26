@@ -26,6 +26,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = ref.read(productDetailNotifierProvider.notifier);
       notifier.reset();
@@ -57,31 +58,47 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // responsive fontsize
     final fontSize = Responsive(context);
-    // product details data provider
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
     ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Added To Cart Successfully'),
-          duration: Duration(seconds: 2),
-          backgroundColor: AppColors.primary,
-        ),
-      );
-      setState(() {
-        _showFloatingCartButton = true;
-      });
-
-      Future.delayed(const Duration(seconds: 25), () {
-        setState(() {
-          _showFloatingCartButton = false;
+      if (next.lastResponse != null &&
+          next.lastResponse != previous?.lastResponse) {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added To Cart Successfully',style: TextStyle( 
+               fontFamily: "Poppins",
+               color: AppColors.textSecondary,
+               fontSize: Responsive(context).body
+            ),),
+            duration: const Duration(seconds: 2),
+            backgroundColor: AppColors.background,
+          ),
+        );
+        setState(() => _showFloatingCartButton = true);
+        Future.delayed(const Duration(seconds: 6), () {
+          if (mounted) setState(() => _showFloatingCartButton = false);
         });
-      });
+      }
+
+      final errorMessage = next.itemError[widget.productId];
+      if (errorMessage != null) {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage,style:  TextStyle( 
+              fontFamily: "Poppins",
+              color: AppColors.error,
+              fontSize: Responsive(context).body
+            ),),
+            duration: const Duration(seconds: 2),
+            backgroundColor: AppColors.background,
+          ),
+        );
+      }
     });
 
     return Scaffold(
-      // app primary background
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
@@ -320,22 +337,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                               variationId: variationId,
                                             ),
                                           );
-                                      ref.invalidate(totalCartNotifierProvider);
+                                      //  ref.invalidate(totalCartNotifierProvider);
                                       ref
                                           .read(cartNotifierProvider.notifier)
                                           .fetchCart();
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            "Product variation not available",
-                                          ),
-                                        ),
-                                      );
                                     }
-                                    ref.invalidate(totalCartNotifierProvider);
                                   },
                                   backgroundColor: AppColors.primary,
                                   labelColor: AppColors.background,
@@ -346,35 +352,6 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
 
                           const SizedBox(height: 12),
-
-                          if (_showFloatingCartButton)
-                            SizedBox(
-                              height: 40,
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.success,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const CartPage(),
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  'Cart',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
@@ -385,6 +362,94 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             error: (error, _) => errorOverShimmer(error: error),
             loading: () => _loadingShimmer(context),
           ),
+
+          if (_showFloatingCartButton)
+            Positioned(
+              bottom: 90,
+              left: 16,
+              right: 16,
+              child: Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(28),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CartPage(),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.shopping_cart_checkout,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'View Cart',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${itemCount} items',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

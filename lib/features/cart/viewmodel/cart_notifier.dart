@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
@@ -136,7 +135,6 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
     }
   }
 
-  // refresh cart
   Future<void> refreshCart() async {
     await fetchCart();
   }
@@ -150,12 +148,12 @@ final cartNotifierProvider =
 //  get total cart item state ( itemcount )
 class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
     with RefreshTokenMixin {
-  final Box<int> _localCache;
   final Dio _dio;
   int? _onlineTotal;
+  int? _cachedTotal; // Simple variable instead of Hive box
   bool _isLoading = false;
 
-  TotalCartNotifier(this._localCache)
+  TotalCartNotifier()
     : _dio = Dio(
         BaseOptions(
           connectTimeout: const Duration(seconds: 10),
@@ -168,8 +166,8 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
   }
 
   Future<void> _init() async {
-    if (_localCache.isNotEmpty) {
-      state = AsyncValue.data(_localCache.get('total') ?? 0);
+    if (_cachedTotal != null) {
+      state = AsyncValue.data(_cachedTotal!);
     } else {
       await fetchTotalCart();
     }
@@ -201,7 +199,7 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
       }
       final parsed = TotalCartItemResponse.fromJson(response.data);
       _onlineTotal = parsed.data;
-      _localCache.put('total', _onlineTotal!);
+      _cachedTotal = _onlineTotal; // Store in variable instead of Hive
       state = AsyncValue.data(_onlineTotal!);
     } on DioException catch (e, st) {
       if (e.response?.statusCode == 401) {
@@ -223,16 +221,16 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
           if (isSuccess) {
             final parsed = TotalCartItemResponse.fromJson(refreshed.data);
             _onlineTotal = parsed.data;
-            _localCache.put('total', _onlineTotal!);
+            _cachedTotal = _onlineTotal; // Store in variable instead of Hive
             state = AsyncValue.data(_onlineTotal!);
             _isLoading = false;
             return;
           }
         }
       }
-      final cached = _localCache.get('total');
-      if (cached != null) {
-        state = AsyncValue.data(cached);
+      // Use cached variable instead of Hive
+      if (_cachedTotal != null) {
+        state = AsyncValue.data(_cachedTotal!);
       }
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
@@ -251,18 +249,18 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
   }
 
   void clearLocalTotal() {
-    _localCache.clear();
+    _cachedTotal = null;
     state = const AsyncValue.data(0);
   }
 }
 
 final totalCartNotifierProvider =
     StateNotifierProvider<TotalCartNotifier, AsyncValue<int>>((ref) {
-      final offlineTotal = Hive.box<int>('total_cart');
-      return TotalCartNotifier(offlineTotal);
+      return TotalCartNotifier(); // No more fucking Hive!
     });
 
-// add to cart state
+// Add to cart state
+// Add to cart state
 class AddToCartState {
   final Map<int, bool> itemLoading;
   final Map<int, String?> itemError;
@@ -306,10 +304,14 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
 
   Future<void> addToCart(AddToCartRequest params) async {
     final id = params.productId;
-    state = state.copyWith(
+
+    // mark loading
+    state = AddToCartState(
       itemLoading: {...state.itemLoading, id: true},
       itemError: {...state.itemError}..remove(id),
+      lastResponse: state.lastResponse,
     );
+
     try {
       final response = await _dio.post(
         '${AppConfig.baseUrl}/ecommerce/cart',
@@ -327,14 +329,17 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
           },
         ),
       );
+
       final data = response.data;
       if (response.statusCode == 200 && data?['success'] == true) {
         final responseData = AddToCartResponse.fromJson(data);
-        state = state.copyWith(
+
+        state = AddToCartState(
           itemLoading: {...state.itemLoading}..remove(id),
           itemError: {...state.itemError}..remove(id),
           lastResponse: responseData,
         );
+
         _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
         _ref.read(cartNotifierProvider.notifier).refreshCart();
       } else {
@@ -360,18 +365,22 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
             ),
           );
         });
+
         if (refreshed != null && refreshed.data?['success'] == true) {
           final responseData = AddToCartResponse.fromJson(refreshed.data);
-          state = state.copyWith(
+
+          state = AddToCartState(
             itemLoading: {...state.itemLoading}..remove(id),
             itemError: {...state.itemError}..remove(id),
             lastResponse: responseData,
           );
+
           _ref.read(totalCartNotifierProvider.notifier).refreshTotalCart();
           _ref.read(cartNotifierProvider.notifier).refreshCart();
           return;
         }
       }
+
       final message =
           e.response?.data?['message'] ??
           (e.type == DioExceptionType.connectionError ||
@@ -379,14 +388,17 @@ class AddToCartNotifier extends StateNotifier<AddToCartState>
                   e.type == DioExceptionType.unknown
               ? 'Check your internet connection.'
               : 'Something went wrong. Please try again.');
-      state = state.copyWith(
+
+      state = AddToCartState(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError, id: message},
+        lastResponse: state.lastResponse,
       );
     } catch (e) {
-      state = state.copyWith(
+      state = AddToCartState(
         itemLoading: {...state.itemLoading}..remove(id),
         itemError: {...state.itemError, id: e.toString()},
+        lastResponse: state.lastResponse,
       );
     }
   }
