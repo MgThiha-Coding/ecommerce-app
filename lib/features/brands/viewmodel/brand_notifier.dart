@@ -58,7 +58,7 @@ class BrandListNotifier
     _isLoading = true;
     try {
       final response = await _dio.get(
-        '${AppConfig.baseUrl}/api/ecommerce/brands',
+        '${AppConfig.baseUrl}/ecommerce/brands',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {
