@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
@@ -14,10 +15,9 @@ import 'package:picoshop_theme2/features/category/view/pages/category_list_page.
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
-import 'package:picoshop_theme2/features/home/widgets/product_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
 import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
-import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
+import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:picoshop_theme2/features/search/view/search_page.dart';
 import 'package:shimmer/shimmer.dart';
@@ -74,7 +74,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  // Error Widget
   Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
@@ -105,7 +104,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final brandListAsync = ref.watch(brandListNotifierProvider);
     final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
-    // final fontSize = Responsive(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -166,123 +164,227 @@ class _HomePageState extends ConsumerState<HomePage> {
             );
           },
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CurrentLocationPage(),
-                ),
-              );
-            },
-            icon: const Icon(LineIcons.mapMarker, color: AppColors.primary),
-          ),
-        ],
       ),
-
       body: SafeArea(
-        child: RefreshIndicator(
-          backgroundColor: Colors.white,
-          onRefresh: _resetAll,
-          child: Padding(
-            padding: Responsive(context).isMobile
-                ? const EdgeInsets.all(8.0)
-                : const EdgeInsets.all(16),
-            child: ListView(
-              controller: _scrollController,
-              children: [
-                // SearchBar
-                Responsive(context).isMobile
-                    ? const SearchBar()
-                    : const SizedBox(height: 55, child: SearchBar()),
-
-                // Brand Preview Section Header & BrandList
-                SectionHeader(LocaleKeys.brand.tr(), () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BrandListPage(),
-                    ),
-                  );
-                }),
-                SizedBox(
-                  height: 55,
-                  child: brandListAsync.when(
-                    data: (brandList) => brandList.isEmpty
-                        ? _buildEmptyState(
-                            'Brand list is currently unavailable.',
-                          )
-                        : brandPreview(context, brandList.take(16).toList()),
-                    loading: () => _buildShimmer(height: 80),
-                    error: (error, _) => _buildEmptyState(error.toString()),
-                  ),
-                ),
-
-                // Categories Preview & CategoryList
-                SectionHeader(LocaleKeys.category.tr(), () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CategoryListPage(),
-                    ),
-                  );
-                }),
-                SizedBox(
-                  height: 70,
-                  child: categoryListAsync.when(
-                    data: (categoryList) => categoryList.isEmpty
-                        ? _buildEmptyState(
-                            'Category list is currently unavailable.',
-                          )
-                        : categoryPreview(
-                            context,
-                            categoryList.take(16).toList(),
-                          ),
-                    loading: () => _buildShimmer(height: 110),
-                    error: (error, _) => _buildEmptyState(error.toString()),
-                  ),
-                ),
-
-                // Featured Product Slider
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 13),
-                  child: BrandPreviewSlider(),
-                ),
-
-                // Product Preview Section Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Center(
-                    child: Text(
-                      LocaleKeys.availableProducts.tr(),
-                      style: GoogleFonts.poppins(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 200,
-                  child: productListAsync.when(
-                    data: (productList) => productList.isEmpty
-                        ? _buildEmptyState(
-                            'Product list is currently unavailable.',
-                          )
-                        : productPreview(
-                            context,
-                            productList.take(18).toList(),
-                          ),
-                    loading: () => _buildShimmer(height: 180),
-                    error: (error, _) => _buildEmptyState(error.toString()),
-                  ),
-                ),
-
-                // space
-              ],
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.white, Colors.blue.withOpacity(0.3)],
             ),
+          ),
+          child: Stack(
+            children: [
+              RefreshIndicator(
+                backgroundColor: Colors.white,
+                onRefresh: _resetAll,
+                child: Padding(
+                  padding: Responsive(context).isMobile
+                      ? const EdgeInsets.all(6.0)
+                      : const EdgeInsets.all(16),
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.only(top: 50),
+                    children: [
+                      SectionHeader(LocaleKeys.brand.tr(), () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BrandListPage(),
+                          ),
+                        );
+                      }),
+                      SizedBox(
+                        height: 55,
+                        child: brandListAsync.when(
+                          data: (brandList) => brandList.isEmpty
+                              ? _buildEmptyState(
+                                  'Brand list is currently unavailable.',
+                                )
+                              : brandPreview(
+                                  context,
+                                  brandList.take(16).toList(),
+                                ),
+                          loading: () => _buildShimmer(height: 80),
+                          error: (error, _) =>
+                              _buildEmptyState(error.toString()),
+                        ),
+                      ),
+                      SectionHeader(LocaleKeys.category.tr(), () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CategoryListPage(),
+                          ),
+                        );
+                      }),
+                      SizedBox(
+                        height: 70,
+                        child: categoryListAsync.when(
+                          data: (categoryList) => categoryList.isEmpty
+                              ? _buildEmptyState(
+                                  'Category list is currently unavailable.',
+                                )
+                              : categoryPreview(
+                                  context,
+                                  categoryList.take(16).toList(),
+                                ),
+                          loading: () => _buildShimmer(height: 110),
+                          error: (error, _) =>
+                              _buildEmptyState(error.toString()),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 13),
+                        child: BrandPreviewSlider(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Center(
+                          child: Text(
+                            LocaleKeys.availableProducts.tr(),
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primary,
+                              fontSize: Responsive(context).body,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 7,
+                        ),
+                        child: productListAsync.when(
+                          data: (productList) {
+                            if (productList.isEmpty) {
+                              return _buildEmptyState(
+                                'Product list is currently unavailable.',
+                              );
+                            }
+                            final previewList = productList.take(20).toList();
+                            return MasonryGridView.count(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              crossAxisCount: Responsive(context).isMobile
+                                  ? 2
+                                  : 4,
+                              mainAxisSpacing: 6,
+                              crossAxisSpacing: 6,
+                              itemCount: previewList.length,
+                              itemBuilder: (context, index) {
+                                final product = previewList[index];
+                                final productId = product.id;
+                                return InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            ProductDetailPage(productId!),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.15),
+                                          blurRadius: 8,
+                                          spreadRadius: 1,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(4),
+                                              ),
+                                          child: Image.network(
+                                            product.productImage ??
+                                                AppImage.emptyContainer,
+                                            fit: BoxFit.cover,
+                                            height: (index % 2 == 0)
+                                                ? 130
+                                                : 190,
+                                            width: double.infinity,
+                                            errorBuilder: (_, __, ___) =>
+                                                Image.asset(
+                                                  AppImage.emptyContainer,
+                                                  fit: BoxFit.cover,
+                                                  width: double.infinity,
+                                                ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                product.name ?? '',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                '${12000} MMK',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 11,
+                                                  color:
+                                                      AppColors.priceLabelColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          loading: () => _buildShimmer(height: 200),
+                          error: (error, _) =>
+                              _buildEmptyState(error.toString()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Responsive(context).isMobile
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: SearchBar(),
+                        ),
+                      )
+                    : const SizedBox(height: 55, child: SearchBar()),
+              ),
+            ],
           ),
         ),
       ),
@@ -330,7 +432,7 @@ class SearchBar extends StatelessWidget {
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.white,
                 hintText: LocaleKeys.search.tr(),
                 hintStyle: TextStyle(
                   fontFamily: "Poppins",

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
@@ -178,6 +179,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                                 color: Colors.black,
                               ),
                             ),
+                            //Icon(LineIcons.shoppingBag,size: fontSize.heading,)
                           ],
                         ),
                       ),
