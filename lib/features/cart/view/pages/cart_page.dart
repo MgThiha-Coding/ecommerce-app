@@ -99,11 +99,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                       icon: Icon(
                         LineIcons.shoppingCart,
                         color: AppColors.primary,
-                        size: fontSize.value(
-                          mobile: 24,
-                          tablet: 25,
-                          desktop: 25,
-                        ),
+                        size: fontSize.value(mobile: 26, tablet: 25, desktop: 25)
                       ),
                     ),
                     if (cartCount > 0)

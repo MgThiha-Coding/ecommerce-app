@@ -366,7 +366,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     "Français (French)",
                     const Locale('fr'),
                   ),
-                  _languageButton(context, "日本語 (Japanese)", const Locale('ja')),
+                  _languageButton(
+                    context,
+                    "日本語 (Japanese)",
+                    const Locale('ja'),
+                  ),
                   _languageButton(
                     context,
                     "Nederlands (Dutch)",
@@ -379,7 +383,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const Locale('my'),
                   ),
                   _languageButton(context, "中文 (Chinese)", const Locale('zh')),
-              
+
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,

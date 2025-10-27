@@ -1,16 +1,18 @@
+//import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:latlong2/latlong.dart';
+//import 'package:geocoding/geocoding.dart';
+//import 'package:latlong2/latlong.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
+//import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/address/model/request/create_address_request.dart';
 import 'package:picoshop_theme2/features/address/model/response/create_addresss_response.dart';
 import 'package:picoshop_theme2/features/address/viewmodel/create_address_notifier.dart';
 import 'package:picoshop_theme2/features/location/model/local_region_response.dart';
 import 'package:picoshop_theme2/features/location/view/available_township_page.dart';
-import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
+//import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
 import 'package:picoshop_theme2/features/location/viewmodel/local_region_notifier.dart';
 import 'package:picoshop_theme2/shared/app_text_field.dart';
 
@@ -36,8 +38,8 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
   final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  LatLng? _selectedLocation;
-  String _detectedAddress = '';
+  //LatLng? _selectedLocation;
+  //String _detectedAddress = '';
 
   @override
   void dispose() {
@@ -71,7 +73,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
           );
     }
   }
-
+  /*
   Future<void> _pickLocationOnMap() async {
     final result = await Navigator.push(
       context,
@@ -109,6 +111,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
       );
     }
   }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +148,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Add Shipping Address',
+          "Add Shipping Address",
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: responsive.subHeading,
@@ -190,7 +193,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
 
               // Personal Details
               Text(
-                'Personal Details',
+                "Personal Details",
                 style: TextStyle(
                   fontFamily: "Poppins",
                   fontSize: responsive.subHeading,
@@ -200,7 +203,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               const SizedBox(height: 8),
               AppTextField(
                 controller: _firstNameController,
-                labelText: 'First Name',
+                labelText: "First Name",
                 hintText: 'Enter your first name',
                 validator: (val) => (val == null || val.isEmpty)
                     ? 'First Name is required'
@@ -209,7 +212,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               const SizedBox(height: 10),
               AppTextField(
                 controller: _lastNameController,
-                labelText: 'Last Name',
+                labelText: "Last Name",
                 hintText: 'Enter your last name',
                 validator: (val) => (val == null || val.isEmpty)
                     ? 'Last Name is required'
@@ -367,7 +370,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                       child: regionState.when(
                         data: (regions) {
                           return DropdownButtonFormField<RegionItem>(
-                            value: _selectedRegion,
+                            initialValue: _selectedRegion,
                             isExpanded: true,
                             dropdownColor: Colors.white,
                             focusColor: Colors.white,

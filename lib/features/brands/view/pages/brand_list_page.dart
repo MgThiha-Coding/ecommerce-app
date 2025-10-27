@@ -147,7 +147,7 @@ ListView brandListView(
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BrandDetailPage(brandId),
+                      builder: (context) => BrandDetailPage(brandId: brandId!),
                     ),
                   );
                 },

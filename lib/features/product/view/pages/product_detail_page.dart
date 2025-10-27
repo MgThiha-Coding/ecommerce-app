@@ -5,7 +5,6 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
-import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
@@ -21,7 +20,7 @@ class ProductDetailPage extends ConsumerStatefulWidget {
 
 class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   int itemCount = 1;
-  bool _showFloatingCartButton = false;
+  // bool _showFloatingCartButton = false;
 
   @override
   void initState() {
@@ -66,19 +65,27 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added To Cart Successfully',style: TextStyle( 
-               fontFamily: "Poppins",
-               color: AppColors.textSecondary,
-               fontSize: Responsive(context).body
-            ),),
+            content: Text(
+              'Added To Cart Successfully',
+              style: TextStyle(
+                fontFamily: "Poppins",
+                color: AppColors.textSecondary,
+                fontSize: Responsive(context).body,
+              ),
+            ),
             duration: const Duration(seconds: 2),
             backgroundColor: AppColors.background,
           ),
         );
-        setState(() => _showFloatingCartButton = true);
-        Future.delayed(const Duration(seconds: 6), () {
-          if (mounted) setState(() => _showFloatingCartButton = false);
+        Future.delayed(const Duration(seconds: 3), () {
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context);
         });
+
+        // setState(() => _showFloatingCartButton = true);
+        // Future.delayed(const Duration(seconds: 6), () {
+        //   if (mounted) setState(() => _showFloatingCartButton = false);
+        //  });
       }
 
       final errorMessage = next.itemError[widget.productId];
@@ -86,11 +93,14 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage,style:  TextStyle( 
-              fontFamily: "Poppins",
-              color: AppColors.error,
-              fontSize: Responsive(context).body
-            ),),
+            content: Text(
+              errorMessage,
+              style: TextStyle(
+                fontFamily: "Poppins",
+                color: AppColors.error,
+                fontSize: Responsive(context).body,
+              ),
+            ),
             duration: const Duration(seconds: 2),
             backgroundColor: AppColors.background,
           ),
@@ -362,7 +372,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             error: (error, _) => errorOverShimmer(error: error),
             loading: () => _loadingShimmer(context),
           ),
-
+          /*
           if (_showFloatingCartButton)
             Positioned(
               bottom: 90,
@@ -450,6 +460,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                 ),
               ),
             ),
+            */
         ],
       ),
     );

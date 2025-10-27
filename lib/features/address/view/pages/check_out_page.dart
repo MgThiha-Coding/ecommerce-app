@@ -18,6 +18,7 @@ import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.d
 import 'package:picoshop_theme2/features/payment/model/response/payment_method_response.dart';
 import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
+import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -66,7 +67,10 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Order placed successfully!")),
             );
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const WrapperPage()),
+            );
           }
         },
         loading: () {},
@@ -110,7 +114,10 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionHeader(LocaleKeys.deliveryAddress.tr(), responsive),
+                _buildSectionHeader(
+                  LocaleKeys.deliveryAddress.tr(),
+                  responsive,
+                ),
                 const SizedBox(height: 8),
                 _buildCreateAddressCard(responsive),
                 const SizedBox(height: 8),
@@ -132,7 +139,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
 
                 const SizedBox(height: 16),
 
-                _buildSectionHeader("Order Summary", responsive),
+                _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
                 const SizedBox(height: 8),
 
                 _buildOrderSummary(
@@ -145,12 +152,12 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 const SizedBox(height: 30),
 
                 SizedBox(
-                  height: 40,
+                  height: 50,
                   width: double.infinity,
                   child: AppButton(
                     title: orderState is AsyncLoading
                         ? "Placing Order..."
-                        : "Place Order",
+                        : LocaleKeys.placeOrder.tr(),
                     backgroundColor: AppColors.primary,
                     labelColor: AppColors.background,
                     isLoading: orderState.isLoading ? true : false,

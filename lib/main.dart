@@ -17,51 +17,38 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize localization early
   await EasyLocalization.ensureInitialized();
+
+  // Lock orientation immediately
   final bool isTablet =
-      // ignore: deprecated_member_use
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
   SystemChrome.setPreferredOrientations(
     isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
 
+  // Initialize Hive but do NOT await long box openings
   await Hive.initFlutter();
   _registerHiveAdapters();
+
+  // Run app immediately to avoid black screen
   runApp(
     EasyLocalization(
       supportedLocales: const [
-        Locale('en'), // English
-        Locale('de'), // German
-        Locale('es'), // Spanish
-        Locale('fr'), // French
-        Locale('ja'), // Japanese
-        Locale('nl'), // Dutch
-        Locale('th'), // Thai
-        Locale('my'), // Burmese
-        Locale('zh'), // Chinese Simplified
+        Locale('en'), Locale('de'), Locale('es'), Locale('fr'),
+        Locale('ja'), Locale('nl'), Locale('th'), Locale('my'), Locale('zh'),
       ],
-
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
-      fallbackLocale: const Locale('en'),
+      startLocale: const Locale('en'),
+      fallbackLocale: const Locale('my'),
       child: const ProviderScope(child: MyApp()),
     ),
   );
-  unawaited(_initializeNonCriticalInBackground());
-}
 
-Future<void> _initializeNonCriticalInBackground() async {
-  try {
-    await dotenv.load(fileName: '.env');
-    await AppConfig.loadAccessToken();
-    await Future.wait([
-      _openBoxSafe<ProductHiveModel>('products'),
-      _openBoxSafe<BrandHiveModel>('brands'),
-      _openBoxSafe<CategoryHiveModel>('category'),
-    ]);
-  } catch (e) {
-    debugPrint('Background init error: $e');
-  }
+  // Defer heavy/non-critical initialization
+  unawaited(_initializeNonCriticalInBackground());
 }
 
 void _registerHiveAdapters() {
@@ -70,6 +57,22 @@ void _registerHiveAdapters() {
   Hive.registerAdapter(CategoryDataHiveAdapter());
 }
 
+/// Opens Hive boxes in background without blocking UI
+Future<void> _initializeNonCriticalInBackground() async {
+  try {
+    await dotenv.load(fileName: '.env');
+    await AppConfig.loadAccessToken();
+
+    // Open all Hive boxes in parallel but do NOT block UI
+    unawaited(_openBoxSafe<ProductHiveModel>('products'));
+    unawaited(_openBoxSafe<BrandHiveModel>('brands'));
+    unawaited(_openBoxSafe<CategoryHiveModel>('category'));
+  } catch (e) {
+    debugPrint('Background init error: $e');
+  }
+}
+
+/// Safely opens a Hive box, auto-recover if corrupted
 Future<void> _openBoxSafe<T>(String boxName) async {
   try {
     await Hive.openBox<T>(boxName);
@@ -95,7 +98,7 @@ class MyApp extends ConsumerWidget {
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
 
-      // CRITICAL: White background to prevent black flash
+      // CRITICAL: White background prevents black flash
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
         primaryColor: Colors.white,

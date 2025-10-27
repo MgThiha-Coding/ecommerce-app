@@ -237,7 +237,7 @@ class _OrderCardState extends State<_OrderCard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${o.amountTotal} MMK',
+                    o.amountTotal,
                     style: GoogleFonts.poppins(
                       fontSize: responsive.body - 1,
                       fontWeight: FontWeight.w700,
@@ -323,7 +323,7 @@ class _OrderCardState extends State<_OrderCard> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Qty: ${it.quantity} • Price: ${it.uomPrice} MMK',
+                                  'Qty: ${it.quantity} • Price: ${it.uomPrice}',
                                   style: GoogleFonts.poppins(
                                     fontSize: responsive.caption,
                                     color: Colors.black54,
@@ -333,7 +333,7 @@ class _OrderCardState extends State<_OrderCard> {
                             ),
                           ),
                           Text(
-                            '${it.subtotal} MMK',
+                            it.subtotal,
                             style: GoogleFonts.poppins(
                               fontSize: responsive.body - 1,
                               fontWeight: FontWeight.w700,
@@ -410,7 +410,7 @@ class _OrderCardState extends State<_OrderCard> {
                         ),
                       ),
                       Text(
-                        '${o.amountTotal} MMK',
+                        o.amountTotal,
                         style: GoogleFonts.poppins(
                           fontSize: responsive.body - 1,
                           fontWeight: FontWeight.w700,

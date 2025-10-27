@@ -131,13 +131,13 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(AppImage.appLogo, scale: 14),
+              Image.asset(AppImage.appLogo, scale: 4),
 
               const SizedBox(height: 30),
               Text(
                 'OTP Verification',
                 style: GoogleFonts.poppins(
-                  color: Colors.white,
+                  color: AppColors.textSecondary,
                   fontSize: fontSize.subHeading,
                   fontWeight: FontWeight.w500,
                 ),
@@ -146,7 +146,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
               Text(
                 'OTP sent to ${widget.email ?? ""}',
                 style: GoogleFonts.poppins(
-                  color: Colors.white70,
+                  color: AppColors.textSecondary,
                   fontSize: fontSize.body,
                 ),
               ),

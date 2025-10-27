@@ -126,7 +126,7 @@ class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check Internet', st);
+        state = AsyncValue.error('Check your connection!', st);
       } else {
         state = AsyncValue.error(e, st);
       }
