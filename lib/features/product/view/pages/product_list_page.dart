@@ -6,6 +6,7 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
@@ -28,6 +29,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchNextIfNeeded();
+      ref.read(businessSettingNotifierProvider.notifier).fetchBusinessSetting();
     });
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels >=
@@ -60,13 +62,14 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   @override
   Widget build(BuildContext context) {
     final productListAsync = ref.watch(productNotifierProvider);
+ //   final businessSettingAsync = ref.watch(businessSettingNotifierProvider);
     final fontSize = Responsive(context);
     ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
         setState(() => _showFloatingCartButton = true);
         Future.delayed(const Duration(seconds: 12), () {
-           if (mounted) setState(() => _showFloatingCartButton = false);
+          if (mounted) setState(() => _showFloatingCartButton = false);
         });
       }
     });
@@ -292,7 +295,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                       gradient: LinearGradient(
                         colors: [
                           AppColors.textSecondary,
-                         AppColors.textSecondary.withOpacity(0.8),
+                          AppColors.textSecondary.withOpacity(0.8),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,

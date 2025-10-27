@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
@@ -30,6 +32,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       final notifier = ref.read(productDetailNotifierProvider.notifier);
       notifier.reset();
       notifier.getProductDetail(widget.productId);
+      // Fetch business settings for currency
+      ref.read(businessSettingNotifierProvider.notifier).fetchBusinessSetting();
     });
   }
 
@@ -55,10 +59,30 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     });
   }
 
+  // Helper method to format price with business setting currency
+  String _formatPrice(String? price, BusinessSettingData? businessSetting) {
+    if (price == null || price.isEmpty) return 'No Price Provided';
+
+    // Try to parse the price string to double
+    final parsedPrice = double.tryParse(price);
+    if (parsedPrice == null) return price; // Return original if can't parse
+
+    if (businessSetting != null) {
+      final symbol = businessSetting.currency.symbol;
+      final decimalPlaces = businessSetting.currencyDecimalPlaces;
+      return '$symbol${parsedPrice.toStringAsFixed(decimalPlaces)}';
+    }
+
+    // Fallback if no business setting
+    return parsedPrice.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     final fontSize = Responsive(context);
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
+    final businessSettingAsync = ref.watch(businessSettingNotifierProvider);
+
     ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
@@ -253,12 +277,37 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
                           const SizedBox(height: 6),
 
-                          Text(
-                            price.isEmpty ? "No Price Provided" : price,
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontSize: fontSize.subHeading,
-                              color: AppColors.textSecondary,
+                          // Use business setting for currency formatting
+                          businessSettingAsync.when(
+                            data: (businessSetting) {
+                              final formattedPrice = _formatPrice(
+                                price,
+                                businessSetting,
+                              );
+                              return Text(
+                                formattedPrice,
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: fontSize.subHeading,
+                                  color: AppColors.textSecondary,
+                                ),
+                              );
+                            },
+                            loading: () => Text(
+                              price.isEmpty ? "No Price Provided" : price,
+                              style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: fontSize.subHeading,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            error: (error, stack) => Text(
+                              price.isEmpty ? "No Price Provided" : price,
+                              style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: fontSize.subHeading,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),

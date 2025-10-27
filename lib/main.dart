@@ -10,34 +10,38 @@ import 'package:picoshop_theme2/core/localization/codegen_loader.g.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive.dart';
 import 'package:picoshop_theme2/features/brands/local/brand_data_hive_adapatar.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive_adapatar.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive_adapater.dart';
+import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_model.dart';
+import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_adapter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize localization early
   await EasyLocalization.ensureInitialized();
-
-  // Lock orientation immediately
   final bool isTablet =
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
   SystemChrome.setPreferredOrientations(
     isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
-
-  // Initialize Hive but do NOT await long box openings
   await Hive.initFlutter();
   _registerHiveAdapters();
+  await _openCriticalBox<BusinessSettingHiveModel>('business_settings');
 
-  // Run app immediately to avoid black screen
   runApp(
     EasyLocalization(
       supportedLocales: const [
-        Locale('en'), Locale('de'), Locale('es'), Locale('fr'),
-        Locale('ja'), Locale('nl'), Locale('th'), Locale('my'), Locale('zh'),
+        Locale('en'),
+        Locale('de'),
+        Locale('es'),
+        Locale('fr'),
+        Locale('ja'),
+        Locale('nl'),
+        Locale('th'),
+        Locale('my'),
+        Locale('zh'),
       ],
       path: 'assets/translations',
       assetLoader: const CodegenLoader(),
@@ -47,7 +51,6 @@ void main() async {
     ),
   );
 
-  // Defer heavy/non-critical initialization
   unawaited(_initializeNonCriticalInBackground());
 }
 
@@ -55,24 +58,48 @@ void _registerHiveAdapters() {
   Hive.registerAdapter(ProductDataHiveAdapter());
   Hive.registerAdapter(BrandDataHiveAdapter());
   Hive.registerAdapter(CategoryDataHiveAdapter());
+  Hive.registerAdapter(BusinessSettingHiveAdapter());
 }
 
-/// Opens Hive boxes in background without blocking UI
+Future<void> _openCriticalBox<T>(String boxName) async {
+  try {
+    await Hive.openBox<T>(boxName);
+  } catch (e) {
+    debugPrint('Critical box $boxName error: $e');
+    try {
+      await Hive.deleteBoxFromDisk(boxName);
+      await Hive.openBox<T>(boxName);
+    } catch (e2) {
+      debugPrint('Failed to recover critical box $boxName: $e2');
+    }
+  }
+}
+
 Future<void> _initializeNonCriticalInBackground() async {
   try {
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
 
-    // Open all Hive boxes in parallel but do NOT block UI
     unawaited(_openBoxSafe<ProductHiveModel>('products'));
     unawaited(_openBoxSafe<BrandHiveModel>('brands'));
     unawaited(_openBoxSafe<CategoryHiveModel>('category'));
+    unawaited(_prefetchBusinessSettings());
   } catch (e) {
     debugPrint('Background init error: $e');
   }
 }
 
-/// Safely opens a Hive box, auto-recover if corrupted
+Future<void> _prefetchBusinessSettings() async {
+  try {
+    final container = ProviderContainer();
+    final notifier = container.read(businessSettingNotifierProvider.notifier);
+    await notifier.fetchBusinessSetting();
+    container.dispose();
+  } catch (e) {
+    debugPrint('Prefetch business settings error: $e');
+  }
+}
+
 Future<void> _openBoxSafe<T>(String boxName) async {
   try {
     await Hive.openBox<T>(boxName);
@@ -97,8 +124,6 @@ class MyApp extends ConsumerWidget {
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-
-      // CRITICAL: White background prevents black flash
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
         primaryColor: Colors.white,
