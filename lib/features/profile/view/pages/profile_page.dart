@@ -79,12 +79,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         : "Guest";
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
+      backgroundColor: Colors.blue.withOpacity(0.3),
+      body: Container(
+        padding: const EdgeInsets.only(top: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.withOpacity(0.2)],
+          ),
+        ),
         child: Column(
           children: [
             _buildHeader(displayName, displayEmail),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Expanded(child: _buildMenuCards(responsive, logOutAsync)),
           ],
         ),
@@ -110,7 +118,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 5),
               Text(
                 email,
                 style: GoogleFonts.poppins(
@@ -135,7 +143,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       child: Card(
         elevation: 6,
         color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(
