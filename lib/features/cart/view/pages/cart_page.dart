@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/features/address/view/pages/check_out_page.dart';
+import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
@@ -22,21 +24,25 @@ class _CartPageState extends ConsumerState<CartPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ref.read(cartNotifierProvider.notifier).fetchCart(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(cartNotifierProvider.notifier).fetchCart();
+      ref.read(businessSettingNotifierProvider.notifier).fetchBusinessSetting();
+    });
   }
- 
- /*
-  @override
-  void didPopNext() {
-    ref.read(cartNotifierProvider.notifier).fetchCart();
-    ref.invalidate(totalCartNotifierProvider);
-  }
-  */
 
   Future<void> _onRefresh() async {
     await ref.read(cartNotifierProvider.notifier).fetchCart();
+  }
+
+  // Helper method to format price with currency
+  String _formatPrice(double price, BusinessSettingData? businessSetting) {
+    if (businessSetting != null) {
+      final symbol = businessSetting.currency.symbol;
+      final decimalPlaces = businessSetting.currencyDecimalPlaces;
+      // ✅ Currency symbol AFTER the price number
+      return '${price.toStringAsFixed(decimalPlaces)}$symbol';
+    }
+    return price.toStringAsFixed(2);
   }
 
   @override
@@ -44,6 +50,7 @@ class _CartPageState extends ConsumerState<CartPage> {
     final fontSize = Responsive(context);
     final cartItemsAsync = ref.watch(cartNotifierProvider);
     final cartState = ref.watch(removeCartItemNotifierProvider);
+    final currencyAsync = ref.watch(businessSettingNotifierProvider);
 
     ref.listen<CartState>(removeCartItemNotifierProvider, (previous, next) {
       final removedItems = previous?.itemLoading.keys
@@ -99,7 +106,11 @@ class _CartPageState extends ConsumerState<CartPage> {
                       icon: Icon(
                         LineIcons.shoppingCart,
                         color: AppColors.primary,
-                        size: fontSize.value(mobile: 26, tablet: 25, desktop: 25)
+                        size: fontSize.value(
+                          mobile: 26,
+                          tablet: 25,
+                          desktop: 25,
+                        ),
                       ),
                     ),
                     if (cartCount > 0)
@@ -159,10 +170,13 @@ class _CartPageState extends ConsumerState<CartPage> {
                           ),
                         );
                       }
+
+                      // Calculate total cost
                       final totalCost = cartItems.fold<double>(
                         0,
                         (sum, item) => sum + (item.uomPrice * item.quantity),
                       );
+
                       return Column(
                         children: [
                           Expanded(
@@ -173,6 +187,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 final isLoading =
                                     cartState.itemLoading[item.id] ?? false;
                                 final errorMsg = cartState.itemError[item.id];
+
                                 return Stack(
                                   children: [
                                     Card(
@@ -210,20 +225,94 @@ class _CartPageState extends ConsumerState<CartPage> {
                                               ),
                                             ),
                                             const SizedBox(height: 2),
-                                            Text(
-                                              'Price: ${item.uomPrice}',
-                                              style: GoogleFonts.poppins(
-                                                fontSize: fontSize.caption,
-                                                color: AppColors.textSecondary,
-                                              ),
+
+                                            // Unit Price with Currency
+                                            currencyAsync.when(
+                                              data: (businessSetting) {
+                                                final unitPrice = item.uomPrice;
+                                                final formattedUnitPrice =
+                                                    _formatPrice(
+                                                      unitPrice,
+                                                      businessSetting,
+                                                    );
+                                                return Text(
+                                                  'Price: $formattedUnitPrice',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
+                                              error: (err, _) {
+                                                return Text(
+                                                  'Price: ${item.uomPrice.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
+                                              loading: () {
+                                                return Text(
+                                                  'Price: ${item.uomPrice.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
                                             ),
                                             const SizedBox(height: 2),
-                                            Text(
-                                              'Subtotal: ${item.uomPrice * item.quantity}',
-                                              style: GoogleFonts.poppins(
-                                                fontSize: fontSize.caption,
-                                                color: AppColors.textSecondary,
-                                              ),
+
+                                            // Subtotal with Currency
+                                            currencyAsync.when(
+                                              data: (businessSetting) {
+                                                final subtotal =
+                                                    item.uomPrice *
+                                                    item.quantity;
+                                                final formattedSubtotal =
+                                                    _formatPrice(
+                                                      subtotal,
+                                                      businessSetting,
+                                                    );
+                                                return Text(
+                                                  'Subtotal: $formattedSubtotal',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
+                                              error: (err, _) {
+                                                final subtotal =
+                                                    item.uomPrice *
+                                                    item.quantity;
+                                                return Text(
+                                                  'Subtotal: ${subtotal.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
+                                              loading: () {
+                                                final subtotal =
+                                                    item.uomPrice *
+                                                    item.quantity;
+                                                return Text(
+                                                  'Subtotal: ${subtotal.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: fontSize.caption,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ],
                                         ),
@@ -264,7 +353,6 @@ class _CartPageState extends ConsumerState<CartPage> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50
-                                                // ignore: deprecated_member_use
                                                 .withOpacity(0.95),
                                             borderRadius: BorderRadius.circular(
                                               12,
@@ -290,6 +378,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                               },
                             ),
                           ),
+
+                          // Total and Checkout Section
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -298,6 +388,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                // Total with Currency
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -310,13 +401,41 @@ class _CartPageState extends ConsumerState<CartPage> {
                                         color: AppColors.textPrimary,
                                       ),
                                     ),
-                                    Text(
-                                      totalCost.toStringAsFixed(2),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: fontSize.subHeading,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primary,
-                                      ),
+                                    currencyAsync.when(
+                                      data: (businessSetting) {
+                                        final formattedTotal = _formatPrice(
+                                          totalCost,
+                                          businessSetting,
+                                        );
+                                        return Text(
+                                          formattedTotal,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: fontSize.subHeading,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.primary,
+                                          ),
+                                        );
+                                      },
+                                      error: (err, _) {
+                                        return Text(
+                                          totalCost.toStringAsFixed(2),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: fontSize.subHeading,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.primary,
+                                          ),
+                                        );
+                                      },
+                                      loading: () {
+                                        return Text(
+                                          totalCost.toStringAsFixed(2),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: fontSize.subHeading,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.primary,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),

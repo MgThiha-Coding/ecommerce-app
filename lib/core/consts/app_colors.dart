@@ -31,6 +31,10 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 
+  // price lable color
+  static const Color priceLabelColor = Colors.red;
+  static const Color brandLabelColor = Colors.blueGrey;
+
   // success & error color
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFF44336);

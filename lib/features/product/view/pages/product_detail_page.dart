@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
@@ -22,17 +21,14 @@ class ProductDetailPage extends ConsumerStatefulWidget {
 
 class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
   int itemCount = 1;
-  // bool _showFloatingCartButton = false;
 
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = ref.read(productDetailNotifierProvider.notifier);
       notifier.reset();
       notifier.getProductDetail(widget.productId);
-      // Fetch business settings for currency
       ref.read(businessSettingNotifierProvider.notifier).fetchBusinessSetting();
     });
   }
@@ -59,30 +55,11 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
     });
   }
 
-  // Helper method to format price with business setting currency
-  String _formatPrice(String? price, BusinessSettingData? businessSetting) {
-    if (price == null || price.isEmpty) return 'No Price Provided';
-
-    // Try to parse the price string to double
-    final parsedPrice = double.tryParse(price);
-    if (parsedPrice == null) return price; // Return original if can't parse
-
-    if (businessSetting != null) {
-      final symbol = businessSetting.currency.symbol;
-      final decimalPlaces = businessSetting.currencyDecimalPlaces;
-      return '$symbol${parsedPrice.toStringAsFixed(decimalPlaces)}';
-    }
-
-    // Fallback if no business setting
-    return parsedPrice.toStringAsFixed(2);
-  }
-
   @override
   Widget build(BuildContext context) {
     final fontSize = Responsive(context);
     final productDetailAsync = ref.watch(productDetailNotifierProvider);
-    final businessSettingAsync = ref.watch(businessSettingNotifierProvider);
-
+    final currency = ref.watch(businessSettingNotifierProvider);
     ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
@@ -101,10 +78,6 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             backgroundColor: AppColors.background,
           ),
         );
-        Future.delayed(const Duration(seconds: 3), () {
-          // ignore: use_build_context_synchronously
-          Navigator.pop(context);
-        });
 
         // setState(() => _showFloatingCartButton = true);
         // Future.delayed(const Duration(seconds: 6), () {
@@ -277,15 +250,55 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                           ),
                           const SizedBox(height: 6),
 
-                          // Use business setting for currency formatting
-                          businessSettingAsync.when(
+                          currency.when(
                             data: (businessSetting) {
-                              final formattedPrice = _formatPrice(
-                                price,
-                                businessSetting,
-                              );
+                              if (price.isEmpty ||
+                                  price == 'Price not available') {
+                                return Text(
+                                  'Price not provided',
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: fontSize.subHeading,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                );
+                              }
+
+                              // Try to parse the price string to double
+                              final parsedPrice = double.tryParse(price);
+                              if (parsedPrice == null) {
+                                return Text(
+                                  price, // Show original price if can't parse
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: fontSize.subHeading,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                );
+                              }
+
+                              // Format with currency if business setting is available
+                              if (businessSetting != null) {
+                                final symbol = businessSetting.currency.symbol;
+                                final decimalPlaces =
+                                    businessSetting.currencyDecimalPlaces;
+
+                                // ✅ FIXED: Currency symbol AFTER the price number
+                                final formattedPrice =
+                                    '${parsedPrice.toStringAsFixed(decimalPlaces)}$symbol';
+
+                                return Text(
+                                  formattedPrice,
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: fontSize.subHeading,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                );
+                              }
+
                               return Text(
-                                formattedPrice,
+                                parsedPrice.toStringAsFixed(2),
                                 style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: fontSize.subHeading,
@@ -293,23 +306,29 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                                 ),
                               );
                             },
-                            loading: () => Text(
-                              price.isEmpty ? "No Price Provided" : price,
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: fontSize.subHeading,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            error: (error, stack) => Text(
-                              price.isEmpty ? "No Price Provided" : price,
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: fontSize.subHeading,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
+                            error: (err, _) {
+                              // Show price without currency formatting on error
+                              return Text(
+                                price.isEmpty ? 'Price not provided' : price,
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: fontSize.subHeading,
+                                  color: AppColors.textSecondary,
+                                ),
+                              );
+                            },
+                            loading: () {
+                              return Text(
+                                price.isEmpty ? 'Price not provided' : price,
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: fontSize.subHeading,
+                                  color: AppColors.textSecondary,
+                                ),
+                              );
+                            },
                           ),
+
                           const SizedBox(height: 16),
 
                           Wrap(
@@ -421,95 +440,6 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             error: (error, _) => errorOverShimmer(error: error),
             loading: () => _loadingShimmer(context),
           ),
-          /*
-          if (_showFloatingCartButton)
-            Positioned(
-              bottom: 90,
-              left: 16,
-              right: 16,
-              child: Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primary.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(28),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CartPage(),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart_checkout,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'View Cart',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${itemCount} items',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            */
         ],
       ),
     );

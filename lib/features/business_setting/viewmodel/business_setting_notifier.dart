@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_model.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 
@@ -24,7 +25,7 @@ class BusinessSettingNotifier
 
   Future<void> _init() async {
     // Business settings usually don't have pagination, so we load from cache first
-    final cached = _localCache.get('business_setting');
+    final cached = _localCache.get('business_settings');
     if (cached != null) {
       state = AsyncValue.data(cached.toDataModel());
     }
@@ -43,7 +44,8 @@ class BusinessSettingNotifier
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'X-API-Token': 'your-api-token', // Replace with actual token
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'X-API-Token': AppConfig.xApiToken,
           },
         ),
       );
@@ -67,7 +69,7 @@ class BusinessSettingNotifier
         final hiveModel = BusinessSettingHiveModel.fromDataModel(
           businessSetting,
         );
-        _localCache.put('business_setting', hiveModel);
+        _localCache.put('business_settings', hiveModel);
 
         state = AsyncValue.data(businessSetting);
       } else {
@@ -78,7 +80,7 @@ class BusinessSettingNotifier
       }
     } on DioException catch (e, st) {
       // If online fetch fails, use cached data if available
-      final cached = _localCache.get('business_setting');
+      final cached = _localCache.get('business_settings');
       if (cached != null) {
         state = AsyncValue.data(cached.toDataModel());
       } else {
