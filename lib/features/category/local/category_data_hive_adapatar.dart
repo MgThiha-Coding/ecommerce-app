@@ -3,7 +3,7 @@ import 'package:picoshop_theme2/features/category/local/category_data_hive.dart'
 
 class CategoryDataHiveAdapter extends TypeAdapter<CategoryHiveModel> {
   @override
-  final typeId = 2;
+  final typeId = 1;
 
   @override
   CategoryHiveModel read(BinaryReader reader) {

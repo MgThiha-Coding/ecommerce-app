@@ -3,7 +3,7 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
 
 class ProductDataHiveAdapter extends TypeAdapter<ProductHiveModel> {
   @override
-  final typeId = 0; 
+  final typeId = 2; 
 
   @override
   ProductHiveModel read(BinaryReader reader) {

@@ -1,10 +1,10 @@
-// business_setting_hive_adapter.dart
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'business_setting_hive_model.dart';
 
 class BusinessSettingHiveAdapter extends TypeAdapter<BusinessSettingHiveModel> {
   @override
-  final int typeId = 3; // Different typeId for business settings
+  final int typeId = 3;
 
   @override
   BusinessSettingHiveModel read(BinaryReader reader) {
