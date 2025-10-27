@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
@@ -71,123 +70,117 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       }
     });
 
-    return Container(
-      color: Colors.blue.withOpacity(0.3),
-      child: SafeArea(
-        child: Scaffold(
-          // backgroundColor: AppColors.background,
-          /*
-          appBar: AppBar(
-            backgroundColor: AppColors.background,
-            scrolledUnderElevation: 0,
-            elevation: 0,
-            centerTitle: true,
-            title: Text(
-              LocaleKeys.availableProducts.tr(),
-              style: GoogleFonts.poppins(
-                fontSize: fontSize.subHeading,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textPrimary,
-              ),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue.withOpacity(0.3),
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          LocaleKeys.availableProducts.tr(),
+          style: GoogleFonts.poppins(
+            fontSize: fontSize.subHeading,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textPrimary,
           ),
-          */
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.blue.withOpacity(0.3), Colors.white],
-              ),
-            ),
-            child: RefreshIndicator(
-              backgroundColor: Colors.white,
-              onRefresh: _onRefresh,
-              child: Stack(
-                children: [
-                  productListAsync.when(
-                    loading: () => _productGridShimmer(context),
-                    error: (error, _) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.grey[100],
-                            content: Text(
-                              error.toString(),
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                color: Colors.blueGrey,
-                                fontSize: 10,
-                              ),
-                            ),
+        ),
+      ),
+    
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.blue.withOpacity(0.3), Colors.white],
+          ),
+        ),
+        child: RefreshIndicator(
+          backgroundColor: Colors.white,
+          onRefresh: _onRefresh,
+          child: Stack(
+            children: [
+              productListAsync.when(
+                loading: () => _productGridShimmer(context),
+                error: (error, _) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.grey[100],
+                        content: Text(
+                          error.toString(),
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            color: Colors.blueGrey,
+                            fontSize: 10,
                           ),
-                        );
-                      });
-                      return const SizedBox.shrink();
-                    },
-                    data: (products) {
-                      // Empty Widget
-                      if (products.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'Product list is currently unavailable.',
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w300,
-                              fontSize: fontSize.body,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        );
-                      }
-
-                      // Product List
-                      return productListView(
-                        context,
-                        _scrollController,
-                        products,
-                        fontSize,
-                      );
-                    },
-                  ),
-
-                  // FloatingCartButton
-                  if (_showFloatingCartButton)
-                    floatingCartButton(context, fontSize),
-
-                  Positioned(
-                    top: 10,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: Container(
-                        height: 36,
-                        width: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              LocaleKeys.availableProducts.tr(),
-                              style: GoogleFonts.poppins(
-                                fontSize: fontSize.body,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                            ),
-                            //Icon(LineIcons.shoppingBag,size: fontSize.heading,)
-                          ],
                         ),
                       ),
+                    );
+                  });
+                  return const SizedBox.shrink();
+                },
+                data: (products) {
+                  // Empty Widget
+                  if (products.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Product list is currently unavailable.',
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w300,
+                          fontSize: fontSize.body,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    );
+                  }
+    
+                  // Product List
+                  return productListView(
+                    context,
+                    _scrollController,
+                    products,
+                    fontSize,
+                  );
+                },
+              ),
+    
+              // FloatingCartButton
+              if (_showFloatingCartButton)
+                floatingCartButton(context, fontSize),
+              /*
+              Positioned(
+                top: 10,
+                left: 0,
+                right: 0,
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Container(
+                    height: 36,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          LocaleKeys.availableProducts.tr(),
+                          style: GoogleFonts.poppins(
+                            fontSize: fontSize.body,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        ),
+                        //Icon(LineIcons.shoppingBag,size: fontSize.heading,)
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              */
+            ],
           ),
         ),
       ),
@@ -205,7 +198,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 6 : 20,
-        vertical: isMobile ? 6 : 10,
+        vertical: isMobile ? 0 : 10,
       ),
       child: MasonryGridView.count(
         controller: scrollController,

@@ -73,97 +73,109 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         backgroundColor: AppColors.background,
         title: Text(
           LocaleKeys.searchProduct.tr(),
-          style: GoogleFonts.poppins(fontSize: 14, color: AppColors.primary),
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              height: 40,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _searchController,
-                      hintText: 'Search by $_selectedFilter...',
-                      validator: (_) => null,
-                      addObscure: false,
-                      onChanged: (_) => _onSearchChanged(),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedFilter,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'product',
-                            child: Text(
-                              'Product',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'brand',
-                            child: Text(
-                              'Brand',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: 'category',
-                            child: Text(
-                              'Category',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedFilter = value);
-                            _onSearchChanged();
-                          }
-                        },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.withOpacity(0.3)],
+          ),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                height: 40,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: _searchController,
+                        hintText: 'Search by $_selectedFilter...',
+                        validator: (_) => null,
+                        addObscure: false,
+                        onChanged: (_) => _onSearchChanged(),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: searchState.when(
-              data: (products) {
-                if (products.isEmpty) return _buildEmptyState();
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return _buildProductTile(product);
-                  },
-                );
-              },
-              loading: () => const _AnimatedSearchingText(),
-              error: (e, _) => Center(
-                child: Text(
-                  'Something went wrong',
-                  style: GoogleFonts.poppins(color: Colors.red),
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedFilter,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'product',
+                              child: Text(
+                                'Product',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'brand',
+                              child: Text(
+                                'Brand',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'category',
+                              child: Text(
+                                'Category',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _selectedFilter = value);
+                              _onSearchChanged();
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            const Divider(height: 1),
+            Expanded(
+              child: searchState.when(
+                data: (products) {
+                  if (products.isEmpty) return _buildEmptyState();
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return _buildProductTile(product);
+                    },
+                  );
+                },
+                loading: () => const _AnimatedSearchingText(),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Something went wrong',
+                    style: GoogleFonts.poppins(color: Colors.red),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -233,11 +245,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 40, color: Colors.grey.shade500),
+          const Icon(Icons.search_off, size: 40, color: Colors.white),
           const SizedBox(height: 10),
           Text(
             'No products found',
-            style: GoogleFonts.poppins(color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(color: Colors.white),
           ),
         ],
       ),
