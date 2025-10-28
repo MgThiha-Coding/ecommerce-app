@@ -376,9 +376,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 right: 0,
                 child: Responsive(context).isMobile
                     ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 2),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          padding: EdgeInsets.symmetric(horizontal: 2),
                           child: SearchBar(),
                         ),
                       )
@@ -445,15 +445,24 @@ class SearchBar extends StatelessWidget {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(
+                    width: 1,
+                    color: AppColors.brandLabelColor,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(
+                    width: 1,
+                    color: AppColors.brandLabelColor,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(
+                    width: 1,
+                    color: AppColors.brandLabelColor,
+                  ),
                 ),
                 isDense: true,
               ),

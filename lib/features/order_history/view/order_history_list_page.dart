@@ -1,10 +1,11 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/order_history/model/order_history_response.dart';
 import 'package:picoshop_theme2/features/order_history/viewmodel/order_histories_notifier.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -21,16 +22,25 @@ class _OrderHistoryListPageState extends ConsumerState<OrderHistoryListPage> {
   @override
   void initState() {
     super.initState();
-    // fetch histories
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(orderHistoriesNotifierProvider.notifier).getOrderHistories();
     });
+  }
+
+  String formatPrice(double amount, BusinessSettingData? businessSetting) {
+    if (businessSetting != null) {
+      final symbol = businessSetting.currency.symbol;
+      final decimalPlaces = businessSetting.currencyDecimalPlaces;
+      return '${amount.toStringAsFixed(decimalPlaces)} $symbol';
+    }
+    return amount.toStringAsFixed(2);
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final historiesAsync = ref.watch(orderHistoriesNotifierProvider);
+    final currencyAsync = ref.watch(businessSettingNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -59,15 +69,25 @@ class _OrderHistoryListPageState extends ConsumerState<OrderHistoryListPage> {
           }
 
           final orders = response.data;
+
           return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             itemCount: orders.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final order = orders[index];
+
+              // Extract business setting if loaded
+              final businessSetting = currencyAsync.maybeWhen(
+                data: (data) => data,
+                orElse: () => null,
+              );
+
               return _OrderCard(
                 order: order,
                 responsive: responsive,
+                businessSetting: businessSetting,
+                formatPrice: formatPrice,
               );
             },
           );
@@ -118,8 +138,15 @@ class _OrderHistoryListPageState extends ConsumerState<OrderHistoryListPage> {
 class _OrderCard extends StatefulWidget {
   final OrderHistory order;
   final Responsive responsive;
+  final BusinessSettingData? businessSetting;
+  final String Function(double, BusinessSettingData?) formatPrice;
 
-  const _OrderCard({required this.order, required this.responsive});
+  const _OrderCard({
+    required this.order,
+    required this.responsive,
+    required this.businessSetting,
+    required this.formatPrice,
+  });
 
   @override
   State<_OrderCard> createState() => _OrderCardState();
@@ -157,6 +184,8 @@ class _OrderCardState extends State<_OrderCard> {
   Widget build(BuildContext context) {
     final o = widget.order;
     final responsive = widget.responsive;
+    final currency = widget.businessSetting;
+    final formatPrice = widget.formatPrice;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 240),
@@ -167,7 +196,6 @@ class _OrderCardState extends State<_OrderCard> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.03),
             blurRadius: 8,
             offset: const Offset(0, 3),
@@ -176,11 +204,9 @@ class _OrderCardState extends State<_OrderCard> {
       ),
       child: Column(
         children: [
-          // Header row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // left: order info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,16 +239,12 @@ class _OrderCardState extends State<_OrderCard> {
                   ],
                 ),
               ),
-
-              // right: status and total
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
                       color: _statusColor(o.status).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -237,7 +259,7 @@ class _OrderCardState extends State<_OrderCard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    o.amountTotal,
+                    formatPrice(double.tryParse(o.amountTotal) ?? 0, currency),
                     style: GoogleFonts.poppins(
                       fontSize: responsive.body - 1,
                       fontWeight: FontWeight.w700,
@@ -248,10 +270,7 @@ class _OrderCardState extends State<_OrderCard> {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Expand / collapse control
           GestureDetector(
             onTap: () => setState(() => expanded = !expanded),
             child: Row(
@@ -272,15 +291,12 @@ class _OrderCardState extends State<_OrderCard> {
               ],
             ),
           ),
-
-          // Animated details
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Column(
                 children: [
-                  // Items list
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -290,7 +306,6 @@ class _OrderCardState extends State<_OrderCard> {
                       final it = o.items[idx];
                       return Row(
                         children: [
-                          // placeholder product thumbnail
                           Container(
                             height: 56,
                             width: 56,
@@ -323,7 +338,7 @@ class _OrderCardState extends State<_OrderCard> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Qty: ${it.quantity} • Price: ${it.uomPrice}',
+                                  'Qty: ${it.quantity} • Price: ${formatPrice(double.tryParse(it.uomPrice) ?? 0, currency)}',
                                   style: GoogleFonts.poppins(
                                     fontSize: responsive.caption,
                                     color: Colors.black54,
@@ -333,7 +348,7 @@ class _OrderCardState extends State<_OrderCard> {
                             ),
                           ),
                           Text(
-                            it.subtotal,
+                            formatPrice(double.tryParse(it.subtotal) ?? 0, currency),
                             style: GoogleFonts.poppins(
                               fontSize: responsive.body - 1,
                               fontWeight: FontWeight.w700,
@@ -344,10 +359,7 @@ class _OrderCardState extends State<_OrderCard> {
                       );
                     },
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Shipping address block
                   if (o.shippingAddress != null)
                     Container(
                       width: double.infinity,
@@ -395,10 +407,7 @@ class _OrderCardState extends State<_OrderCard> {
                         ],
                       ),
                     ),
-
                   const SizedBox(height: 12),
-
-                  // Summary row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -410,7 +419,7 @@ class _OrderCardState extends State<_OrderCard> {
                         ),
                       ),
                       Text(
-                        o.amountTotal,
+                        formatPrice(double.tryParse(o.amountTotal) ?? 0, currency),
                         style: GoogleFonts.poppins(
                           fontSize: responsive.body - 1,
                           fontWeight: FontWeight.w700,

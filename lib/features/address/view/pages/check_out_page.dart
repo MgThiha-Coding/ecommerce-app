@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
 import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
@@ -18,7 +20,6 @@ import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.d
 import 'package:picoshop_theme2/features/payment/model/response/payment_method_response.dart';
 import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
-import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -56,6 +57,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     final responsive = Responsive(context);
     final cartItemsAsync = ref.watch(cartNotifierProvider);
     final orderState = ref.watch(createOrderNotifierProvider);
+    final currency = ref.watch(businessSettingNotifierProvider);
 
     ref.listen<AsyncValue<CreateOrderResponse?>>(createOrderNotifierProvider, (
       previous,
@@ -64,13 +66,12 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       next.when(
         data: (response) {
           if (response != null && response.success) {
+            ref.read(cartNotifierProvider.notifier).fetchCart();
+            ref.read(cartNotifierProvider.notifier).refreshCart();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Order placed successfully!")),
             );
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WrapperPage()),
-            );
+            Navigator.pop(context);
           }
         },
         loading: () {},
@@ -147,6 +148,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                   itemTotal,
                   shippingAmount,
                   itemTotal + shippingAmount,
+                  currency,
                 ),
 
                 const SizedBox(height: 30),
@@ -419,7 +421,23 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     double itemTotal,
     double shippingAmount,
     double totalCost,
+    AsyncValue<BusinessSettingData?> currency,
   ) {
+    String formatPrice(double amount) {
+      return currency.when(
+        data: (businessSetting) {
+          if (businessSetting != null) {
+            final symbol = businessSetting.currency.symbol;
+            final decimalPlaces = businessSetting.currencyDecimalPlaces;
+            return '${amount.toStringAsFixed(decimalPlaces)}$symbol';
+          }
+          return amount.toStringAsFixed(2); // fallback
+        },
+        loading: () => amount.toStringAsFixed(2),
+        error: (_, __) => amount.toStringAsFixed(2),
+      );
+    }
+
     return Card(
       color: AppColors.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -427,17 +445,11 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
           children: [
-            _buildSummaryRow(
-              "Items ($itemCount)",
-              "${itemTotal.toStringAsFixed(2)} MMK",
-            ),
+            _buildSummaryRow("Items ($itemCount)", formatPrice(itemTotal)),
             const SizedBox(height: 6),
-            _buildSummaryRow(
-              "Shipping",
-              "${shippingAmount.toStringAsFixed(2)} MMK",
-            ),
+            _buildSummaryRow("Shipping", formatPrice(shippingAmount)),
             const Divider(),
-            _buildSummaryRow("Total", "${totalCost.toStringAsFixed(2)} MMK"),
+            _buildSummaryRow("Total", formatPrice(totalCost)),
           ],
         ),
       ),

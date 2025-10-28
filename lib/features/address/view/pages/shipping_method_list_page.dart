@@ -5,6 +5,7 @@ import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_noti
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
+import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShippingMethodListPage extends ConsumerStatefulWidget {
@@ -32,6 +33,23 @@ class _ShippingMethodListPageState
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final shippingAsync = ref.watch(shippingMethodNotifierProvider);
+    final currencyAsync = ref.watch(businessSettingNotifierProvider);
+
+    String formatPrice(String amount) {
+      final parsedAmount = double.tryParse(amount) ?? 0;
+      return currencyAsync.when(
+        data: (businessSetting) {
+          if (businessSetting != null) {
+            final symbol = businessSetting.currency.symbol;
+            final decimalPlaces = businessSetting.currencyDecimalPlaces;
+            return '${parsedAmount.toStringAsFixed(decimalPlaces)}$symbol';
+          }
+          return parsedAmount.toStringAsFixed(2);
+        },
+        loading: () => parsedAmount.toStringAsFixed(2),
+        error: (_, __) => parsedAmount.toStringAsFixed(2),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -88,7 +106,6 @@ class _ShippingMethodListPageState
                     ),
                     boxShadow: [
                       BoxShadow(
-                        // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
@@ -123,7 +140,7 @@ class _ShippingMethodListPageState
                             const SizedBox(height: 4),
                             if (item.amount.isNotEmpty)
                               Text(
-                                "${double.tryParse(item.amount)?.toStringAsFixed(2) ?? item.amount} MMK",
+                                formatPrice(item.amount),
                                 style: GoogleFonts.poppins(
                                   fontSize: responsive.body,
                                   color: Colors.black54,

@@ -9,8 +9,6 @@ import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart';
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/pages/payment_method_page.dart';
-import 'package:picoshop_theme2/features/profile/view/pages/shipping_method_page.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 
@@ -163,6 +161,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
               ),
+              /*
               _buildMenuTile(
                 title: LocaleKeys.shippingMethod.tr(),
                 icon: Icons.local_shipping,
@@ -179,6 +178,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (_) => const PaymentMethodPage()),
                 ),
               ),
+              */
               _buildMenuTile(
                 title: LocaleKeys.language.tr(),
                 icon: Icons.language,
