@@ -72,6 +72,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
 
     return Scaffold(
       appBar: AppBar(
+        // ignore: deprecated_member_use
         backgroundColor: Colors.blue.withOpacity(0.3),
         scrolledUnderElevation: 0,
         elevation: 0,
@@ -85,12 +86,13 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         ),
       ),
-    
+
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            // ignore: deprecated_member_use
             colors: [Colors.blue.withOpacity(0.3), Colors.white],
           ),
         ),
@@ -99,6 +101,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           onRefresh: _onRefresh,
           child: Stack(
             children: [
+              // Product List
               productListAsync.when(
                 loading: () => _productGridShimmer(context),
                 error: (error, _) {
@@ -134,7 +137,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                       ),
                     );
                   }
-    
+
                   // Product List
                   return productListView(
                     context,
@@ -144,42 +147,10 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                   );
                 },
               ),
-    
+
               // FloatingCartButton
               if (_showFloatingCartButton)
                 floatingCartButton(context, fontSize),
-              /*
-              Positioned(
-                top: 10,
-                left: 0,
-                right: 0,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 36,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          LocaleKeys.availableProducts.tr(),
-                          style: GoogleFonts.poppins(
-                            fontSize: fontSize.body,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
-                        ),
-                        //Icon(LineIcons.shoppingBag,size: fontSize.heading,)
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              */
             ],
           ),
         ),
@@ -227,6 +198,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.grey.withOpacity(0.15),
                     blurRadius: 8,
                     spreadRadius: 1,
@@ -300,38 +272,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        /*
-                        SizedBox(
-                          height: isMobile ? 35 : 30,
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(productId!),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            child: Text(
-                              'See Detail',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: fontSize.caption,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        */
                       ],
                     ),
                   ),
@@ -343,154 +283,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       ),
     );
   }
-
-  /*
-  Widget productListView(
-    BuildContext context,
-    ScrollController scrollController,
-    List<ProductDataModel> products,
-    Responsive fontSize,
-  ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: fontSize.isMobile ? 2 : 20,
-        vertical: fontSize.isMobile ? 6 : 10,
-      ),
-      child: GridView.builder(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: products.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: Responsive(context).isMobile ? 2 : 4,
-          mainAxisSpacing: 0,
-          crossAxisSpacing: 0,
-          childAspectRatio: fontSize.isMobile ? 1 / 1.6 : 1 / 1.4,
-        ),
-        itemBuilder: (context, index) {
-          final product = products[index];
-          final productId = products[index].id;
-          return InkWell(
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.grey.withOpacity(0.15),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(14),
-                      ),
-                      child: product.productImage?.isNotEmpty == true
-                          ? Image.network(
-                              product.productImage!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (_, __, ___) => Image.asset(
-                                AppImage.emptyContainer,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                              ),
-                            )
-                          : Image.asset(
-                              AppImage.emptyContainer,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name ?? '',
-                          style: GoogleFonts.poppins(
-                            fontSize: fontSize.body,
-                            fontWeight: Responsive(context).isMobile
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: fontSize.isMobile ? 3 : 5),
-                        Text(
-                          'Brand ${product.brandName ?? ''}',
-                          style: GoogleFonts.poppins(
-                            fontSize: fontSize.caption,
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          product.productType ?? '',
-                          style: GoogleFonts.poppins(
-                            fontSize: fontSize.caption,
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: fontSize.isMobile ? 6 : 10),
-                        SizedBox(
-                          height: Responsive(context).isMobile ? 35 : 30,
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(productId!),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            child: Text(
-                              'See Detail',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: fontSize.caption,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-  */
 
   // FloatingCartButton
   Widget floatingCartButton(BuildContext context, Responsive fontSize) {
@@ -505,6 +297,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           gradient: LinearGradient(
             colors: [
               AppColors.textSecondary,
+              // ignore: deprecated_member_use
               AppColors.textSecondary.withOpacity(0.8),
             ],
             begin: Alignment.topLeft,
@@ -513,6 +306,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: AppColors.primary.withOpacity(0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
@@ -535,6 +329,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
                     color: Colors.white.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),

@@ -229,13 +229,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
         ),
-        trailing: Text(
-          product.stockSumCurrentQuantity ?? '',
-          style: GoogleFonts.poppins(
-            color: Colors.green.shade700,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
     );
   }
@@ -321,9 +314,9 @@ class _AnimatedSearchingTextState extends State<_AnimatedSearchingText>
         Text(
           'Searching',
           style: TextStyle(
-            color: color,
+            color: AppColors.background,
             fontWeight: FontWeight.w500,
-            fontSize: Responsive(context).body,
+            fontSize: Responsive(context).subHeading,
           ),
         ),
         _buildAnimatedDots(color),

@@ -15,11 +15,11 @@ import 'package:picoshop_theme2/features/category/view/pages/category_list_page.
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
-import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
 import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
+import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
-import 'package:picoshop_theme2/features/search/view/search_page.dart';
+import 'package:picoshop_theme2/features/search/view/pages/search_page.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -74,6 +74,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+  // Empty Widget
   Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
@@ -165,12 +166,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
         ),
       ),
+
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
+              // ignore: deprecated_member_use
               colors: [Colors.white, Colors.blue.withOpacity(0.3)],
             ),
           ),
@@ -187,16 +190,21 @@ class _HomePageState extends ConsumerState<HomePage> {
                     controller: _scrollController,
                     padding: const EdgeInsets.only(top: 50),
                     children: [
-                      SectionHeader(LocaleKeys.brand.tr(), () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BrandListPage(),
-                          ),
-                        );
-                      }),
+                      // Brand Section
+                      sectionHeader(
+                        Responsive(context),
+                        LocaleKeys.brand.tr(),
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BrandListPage(),
+                            ),
+                          );
+                        },
+                      ),
                       SizedBox(
-                        height: 55,
+                        height: 40,
                         child: brandListAsync.when(
                           data: (brandList) => brandList.isEmpty
                               ? _buildEmptyState(
@@ -211,16 +219,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                               _buildEmptyState(error.toString()),
                         ),
                       ),
-                      SectionHeader(LocaleKeys.category.tr(), () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CategoryListPage(),
-                          ),
-                        );
-                      }),
+
+                      // Category Section
+                      sectionHeader(
+                        Responsive(context),
+                        LocaleKeys.category.tr(),
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CategoryListPage(),
+                            ),
+                          );
+                        },
+                      ),
                       SizedBox(
-                        height: 70,
+                        height: 60,
                         child: categoryListAsync.when(
                           data: (categoryList) => categoryList.isEmpty
                               ? _buildEmptyState(
@@ -235,22 +249,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                               _buildEmptyState(error.toString()),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: BrandPreviewSlider(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Center(
-                          child: Text(
-                            LocaleKeys.availableProducts.tr(),
-                            style: GoogleFonts.poppins(
-                              color: AppColors.primary,
-                              fontSize: Responsive(context).body,
-                              fontWeight: FontWeight.w500,
+
+                      // Available Product Sections
+                      sectionHeader(
+                        Responsive(context),
+                        LocaleKeys.availableProducts.tr(),
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProductListPage(),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(
@@ -294,6 +305,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                       borderRadius: BorderRadius.circular(3),
                                       boxShadow: [
                                         BoxShadow(
+                                          // ignore: deprecated_member_use
                                           color: Colors.grey.withOpacity(0.15),
                                           blurRadius: 8,
                                           spreadRadius: 1,
@@ -342,9 +354,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                              const SizedBox(height: 4),
+                                              const SizedBox(height: 2),
+
                                               Text(
-                                                '${12000} MMK',
+                                                product.productType.toString(),
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 11,
                                                   color:
@@ -370,8 +383,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                 ),
               ),
+
+              // Sticky Float SearchBar
               Positioned(
-                top: 0,
+                top: 6,
                 left: 0,
                 right: 0,
                 child: Responsive(context).isMobile
@@ -391,6 +406,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  // Shimmer Loading
+
   Widget _buildShimmer({required double height}) {
     return Shimmer.fromColors(
       baseColor: AppColors.background,
@@ -407,6 +424,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
+// SearchBar
 class SearchBar extends StatelessWidget {
   const SearchBar({super.key});
 
@@ -432,37 +450,32 @@ class SearchBar extends StatelessWidget {
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Colors.grey[100],
                 hintText: LocaleKeys.search.tr(),
                 hintStyle: TextStyle(
                   fontFamily: "Poppins",
                   fontSize: fontSize.body,
+                  color: AppColors.textPrimary,
                 ),
-                prefixIcon: const Icon(LineIcons.search),
+                prefixIcon: const Icon(
+                  LineIcons.search,
+                  color: AppColors.textPrimary,
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 0,
                   horizontal: 12,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    width: 1,
-                    color: AppColors.brandLabelColor,
-                  ),
+                  borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    width: 1,
-                    color: AppColors.brandLabelColor,
-                  ),
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    width: 1,
-                    color: AppColors.brandLabelColor,
-                  ),
+                  borderSide: BorderSide.none,
                 ),
                 isDense: true,
               ),
