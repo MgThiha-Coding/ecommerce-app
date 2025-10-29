@@ -3,7 +3,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -84,9 +83,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
             storage.setVerifyStage(true);
             await storage.setPendingEmail(_emailController.text);
-            await storage.setVerifyStage(
-              true,
-            ); // mark that verification is in progress
+            await storage.setVerifyStage(true);
 
             Navigator.push(
               // ignore: use_build_context_synchronously
@@ -107,9 +104,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               content: Text(
                 error.toString(),
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  color: Colors.blueGrey,
-                  fontSize: 12,
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: Responsive(context).body,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),
@@ -167,6 +165,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
 
                   const SizedBox(height: 20),
+
+                  // First Name
                   buildLabel('First Name'),
                   const SizedBox(height: 4),
                   AppTextField(
@@ -176,8 +176,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? "Please enter your first name"
                         : null,
                   ),
-
                   const SizedBox(height: 4),
+
+                  // Last Name
                   buildLabel('Last Name'),
                   const SizedBox(height: 4),
                   AppTextField(
@@ -187,8 +188,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? "Pleae enter your last name"
                         : null,
                   ),
-
                   const SizedBox(height: 4),
+
+                  // Email
                   buildLabel('Email'),
                   const SizedBox(height: 4),
                   AppTextField(
@@ -198,23 +200,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ? "Please enter your email"
                         : null,
                   ),
-
                   const SizedBox(height: 4),
 
-                  // Phone Field
+                  // Phone 
                   buildLabel('Phone'),
                   const SizedBox(height: 4),
                   AppTextField(
                     controller: _phoneController,
+                    keyboardType: TextInputType.number,
                     hintText: "Phone",
                     validator: (v) => v == null || v.isEmpty
                         ? "Please enter your phone"
                         : null,
                   ),
-
                   const SizedBox(height: 4),
 
-                  // Password Field
+                  // Password 
                   buildLabel('Password'),
                   const SizedBox(height: 4),
                   AppTextField(
@@ -225,18 +226,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       if (v == null || v.isEmpty) {
                         return "Password required";
                       }
-                      if (v.length < 6) {
+                      if (v.length < 8) {
                         return "Password must be at least 6 characters";
                       }
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 4),
 
+                  // Confirm Password
                   buildLabel('Confirm Password'),
                   const SizedBox(height: 4),
-
                   AppTextField(
                     controller: _confirmController,
                     hintText: "Confirm Password",
@@ -251,7 +251,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 16),
 
                   // Register Button

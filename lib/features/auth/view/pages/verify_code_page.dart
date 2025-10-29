@@ -109,15 +109,16 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           }
         },
         error: (error, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
+           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
               content: Text(
                 error.toString(),
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  color: Colors.blueGrey,
-                  fontSize: 12,
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: Responsive(context).body,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ),

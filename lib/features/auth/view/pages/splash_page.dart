@@ -112,7 +112,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                 'Discover your favorite items here',
                 style: TextStyle(
                   fontFamily: "Poppins",
-                  fontSize: fontSize.subHeading,
+                  fontSize: fontSize.body,
                   color: AppColors.textSecondary,
                 ),
               ),

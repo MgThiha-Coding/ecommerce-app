@@ -1,6 +1,9 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
@@ -29,10 +32,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // get device name
+  Future<String?> getDeviceName() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (kIsWeb) {
+      final webInfo = await deviceInfo.webBrowserInfo;
+      return '${webInfo.browserName}-${webInfo.platform}';
+    } else if (Platform.isAndroid) {
+      return (await deviceInfo.androidInfo).id;
+    } else if (Platform.isIOS) {
+      return (await deviceInfo.iosInfo).identifierForVendor;
+    }
+    return null;
+  }
+
   // login
   void login() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final deviceName = getDeviceName();
     if (email.isEmpty || password.isEmpty) return;
 
     ref
@@ -42,7 +60,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             emailOrPhoneOrUserName: email,
             password: password,
             rememberMe: true,
-            deviceName: 'Pico User',
+            deviceName: deviceName.toString(),
           ),
         );
   }
@@ -85,6 +103,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               phone: user.phone,
             );
 
+            // set log In
             storage.isLoggedIn();
 
             AppConfig.updateAccessToken(auth.accessToken);
@@ -98,22 +117,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         },
         error: (error, _) {
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.grey.shade200,
-                content: Text(
-                  error.toString(),
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    color: Colors.red.shade700,
-                    fontSize: 12,
-                  ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.grey[200],
+              content: Text(
+                error.toString(),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: Responsive(context).body,
+                  color: AppColors.textSecondary,
                 ),
               ),
-            );
+            ),
+          );
         },
       );
     });
@@ -137,7 +154,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(AppImage.appLogo, scale: 4),
                   ),
+
                   const SizedBox(height: 6),
+                  
                   Text(
                     'Welcome to Pico Mart',
                     style: TextStyle(
@@ -148,8 +167,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
 
-                  Responsive(context).isMobile?
-                  const SizedBox(height: 30):const SizedBox(height: 15,),
+                  Responsive(context).isMobile
+                      ? const SizedBox(height: 30)
+                      : const SizedBox(height: 15),
 
                   // Email Field
                   Align(

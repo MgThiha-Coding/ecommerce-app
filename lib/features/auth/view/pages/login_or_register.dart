@@ -27,23 +27,28 @@ class _LoginOrRegisterState extends ConsumerState<LoginOrRegister> {
 
   /// Checks if user has a pending verification
   Future<void> _checkVerificationStage() async {
+    // check the secureStorage
     final storage = ref.read(secureStorageProvider);
+    // check verifyStage
     final verifyStage = await storage.getVerifyStage();
+    // check pendingEmail
     final pendingEmail = await storage.getPendingEmail();
 
     if (!mounted) return;
 
+    // if verifyStage and pending email is not null
+    // set verficationChecked 'true'
+    // show snackbar to finish verify code
+    // route to verify code page
     if (verifyStage && pendingEmail != null) {
       setState(() {
         _verificationChecked = true;
       });
 
-      // Show a subtle prompt for the user
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete your verification')),
       );
 
-      // Navigate to VerifyCodePage without blocking back
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => VerifyCodePage(email: pendingEmail)),
@@ -69,7 +74,7 @@ class _LoginOrRegisterState extends ConsumerState<LoginOrRegister> {
 
   @override
   Widget build(BuildContext context) {
-    // While checking verification stage, show a loader
+    // show a loader when checking the verification
     if (!_verificationChecked) {
       return const Scaffold(
         backgroundColor: AppColors.background,
