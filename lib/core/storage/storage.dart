@@ -8,6 +8,7 @@ class SecureStorage {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
+  // Auth Data
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
@@ -18,19 +19,7 @@ class SecureStorage {
     await _storage.write(key: 'user_id', value: userId);
   }
 
-  Future<String?> getAccessToken() async =>
-      await _storage.read(key: 'access_token');
-
-  Future<String?> getRefreshToken() async =>
-      await _storage.read(key: 'refresh_token');
-
-  Future<String?> getUserId() async => await _storage.read(key: 'user_id');
-
-  Future<bool> isLoggedIn() async {
-    final token = await _storage.read(key: 'access_token');
-    return token != null && token.isNotEmpty;
-  }
-
+  // User Info
   Future<void> saveUserInfo({
     required String name,
     required String email,
@@ -48,6 +37,23 @@ class SecureStorage {
     return {'name': name, 'email': email, 'phone': phone};
   }
 
+  // clear the storage
+  Future<void> clear() async => await _storage.deleteAll();
+
+  // isLoggedIn
+  Future<bool> isLoggedIn() async {
+    final token = await _storage.read(key: 'access_token');
+    return token != null && token.isNotEmpty;
+  }
+
+  Future<String?> getAccessToken() async =>
+      await _storage.read(key: 'access_token');
+
+  Future<String?> getRefreshToken() async =>
+      await _storage.read(key: 'refresh_token');
+
+  Future<String?> getUserId() async => await _storage.read(key: 'user_id');
+
   Future<void> setFirstLaunchFlag(bool isFirstLaunch) async {
     await _storage.write(
       key: 'first_launch',
@@ -55,30 +61,34 @@ class SecureStorage {
     );
   }
 
+  Future<void> setVerifyStage(bool isVerifyStage) async {
+    await _storage.write(
+      key: 'verify_stage',
+      value: isVerifyStage ? 'true' : 'false',
+    );
+  }
+
+  Future<void> setPendingEmail(String email) async {
+    await _storage.write(key: 'pending_email', value: email);
+  }
+
+  Future<String?> getPendingEmail() async {
+  return await _storage.read(key: 'pending_email');
+}
+
+
+  Future<void> clearPendingEmail() async {
+    await _storage.delete(key: 'pending_email');
+  }
+
+  Future<bool> getVerifyStage() async {
+    final value = await _storage.read(key: 'verify_stage');
+    return value == 'true';
+  }
+
   Future<bool?> getFirstLaunchFlag() async {
     final value = await _storage.read(key: 'first_launch');
     if (value == null) return null;
     return value == 'true';
   }
-
-  Future<void> saveAuthStage(String stage) async {
-    await _storage.write(key: 'auth_stage', value: stage);
-  }
-
-  Future<String?> getAuthStage() async =>
-      await _storage.read(key: 'auth_stage');
-
-  Future<void> savePendingEmail(String email) async {
-    await _storage.write(key: 'pending_email', value: email);
-  }
-
-  Future<String?> getPendingEmail() async =>
-      await _storage.read(key: 'pending_email');
-
-  Future<void> clearAuthStage() async {
-    await _storage.delete(key: 'auth_stage');
-    await _storage.delete(key: 'pending_email');
-  }
-
-  Future<void> clear() async => await _storage.deleteAll();
 }
