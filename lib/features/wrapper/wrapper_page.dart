@@ -1,196 +1,3 @@
-/*
-import 'package:flutter/material.dart' hide Badge;
-import 'package:animations/animations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:line_icons/line_icons.dart';
-import 'package:picoshop_theme2/core/consts/app_colors.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
-import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/home/pages/home_page.dart';
-import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
-import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
-import 'package:picoshop_theme2/features/search/view/search_page.dart';
-import 'package:badges/badges.dart';
-
-class WrapperPage extends StatefulWidget {
-  const WrapperPage({super.key});
-
-  @override
-  State<WrapperPage> createState() => _WrapperPageState();
-}
-
-class _WrapperPageState extends State<WrapperPage> {
-  int _currentIndex = 0;
-  int _previousIndex = 0;
-
-  final List<Widget> _pages = const [
-    HomePage(),
-    ProductListPage(),
-    SearchPage(),
-    CartPage(),
-    ProfilePage(),
-  ];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _previousIndex = _currentIndex;
-      _currentIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = Responsive(context);
-
-    if (responsive.isMobile) {
-      return Scaffold(
-        body: PageTransitionSwitcher(
-          duration: const Duration(milliseconds: 300),
-          reverse: _currentIndex < _previousIndex,
-          transitionBuilder: (child, animation, secondaryAnimation) {
-            return SharedAxisTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              transitionType: SharedAxisTransitionType.horizontal,
-              child: child,
-            );
-          },
-          child: _pages[_currentIndex],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: AppColors.background,
-          currentIndex: _currentIndex,
-          onTap: _onTabTapped,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppColors.selectedNavColor,
-          unselectedItemColor: AppColors.unselctedNavColor,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-          unselectedLabelStyle: const TextStyle(fontSize: 10),
-          items: [
-            const BottomNavigationBarItem(
-              icon: Icon(LineIcons.home),
-              label: 'Home',
-            ),
-            const BottomNavigationBarItem(
-              icon: Icon(LineIcons.box),
-              label: 'Products',
-            ),
-            const BottomNavigationBarItem(
-              icon: Icon(LineIcons.search),
-              label: 'Search',
-            ),
-
-            BottomNavigationBarItem(
-              icon: Consumer(
-                builder: (context, ref, _) {
-                  final cartCount = ref
-                      .watch(cartNotifierProvider)
-                      .maybeWhen(
-                        data: (items) => items.length,
-                        orElse: () => 0,
-                      );
-
-                  return Badge(
-                    showBadge: cartCount > 0,
-                    badgeContent: Text(
-                      '$cartCount',
-                      style: const TextStyle(color: Colors.white, fontSize: 10),
-                    ),
-
-                    position: BadgePosition.topEnd(top: -10, end: -12),
-                    child: const Icon(LineIcons.shoppingCart),
-                  );
-                },
-              ),
-
-              label: 'Cart',
-            ),
-
-            const BottomNavigationBarItem(
-              icon: Icon(LineIcons.user),
-              label: 'Profile',
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Desktop layout with NavigationRail
-    return SafeArea(
-      child: Scaffold(
-        body: Row(
-          children: [
-            NavigationRail(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: _onTabTapped,
-              labelType: NavigationRailLabelType.all,
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(LineIcons.home, size: responsive.navIcon),
-                  label: Text(
-                    'Home',
-                    style: TextStyle(fontSize: responsive.navLabel),
-                  ),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(LineIcons.box, size: responsive.navIcon),
-                  label: Text(
-                    'Products',
-                    style: TextStyle(fontSize: responsive.navLabel),
-                  ),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(LineIcons.search, size: responsive.navIcon),
-                  label: Text(
-                    'Search',
-                    style: TextStyle(fontSize: responsive.navLabel),
-                  ),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(LineIcons.shoppingCart, size: responsive.navIcon),
-                  label: Text(
-                    'Cart',
-                    style: TextStyle(fontSize: responsive.navLabel),
-                  ),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(LineIcons.user, size: responsive.navIcon),
-                  label: Text(
-                    'Profile',
-                    style: TextStyle(fontSize: responsive.navLabel),
-                  ),
-                ),
-              ],
-            ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: PageTransitionSwitcher(
-                duration: const Duration(milliseconds: 300),
-                reverse: _currentIndex < _previousIndex,
-                transitionBuilder: (child, animation, secondaryAnimation) {
-                  return SharedAxisTransition(
-                    animation: animation,
-                    secondaryAnimation: secondaryAnimation,
-                    transitionType: SharedAxisTransitionType.horizontal,
-                    child: child,
-                  );
-                },
-                child: _pages[_currentIndex],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
 import 'package:flutter/material.dart' hide Badge;
 import 'package:animations/animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,7 +53,7 @@ class _WrapperPageState extends State<WrapperPage>
   }
 
   void _onTabTapped(int index) async {
-    // Scale down animation when tab is pressed
+    
     await _scaleController.forward();
 
     setState(() {
@@ -254,12 +61,12 @@ class _WrapperPageState extends State<WrapperPage>
       _currentIndex = index;
     });
 
-    // Scale back up after page transition starts
+    
     await Future.delayed(const Duration(milliseconds: 100));
     await _scaleController.reverse();
   }
 
-  // Custom page transition for different directions
+  
   Widget _buildPageTransition(Widget child, int index) {
     final isForward = index > _previousIndex;
 
@@ -284,9 +91,9 @@ class _WrapperPageState extends State<WrapperPage>
     Animation<double> secondaryAnimation,
     bool isForward,
   ) {
-    // Different transitions based on direction
+    
     if (isForward) {
-      // Slide from right to left for forward navigation
+      
       return SlideTransition(
         position: Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero)
             .animate(
@@ -298,7 +105,7 @@ class _WrapperPageState extends State<WrapperPage>
         child: FadeTransition(opacity: animation, child: child),
       );
     } else {
-      // Slide from left to right for backward navigation
+    
       return SlideTransition(
         position:
             Tween<Offset>(
@@ -315,7 +122,7 @@ class _WrapperPageState extends State<WrapperPage>
     }
   }
 
-  // Enhanced bottom navigation bar with smooth animations
+ 
   Widget _buildBottomNavBar() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -323,6 +130,7 @@ class _WrapperPageState extends State<WrapperPage>
         color: AppColors.background,
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, -2),
@@ -393,6 +201,7 @@ class _WrapperPageState extends State<WrapperPage>
       activeIcon: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
+          // ignore: deprecated_member_use
           color: AppColors.selectedNavColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -415,7 +224,7 @@ class _WrapperPageState extends State<WrapperPage>
             cartCount > 99 ? '99+' : '$cartCount',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 8,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -424,7 +233,7 @@ class _WrapperPageState extends State<WrapperPage>
             padding: const EdgeInsets.all(4),
             borderRadius: BorderRadius.circular(8),
           ),
-          position: BadgePosition.topEnd(top: -8, end: -8),
+          position: BadgePosition.topEnd(top: -9, end: -8),
           child: Icon(
             LineIcons.shoppingCart,
             color: isActive
@@ -463,12 +272,13 @@ class _WrapperPageState extends State<WrapperPage>
       child: Scaffold(
         body: Row(
           children: [
-            // Enhanced NavigationRail with animations
+          
             Container(
               decoration: BoxDecoration(
                 color: AppColors.background,
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 8,
                     offset: const Offset(2, 0),
@@ -540,6 +350,7 @@ class _WrapperPageState extends State<WrapperPage>
       selectedIcon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
+          // ignore: deprecated_member_use
           color: AppColors.selectedNavColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
         ),
