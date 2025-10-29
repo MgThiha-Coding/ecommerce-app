@@ -1,11 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picoshop_theme2/core/consts/app_colors.dart';
+//import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
+//import 'package:picoshop_theme2/core/responsive/responsive.dart';
+//import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
+import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 
+/*
 class BrandPreviewSlider extends ConsumerStatefulWidget {
   const BrandPreviewSlider({super.key});
 
@@ -167,16 +169,25 @@ class _BrandPreviewSliderState extends ConsumerState<BrandPreviewSlider> {
   }
 }
 
-/*
-class ProductPreviewSlider extends ConsumerWidget {
+*/
+
+class ProductPreviewSlider extends ConsumerStatefulWidget {
   const ProductPreviewSlider({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductPreviewSlider> createState() =>
+      _ProductPreviewSliderState();
+}
+
+class _ProductPreviewSliderState extends ConsumerState<ProductPreviewSlider> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final productListAsync = ref.watch(productNotifierProvider);
 
     return SizedBox(
-      height: 80,
+      height: 160, // slightly taller to fit dots
       width: double.infinity,
       child: productListAsync.when(
         data: (productList) {
@@ -200,70 +211,104 @@ class ProductPreviewSlider extends ConsumerWidget {
             );
           }
 
-          return CarouselSlider.builder(
-            itemCount: productList.take(10).toList().length,
-            itemBuilder: (context, index, realIndex) {
-              final product = productList[index];
-              final productName = product.name ?? '';
-              final productImage = product.productImage ?? '';
+          final displayList = productList.take(6).toList();
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: productImage.isEmpty
-                            ? Image.asset(
-                                AppImage.emptyContainer,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.network(
-                                productImage,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Image.asset(
-                                      AppImage.emptyContainer,
-                                      fit: BoxFit.cover,
-                                    ),
-                              ),
-                      ),
-                      if (productName.isNotEmpty)
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            // ignore: deprecated_member_use
-                            color: Colors.black.withOpacity(0.4),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Text(
-                              productName,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
+          return Column(
+            children: [
+              CarouselSlider.builder(
+                itemCount: displayList.length,
+                itemBuilder: (context, index, realIndex) {
+                  final product = displayList[index];
+                  final productName = product.name ?? '';
+                  final productImage = product.productImage ?? '';
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(0),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: productImage.isEmpty
+                                ? Image.asset(
+                                    AppImage.emptyContainer,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.network(
+                                    productImage,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                              AppImage.emptyContainer,
+                                              fit: BoxFit.cover,
+                                            ),
+                                  ),
+                          ),
+                          if (productName.isNotEmpty)
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                color: Colors.black.withOpacity(0.4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Text(
+                                  productName,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                options: CarouselOptions(
+                  height: 140,
+                  viewportFraction: 1.0,
+                  enableInfiniteScroll: true,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 3),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.easeInOut,
+                  scrollPhysics: const BouncingScrollPhysics(),
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
                 ),
-              );
-            },
-            options: CarouselOptions(
-              height: 80,
-              viewportFraction: 1.0,
-              enableInfiniteScroll: true,
-              autoPlay: true,
-              autoPlayInterval: const Duration(seconds: 5),
-              autoPlayAnimationDuration: const Duration(seconds: 1),
-              autoPlayCurve: Curves.easeInOut,
-              scrollPhysics: const BouncingScrollPhysics(),
-            ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: displayList.asMap().entries.map((entry) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: _currentIndex == entry.key ? 10.0 : 6.0,
+                    height: 6.0,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 4.0,
+                      horizontal: 3.0,
+                    ),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentIndex == entry.key
+                          ? Colors.white
+                          : Colors.grey.shade400,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
           );
         },
         loading: () => ClipRRect(
@@ -286,5 +331,3 @@ class ProductPreviewSlider extends ConsumerWidget {
     );
   }
 }
-
-*/

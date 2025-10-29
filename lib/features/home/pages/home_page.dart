@@ -8,14 +8,15 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
 import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
+import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
 import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
+import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
@@ -108,6 +109,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+
+      /*
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.background,
@@ -166,6 +169,40 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
         ),
       ),
+      */
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: CircleAvatar(
+                radius: 18,
+                child: Image.asset(AppImage.appLogo, fit: BoxFit.cover),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Expanded(child: SearchBar()),
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OrderHistoryListPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(LineIcons.shoppingBag),
+              ),
+            ),
+          ],
+        ),
+      ),
 
       body: SafeArea(
         child: Container(
@@ -174,7 +211,11 @@ class _HomePageState extends ConsumerState<HomePage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               // ignore: deprecated_member_use
-              colors: [Colors.white, Colors.blue.withOpacity(0.3)],
+              colors: [
+                Colors.white, // top
+                Colors.blue.withOpacity(0.15), // subtle middle
+                Colors.blue.withOpacity(0.05), // bottom very light
+              ],
             ),
           ),
           child: Stack(
@@ -188,8 +229,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       : const EdgeInsets.all(16),
                   child: ListView(
                     controller: _scrollController,
-                    padding: const EdgeInsets.only(top: 50),
+                    padding: const EdgeInsets.only(top: 6),
                     children: [
+                      const ProductPreviewSlider(),
                       // Brand Section
                       sectionHeader(
                         Responsive(context),
@@ -385,6 +427,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
 
               // Sticky Float SearchBar
+              /*
               Positioned(
                 top: 6,
                 left: 0,
@@ -399,6 +442,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       )
                     : const SizedBox(height: 55, child: SearchBar()),
               ),
+              */
             ],
           ),
         ),
@@ -441,7 +485,7 @@ class SearchBar extends StatelessWidget {
           );
         },
         child: SizedBox(
-          height: 48,
+          height: 44,
           child: AbsorbPointer(
             child: TextField(
               style: TextStyle(
@@ -450,7 +494,7 @@ class SearchBar extends StatelessWidget {
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.grey[200],
                 hintText: LocaleKeys.search.tr(),
                 hintStyle: TextStyle(
                   fontFamily: "Poppins",
