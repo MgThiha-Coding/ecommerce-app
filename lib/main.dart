@@ -19,22 +19,15 @@ import 'package:picoshop_theme2/features/product/local/product_data_hive_adapate
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize localization early
   await EasyLocalization.ensureInitialized();
-
-  // Lock orientation immediately
   final bool isTablet =
       WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
   SystemChrome.setPreferredOrientations(
     isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
   );
 
-  // Initialize Hive but do NOT await long box openings
   await Hive.initFlutter();
   _registerHiveAdapters();
-
-  // Run app immediately to avoid black screen
   runApp(
     EasyLocalization(
       supportedLocales: const [
@@ -56,7 +49,6 @@ void main() async {
     ),
   );
 
-  // Defer heavy/non-critical initialization
   unawaited(_initializeNonCriticalInBackground());
 }
 
@@ -67,16 +59,11 @@ void _registerHiveAdapters() {
   Hive.registerAdapter(BusinessSettingHiveAdapter());
 }
 
-/// Opens Hive boxes in background without blocking UI
 Future<void> _initializeNonCriticalInBackground() async {
   try {
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
-
-    // Open business setting box FIRST since it's critical
     await _openBoxSafe<BusinessSettingHiveModel>('business_settings');
-
-    // Open other boxes in background (non-critical)
     unawaited(_openBoxSafe<ProductHiveModel>('products'));
     unawaited(_openBoxSafe<BrandHiveModel>('brands'));
     unawaited(_openBoxSafe<CategoryHiveModel>('category'));
@@ -85,7 +72,6 @@ Future<void> _initializeNonCriticalInBackground() async {
   }
 }
 
-/// Safely opens a Hive box, auto-recover if corrupted
 Future<void> _openBoxSafe<T>(String boxName) async {
   try {
     await Hive.openBox<T>(boxName);
@@ -110,13 +96,6 @@ class MyApp extends ConsumerWidget {
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-
-      // CRITICAL: White background prevents black flash
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: Colors.white,
-      ),
-
       home: const SplashPage(),
     );
   }

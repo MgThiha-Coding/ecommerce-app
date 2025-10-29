@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/provider/auth_stage_provider.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/auth/model/request/register_request.dart';
 import 'package:picoshop_theme2/features/auth/model/response/register_response.dart';
@@ -80,7 +81,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
             if (!context.mounted) return;
 
+            await ref
+                .read(authStageProvider.notifier)
+                .setStage(
+                  AuthStage.verify,
+                  email: _emailController.text,
+                );
+
             Navigator.push(
+              // ignore: use_build_context_synchronously
               context,
               MaterialPageRoute(
                 builder: (context) => VerifyCodePage(

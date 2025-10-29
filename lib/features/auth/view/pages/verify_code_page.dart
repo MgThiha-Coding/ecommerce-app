@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/provider/auth_stage_provider.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
@@ -93,7 +94,10 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
               phone: user.phone,
             );
 
+            await ref.read(authStageProvider.notifier).clearStage();
+
             storage.isLoggedIn();
+
             AppConfig.updateAccessToken(accessToken);
 
             Navigator.pushAndRemoveUntil(
