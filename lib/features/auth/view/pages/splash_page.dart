@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/core/storage/user_model.dart';
 import 'package:picoshop_theme2/core/storage/user_provider.dart';
@@ -21,22 +21,25 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   void initState() {
     super.initState();
 
+    //  async stuff after build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // read the secure storage provider (where we save first launch, user info etc.)
       final storage = ref.read(secureStorageProvider);
 
-      // 1️⃣ First launch?
+      // check if this is first time launching app
       final isFirstLaunch = await storage.getFirstLaunchFlag() ?? true;
 
-      // 3️⃣ Logged in?
+      // check if user already logged in
       final isLoggedIn = await storage.isLoggedIn();
 
-      if (!mounted) return;
+      if (!mounted) return; // make sure widget still exists
 
-      // small splash delay
+      // wait for 2 seconds to show splash
       await Future.delayed(const Duration(seconds: 2));
 
+      // if first launch, go to onboarding
       if (isFirstLaunch) {
-        await storage.setFirstLaunchFlag(false);
+        await storage.setFirstLaunchFlag(false); // mark first launch as done
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -46,11 +49,12 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         return;
       }
 
+      // if user is logged in, set user info and go to wrapper/home
       if (isLoggedIn) {
-        // restore user info
         final userInfo = await storage.getUserInfo();
         final userId = await storage.getUserId();
 
+        // only set user if all important info exists
         if (userInfo['name'] != null &&
             userInfo['email'] != null &&
             userId != null) {
@@ -71,7 +75,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         return;
       }
 
-      // fallback → onboarding
+      // if not first launch and not logged in, go to onboarding anyway
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
@@ -83,6 +87,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = Responsive(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -90,23 +95,25 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // app logo
               Image.asset(AppImage.appLogo, scale: 3),
               const SizedBox(height: 8),
+              // app labels
               Text(
                 'Welcome to Pico Mart',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: fontSize.subHeading,
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 'Discover your favorite items here',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: fontSize.subHeading,
                   color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w300,
                 ),
               ),
             ],
