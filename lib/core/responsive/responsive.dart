@@ -45,7 +45,7 @@ class Responsive {
   double get buttonWidth => value(mobile: 130, tablet: 100, desktop: 30);
 
   // nav label
-  double get navLabel => value(mobile: 10, tablet: 10, desktop: 14);
+  double get navLabel => value(mobile: 10, tablet: 12, desktop: 14);
    double get navIcon => value(mobile: 10, tablet: 18, desktop: 30);
 
   // AuthPage

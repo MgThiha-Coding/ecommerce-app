@@ -77,14 +77,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         : "Guest";
 
     return Scaffold(
-      backgroundColor: Colors.blue.withOpacity(0.3),
+      backgroundColor: Colors.white,
       body: Container(
         padding: const EdgeInsets.only(top: 20),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.blue.withOpacity(0.2)],
+            colors: [Colors.white, Colors.white],
           ),
         ),
         child: Column(
@@ -309,23 +309,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showLanguageDialog() {
+    final responsive = Responsive(context);
+    final isTablet = responsive.isTablet;
+    final horizontalPadding = isTablet ? 100.0 : 24.0;
+    final verticalPadding = isTablet ? 48.0 : 24.0;
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
           elevation: 10,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(isTablet ? 30 : 20),
           ),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(isTablet ? 32 : 20),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(isTablet ? 30 : 20),
               gradient: LinearGradient(
                 colors: [
                   // ignore: deprecated_member_use
@@ -353,45 +358,65 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     LocaleKeys.language.tr(),
                     style: GoogleFonts.poppins(
                       color: AppColors.textSecondary,
-                      fontSize: 18,
+                      fontSize: Responsive(context).subHeading,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _languageButton(context, "English", const Locale('en')),
+                  SizedBox(height: isTablet ? 30 : 20),
+                  _languageButton(
+                    context,
+                    "English",
+                    const Locale('en'),
+                    isTablet,
+                  ),
                   _languageButton(
                     context,
                     "Deutsch (German)",
                     const Locale('de'),
+                    isTablet,
                   ),
                   _languageButton(
                     context,
                     "Español (Spanish)",
                     const Locale('es'),
+                    isTablet,
                   ),
                   _languageButton(
                     context,
                     "Français (French)",
                     const Locale('fr'),
+                    isTablet,
                   ),
                   _languageButton(
                     context,
                     "日本語 (Japanese)",
                     const Locale('ja'),
+                    isTablet,
                   ),
                   _languageButton(
                     context,
                     "Nederlands (Dutch)",
                     const Locale('nl'),
+                    isTablet,
                   ),
-                  _languageButton(context, "ไทย (Thai)", const Locale('th')),
+                  _languageButton(
+                    context,
+                    "ไทย (Thai)",
+                    const Locale('th'),
+                    isTablet,
+                  ),
                   _languageButton(
                     context,
                     "မြန်မာ (Burmese)",
                     const Locale('my'),
+                    isTablet,
                   ),
-                  _languageButton(context, "中文 (Chinese)", const Locale('zh')),
-
+                  _languageButton(
+                    context,
+                    "中文 (Chinese)",
+                    const Locale('zh'),
+                    isTablet,
+                  ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -399,12 +424,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 20 : 20,
+                          vertical: isTablet ? 10 : 10,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(
+                            isTablet ? 14 : 14,
+                          ),
                         ),
                       ),
                       onPressed: () => Navigator.pop(context),
@@ -413,6 +440,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         style: GoogleFonts.poppins(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
+                          fontSize: Responsive(context).body,
                         ),
                       ),
                     ),
@@ -426,42 +454,54 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _languageButton(BuildContext context, String label, Locale locale) {
-    return SizedBox(
-      width: double.infinity,
-
-      child: MaterialButton(
-        elevation: 0,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        onPressed: () {
-          context.setLocale(locale);
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Language changed to $label',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: Responsive(context).body,
+  Widget _languageButton(
+    BuildContext context,
+    String label,
+    Locale locale,
+    bool isTablet,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: MaterialButton(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(isTablet ? 16 : 12),
+          ),
+          padding: EdgeInsets.symmetric(
+            vertical: isTablet ? 14 : 10,
+            horizontal: isTablet ? 16 : 12,
+          ),
+          onPressed: () {
+            context.setLocale(locale);
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Language changed to $label',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: isTablet ? 16 : 14,
+                  ),
                 ),
+                backgroundColor: AppColors.primary,
+                duration: const Duration(seconds: 2),
               ),
-              backgroundColor: AppColors.primary,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
+            );
+          },
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
               label,
               style: GoogleFonts.poppins(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
+                fontSize: Responsive(context).body,
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -474,9 +514,16 @@ class _LogoutConfirmDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final responsive = Responsive(context);
+    final isTablet = responsive.isTablet;
+    final horizontalPadding = isTablet ? 300.0 : 24.0;
+    final verticalPadding = isTablet ? 48.0 : 24.0;
+
     return Dialog(
       backgroundColor: Colors.white,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(20),

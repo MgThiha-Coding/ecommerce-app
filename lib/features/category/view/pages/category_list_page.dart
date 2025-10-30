@@ -43,6 +43,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      /*
       appBar: AppBar(
         backgroundColor: AppColors.background,
         scrolledUnderElevation: 0,
@@ -56,6 +57,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
         ),
         centerTitle: true,
       ),
+      */
       body: Column(
         children: [
           Expanded(

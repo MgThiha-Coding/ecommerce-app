@@ -41,10 +41,10 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
           style: GoogleFonts.poppins(
             fontSize: responsive.subHeading,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
-        foregroundColor: AppColors.textPrimary,
+        //    foregroundColor: AppColors.textPrimary,
       ),
       body: brandState.when(
         loading: () => const Center(child: CircularProgressIndicator()),

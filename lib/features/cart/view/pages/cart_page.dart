@@ -514,7 +514,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Failed to load cart.\n${error.toString()}',
+                                'Oops! Something went wrong.\nPlease try again in a moment.',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   fontSize: fontSize.body,

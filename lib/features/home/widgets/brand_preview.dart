@@ -5,15 +5,12 @@ import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
 Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
   return ListView.builder(
-    scrollDirection: Axis.horizontal,
     itemCount: brandList.length,
     itemBuilder: (context, index) {
       final brandName = brandList[index]?.name ?? '';
       return Card(
         elevation: 0.4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(9.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9.0)),
         child: Container(
           width: 100,
           decoration: BoxDecoration(
@@ -27,7 +24,7 @@ Widget brandPreview(BuildContext context, List<BrandDataModel?> brandList) {
               style: TextStyle(
                 fontFamily: "Poppins",
                 fontSize: Responsive(context).caption,
-                color: AppColors.textSecondary
+                color: AppColors.textSecondary,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 2,

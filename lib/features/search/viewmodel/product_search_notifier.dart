@@ -34,7 +34,10 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
     state = const AsyncValue.data([]);
   }
 
-  Future<void> search({required String keyword, required String filterType}) async {
+  Future<void> search({
+    required String keyword,
+    required String filterType,
+  }) async {
     _keyword = keyword.trim();
     _filterType = filterType;
     _results.clear();
@@ -67,7 +70,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
           options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         );
         final brands = BrandListResponse.fromJson(brandResp.data).data?.data ?? [];
-        filterIds = brands.map((b) => b.id).toList();
+        filterIds = brands.map((b) => b.id).whereType<int>().toList();
         if (filterIds.isEmpty) {
           _isNoMore = true;
           state = const AsyncValue.data([]);
@@ -79,8 +82,8 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
           queryParameters: {'search': _keyword},
           options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         );
-        final categories = CategoriesListResponse.fromJson(catResp.data).data.data;
-        filterIds = categories.map((c) => c.id).toList();
+        final categories = CategoriesListResponse.fromJson(catResp.data).data?.data ?? [];
+        filterIds = categories.map((c) => c.id).whereType<int>().toList();
         if (filterIds.isEmpty) {
           _isNoMore = true;
           state = const AsyncValue.data([]);
@@ -89,6 +92,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
       }
 
       final Map<String, dynamic> query = {'page': _currentPage};
+
       if (_filterType == 'product') {
         query['filter[products.name][\$like]'] = '%$_keyword%';
       } else if (_filterType == 'brand') {
@@ -139,10 +143,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
       if (cached.isNotEmpty) {
         state = AsyncValue.data(cached);
       } else {
-        state = AsyncValue.error(
-          e.response?.data['message'] ?? 'Check Internet',
-          st,
-        );
+        state = AsyncValue.error(e.response?.data['message'] ?? 'Check Internet', st);
       }
     } finally {
       _isLoading = false;
@@ -150,8 +151,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
   }
 }
 
-final combinedProductSearchProvider =
-    StateNotifierProvider<CombinedProductSearchNotifier, AsyncValue<List<ProductDataModel>>>((ref) {
+final combinedProductSearchProvider = StateNotifierProvider<CombinedProductSearchNotifier, AsyncValue<List<ProductDataModel>>>((ref) {
   final offlineProducts = Hive.box<ProductHiveModel>('products');
   return CombinedProductSearchNotifier(offlineProducts);
 });

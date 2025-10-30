@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 
 class CategoryDetailPage extends ConsumerStatefulWidget {
@@ -16,14 +18,19 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      //ref.read(categoryDetailNotifierProvider.notifier).getCagetoryDetail(widget.categoryId!);
+      if (widget.categoryId != null) {
+        ref
+            .read(categoryDetailNotifierProvider.notifier)
+            .getCategoryDetail(widget.categoryId!);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive(context);
     final categoryDetailAsync = ref.watch(categoryDetailNotifierProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
+    //final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -33,117 +40,176 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
-        title: Text('Category Detail',style: GoogleFonts.poppins( 
-           fontSize: 14,
-        ),),
+        title: Text(
+          'Category Detail',
+          style: GoogleFonts.poppins(
+            fontSize: responsive.subHeading,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFFFC107),
-        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Container(
-        height: double.infinity,
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFC107), Color(0xFFFFE082), Color(0xFFA5D6A7)],
+            colors: [Colors.white, Colors.white],
           ),
         ),
         child: categoryDetailAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(
+            child: Padding(
+              padding: EdgeInsets.all(responsive.paddingMedium),
+              child: Text(
+                err.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: responsive.body,
+                ),
+              ),
+            ),
+          ),
           data: (categoryDetail) {
-            if (categoryDetail?.data != null) {
-              final categoryName = categoryDetail!.data.name;
-              final description =
-                  categoryDetail.data.description ?? "No description available";
-
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Header / decorative banner
-                    Container(
-                      height: screenHeight * 0.25,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.green.shade600,
-                            Colors.green.shade400,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(40),
-                          bottomRight: Radius.circular(40),
-                        ),
-                      ),
-                      child: Center(
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.category_outlined,
-                            size: 50,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Category Info
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            categoryName,
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.06,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            description,
-                            textAlign: TextAlign.justify,
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.04,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          // Optional: Created at info
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Created: ${categoryDetail.data.createdAt.toString()}",
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            if (categoryDetail?.data == null) {
+              return Center(
+                child: Text(
+                  'No category information available.',
+                  style: TextStyle(
+                    color: Colors.grey[800],
+                    fontSize: responsive.body,
+                  ),
                 ),
               );
-            } else {
-              return const SizedBox.shrink();
             }
+
+            final category = categoryDetail!.data;
+            final categoryName = category.name;
+            final description =
+                category.description ?? 'No description available';
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Header / Avatar
+                  Container(
+                    height: screenHeight * 0.25,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.green.shade600, Colors.green.shade400],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(40),
+                        bottomRight: Radius.circular(40),
+                      ),
+                    ),
+                    child: Center(
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.category_outlined,
+                          size: 50,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: responsive.paddingLarge),
+
+                  // Category Name
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: responsive.paddingLarge,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          categoryName,
+                          style: TextStyle(
+                            fontSize: responsive.heading,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: responsive.paddingSmall),
+
+                        // Description
+                        Text(
+                          description,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                            fontSize: responsive.body,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                        SizedBox(height: responsive.paddingLarge),
+
+                        // Info rows
+                        _infoRow(
+                          label: 'ID',
+                          value: category.id.toString(),
+                          responsive: responsive,
+                        ),
+                        _infoRow(
+                          label: 'Created At',
+                          value: category.createdAt.toString(),
+                          responsive: responsive,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
           },
-          error: (err, _) => const Center(child: Text('')),
-          loading: () => const Center(child: CircularProgressIndicator()),
         ),
+      ),
+    );
+  }
+
+  Widget _infoRow({
+    required String label,
+    required String value,
+    required Responsive responsive,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: responsive.paddingSmall),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: responsive.body,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 5,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: responsive.body,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

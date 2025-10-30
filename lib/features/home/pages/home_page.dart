@@ -1,27 +1,22 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
+import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
+import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/brands/viewmodel/brand_notifier.dart';
-import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
-import 'package:picoshop_theme2/features/home/widgets/brand_preview.dart';
-import 'package:picoshop_theme2/features/home/widgets/category_preview.dart';
-import 'package:picoshop_theme2/features/home/widgets/product_preview_slider.dart';
-import 'package:picoshop_theme2/features/home/widgets/section_header.dart';
-import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
+import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
-import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
 import 'package:picoshop_theme2/features/search/view/pages/search_page.dart';
-import 'package:shimmer/shimmer.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -31,8 +26,8 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final ScrollController _scrollController = ScrollController();
-  bool _isFetching = false;
+  final ScrollController _productScrollController = ScrollController();
+  bool _isFetchingProducts = false;
 
   @override
   void initState() {
@@ -42,9 +37,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       _getNextPageAll();
     });
 
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
+    _productScrollController.addListener(() {
+      if (_productScrollController.position.pixels >=
+          _productScrollController.position.maxScrollExtent - 200) {
         _getNextPageAll();
       }
     });
@@ -56,14 +51,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       ref.read(categoryListNotifierProvider.notifier).reset(),
       ref.read(productNotifierProvider.notifier).reset(),
     ]);
-
     _getNextPageAll();
   }
 
   void _getNextPageAll() async {
-    if (_isFetching) return;
-    _isFetching = true;
-
+    if (_isFetchingProducts) return;
+    _isFetchingProducts = true;
     try {
       await Future.wait([
         ref.read(brandListNotifierProvider.notifier).getNextPage(),
@@ -71,11 +64,10 @@ class _HomePageState extends ConsumerState<HomePage> {
         ref.read(productNotifierProvider.notifier).getNextPage(),
       ]);
     } finally {
-      _isFetching = false;
+      _isFetchingProducts = false;
     }
   }
 
-  // Empty Widget
   Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
@@ -88,7 +80,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Something went wrong. Please try again later.',
+            message,
             style: TextStyle(
               fontFamily: "Poppins",
               fontSize: Responsive(context).body,
@@ -101,35 +93,46 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Widget _buildShimmer({required double height}) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.background,
+      highlightColor: AppColors.background,
+      child: Container(
+        height: height,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final brandListAsync = ref.watch(brandListNotifierProvider);
-    final categoryListAsync = ref.watch(categoryListNotifierProvider);
     final productListAsync = ref.watch(productNotifierProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-
-      /*
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        elevation: 0,
-        titleSpacing: 0,
-        title: Consumer(
-          builder: (context, ref, _) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(width: 8),
-                CircleAvatar(
-                  radius: 18,
-                  child: Image.asset(AppImage.appLogo, fit: BoxFit.cover),
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  children: [
-                    Column(
+        appBar: AppBar(
+          scrolledUnderElevation: 0,
+          // ignore: deprecated_member_use
+          backgroundColor: Colors.white,
+          elevation: 0,
+          titleSpacing: 0,
+          title: Consumer(
+            builder: (context, ref, _) {
+              return Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: CircleAvatar(child: Image.asset(AppImage.appLogo)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -140,12 +143,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                               style: TextStyle(
                                 fontFamily: "Poppins",
                                 fontSize: Responsive(context).body,
-                                color: AppColors.textSecondary,
+                                color: Colors.blueAccent,
                               ),
                             ),
                             const Icon(
                               Icons.waving_hand,
-                              color: AppColors.primary,
+                              color: Colors.blueAccent,
                               size: 16,
                             ),
                           ],
@@ -153,322 +156,94 @@ class _HomePageState extends ConsumerState<HomePage> {
                         Text(
                           ref.watch(userProvider)?.name ?? "Guest",
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                           style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: Responsive(context).subHeading,
-                            color: AppColors.textPrimary,
+                            color: Colors.blueAccent,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      */
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        titleSpacing: 0,
-        title: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: CircleAvatar(
-                radius: 18,
-                child: Image.asset(AppImage.appLogo, fit: BoxFit.cover),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Expanded(child: SearchBar()),
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const OrderHistoryListPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(LineIcons.shoppingBag),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              // ignore: deprecated_member_use
-              colors: [
-                Colors.white, // top
-                Colors.blue.withOpacity(0.15), // subtle middle
-                Colors.blue.withOpacity(0.05), // bottom very light
-              ],
-            ),
-          ),
-          child: Stack(
-            children: [
-              RefreshIndicator(
-                backgroundColor: Colors.white,
-                onRefresh: _resetAll,
-                child: Padding(
-                  padding: Responsive(context).isMobile
-                      ? const EdgeInsets.all(6.0)
-                      : const EdgeInsets.all(16),
-                  child: ListView(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.only(top: 6),
-                    children: [
-                      const ProductPreviewSlider(),
-                      // Brand Section
-                      sectionHeader(
-                        Responsive(context),
-                        LocaleKeys.brand.tr(),
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BrandListPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(
-                        height: 40,
-                        child: brandListAsync.when(
-                          data: (brandList) => brandList.isEmpty
-                              ? _buildEmptyState(
-                                  'Brand list is currently unavailable.',
-                                )
-                              : brandPreview(
-                                  context,
-                                  brandList.take(16).toList(),
-                                ),
-                          loading: () => _buildShimmer(height: 80),
-                          error: (error, _) =>
-                              _buildEmptyState(error.toString()),
-                        ),
-                      ),
-
-                      // Category Section
-                      sectionHeader(
-                        Responsive(context),
-                        LocaleKeys.category.tr(),
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CategoryListPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(
-                        height: 60,
-                        child: categoryListAsync.when(
-                          data: (categoryList) => categoryList.isEmpty
-                              ? _buildEmptyState(
-                                  'Category list is currently unavailable.',
-                                )
-                              : categoryPreview(
-                                  context,
-                                  categoryList.take(16).toList(),
-                                ),
-                          loading: () => _buildShimmer(height: 110),
-                          error: (error, _) =>
-                              _buildEmptyState(error.toString()),
-                        ),
-                      ),
-
-                      // Available Product Sections
-                      sectionHeader(
-                        Responsive(context),
-                        LocaleKeys.availableProducts.tr(),
-                        () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ProductListPage(),
-                            ),
-                          );
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 7,
-                        ),
-                        child: productListAsync.when(
-                          data: (productList) {
-                            if (productList.isEmpty) {
-                              return _buildEmptyState(
-                                'Product list is currently unavailable.',
-                              );
-                            }
-                            final previewList = productList.take(20).toList();
-                            return MasonryGridView.count(
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              crossAxisCount: Responsive(context).isMobile
-                                  ? 2
-                                  : 4,
-                              mainAxisSpacing: 6,
-                              crossAxisSpacing: 6,
-                              itemCount: previewList.length,
-                              itemBuilder: (context, index) {
-                                final product = previewList[index];
-                                final productId = product.id;
-                                return InkWell(
-                                  borderRadius: BorderRadius.circular(14),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            ProductDetailPage(productId!),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(3),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          // ignore: deprecated_member_use
-                                          color: Colors.grey.withOpacity(0.15),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              const BorderRadius.vertical(
-                                                top: Radius.circular(4),
-                                              ),
-                                          child: Image.network(
-                                            product.productImage ??
-                                                AppImage.emptyContainer,
-                                            fit: BoxFit.cover,
-                                            height: (index % 2 == 0)
-                                                ? 130
-                                                : 190,
-                                            width: double.infinity,
-                                            errorBuilder: (_, __, ___) =>
-                                                Image.asset(
-                                                  AppImage.emptyContainer,
-                                                  fit: BoxFit.cover,
-                                                  width: double.infinity,
-                                                ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                product.name ?? '',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 2),
-
-                                              Text(
-                                                product.productType.toString(),
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 11,
-                                                  color:
-                                                      AppColors.priceLabelColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          loading: () => _buildShimmer(height: 200),
-                          error: (error, _) =>
-                              _buildEmptyState(error.toString()),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ),
-
-              // Sticky Float SearchBar
-              /*
-              Positioned(
-                top: 6,
-                left: 0,
-                right: 0,
-                child: Responsive(context).isMobile
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 2),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 2),
-                          child: SearchBar(),
-                        ),
-                      )
-                    : const SizedBox(height: 55, child: SearchBar()),
-              ),
-              */
+                  const Expanded(child: SearchBar()),
+                  /*
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const OrderHistoryListPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        LineIcons.shoppingBag,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                  ),
+                  */
+                ],
+              );
+            },
+          ),
+          bottom: TabBar(
+            // isScrollable: true,
+            labelColor: Colors.blueAccent,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorColor: AppColors.textSecondary,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 3),
+            labelStyle: TextStyle(
+              fontFamily: "Poppins",
+              fontSize: Responsive(context).body,
+              fontWeight: FontWeight.w500,
+            ),
+            tabs: const [
+              Tab(text: "Products"),
+              Tab(text: "Brands"),
+              Tab(text: "Categories"),
+              Tab(text: "New"),
             ],
           ),
         ),
-      ),
-    );
-  }
 
-  // Shimmer Loading
-
-  Widget _buildShimmer({required double height}) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.background,
-      highlightColor: AppColors.background,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(12),
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _resetAll,
+            child: TabBarView(
+              children: [
+                ProductGridSection(
+                  productListAsync: productListAsync,
+                  buildEmptyState: _buildEmptyState,
+                  buildShimmer: ({double height = 200}) =>
+                      _buildShimmer(height: height),
+                ),
+                const BrandListPage(),
+                const CategoryListPage(),
+                Center(
+                  child: Text(
+                    'New Arrivals\n(Coming Soon)',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: Responsive(context).body,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        height: height,
-        width: double.infinity,
       ),
     );
   }
 }
 
-// SearchBar
+// SearchBar Widget
 class SearchBar extends StatelessWidget {
   const SearchBar({super.key});
 
@@ -485,7 +260,7 @@ class SearchBar extends StatelessWidget {
           );
         },
         child: SizedBox(
-          height: 44,
+          height: 43,
           child: AbsorbPointer(
             child: TextField(
               style: TextStyle(
@@ -501,24 +276,38 @@ class SearchBar extends StatelessWidget {
                   fontSize: fontSize.body,
                   color: AppColors.textPrimary,
                 ),
-                prefixIcon: const Icon(
-                  LineIcons.search,
-                  color: AppColors.textPrimary,
+                suffixIcon: Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 4,
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
+                    color: Colors.black.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    LineIcons.search,
+                    color: Colors.white,
+                    size: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 0,
                   horizontal: 12,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
                 isDense: true,
@@ -526,6 +315,128 @@ class SearchBar extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Product Grid Section
+class ProductGridSection extends StatelessWidget {
+  final AsyncValue<List<ProductDataModel>> productListAsync;
+  final Widget Function(String message) buildEmptyState;
+  final Widget Function({double height}) buildShimmer;
+
+  const ProductGridSection({
+    Key? key,
+    required this.productListAsync,
+    required this.buildEmptyState,
+    required this.buildShimmer,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+      child: productListAsync.when(
+        data: (list) {
+          if (list.isEmpty) {
+            return buildEmptyState('Product list is currently unavailable.');
+          }
+
+          final previewList = list.take(20).toList();
+
+          return GridView.builder(
+            physics: const BouncingScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Responsive(context).isMobile ? 2 : 4,
+              crossAxisSpacing: 6,
+              mainAxisSpacing: 6,
+              childAspectRatio: 0.68,
+            ),
+            itemCount: previewList.length,
+            itemBuilder: (context, index) {
+              final product = previewList[index];
+              final productId = product.id;
+              return InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailPage(productId!),
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        // ignore: deprecated_member_use
+                        color: Colors.grey.withOpacity(0.15),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4),
+                        ),
+                        child: Image.network(
+                          product.productImage ?? AppImage.emptyContainer,
+                          fit: BoxFit.cover,
+                          height: 160,
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) => Image.asset(
+                            AppImage.emptyContainer,
+                            fit: BoxFit.cover,
+                            height: 160,
+                            width: double.infinity,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product.name ?? '',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              product.productType ?? "",
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                color: AppColors.priceLabelColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        loading: () => buildShimmer(height: 200),
+        error: (err, _) => buildEmptyState(err.toString()),
       ),
     );
   }

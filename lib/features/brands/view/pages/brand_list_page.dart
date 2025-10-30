@@ -43,6 +43,7 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      /*
       appBar: AppBar(
         backgroundColor: AppColors.background,
         scrolledUnderElevation: 0,
@@ -56,6 +57,7 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
         ),
         centerTitle: true,
       ),
+      */
       body: Column(
         children: [
           Expanded(
@@ -74,8 +76,15 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
                   loading: () => brandListShimmer(context),
                   error: (e, _) => const SizedBox.shrink(),
                   data: (brands) {
-                    if (brands.isEmpty) return const Center(child: Text('No brands'));
-                    return brandListView(context, brands, notifier.isNoMore, _scrollController, responsive);
+                    if (brands.isEmpty)
+                      return const Center(child: Text('No brands'));
+                    return brandListView(
+                      context,
+                      brands,
+                      notifier.isNoMore,
+                      _scrollController,
+                      responsive,
+                    );
                   },
                 ),
               ),
@@ -123,14 +132,16 @@ ListView brandListView(
                       style: GoogleFonts.poppins(
                         fontSize: responsive.subHeading,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary
+                        color: AppColors.textPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: responsive.caption),
                     Text(
-                      description.isEmpty ? "No description available" : description,
+                      description.isEmpty
+                          ? "No description available"
+                          : description,
                       style: GoogleFonts.poppins(
                         fontSize: responsive.caption,
                         color: Colors.grey[700],
@@ -176,6 +187,7 @@ ListView brandListView(
     },
   );
 }
+
 ListView brandListShimmer(BuildContext context, {int itemCount = 12}) {
   final responsive = Responsive(context);
   return ListView.separated(
@@ -196,7 +208,11 @@ ListView brandListShimmer(BuildContext context, {int itemCount = 12}) {
           ),
           child: Row(
             children: [
-              Container(width: responsive.body, height: responsive.body, color: Colors.grey.shade300),
+              Container(
+                width: responsive.body,
+                height: responsive.body,
+                color: Colors.grey.shade300,
+              ),
               SizedBox(width: responsive.body),
               Expanded(
                 child: Container(

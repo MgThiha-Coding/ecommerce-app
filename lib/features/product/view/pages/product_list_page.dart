@@ -73,7 +73,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     return Scaffold(
       appBar: AppBar(
         // ignore: deprecated_member_use
-        backgroundColor: Colors.blue.withOpacity(0.3),
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
@@ -82,18 +82,18 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           style: GoogleFonts.poppins(
             fontSize: fontSize.subHeading,
             fontWeight: FontWeight.w400,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
       ),
 
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             // ignore: deprecated_member_use
-            colors: [Colors.blue.withOpacity(0.3), Colors.white],
+            colors: [Colors.white, Colors.white],
           ),
         ),
         child: RefreshIndicator(
@@ -174,7 +174,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       child: MasonryGridView.count(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        crossAxisCount: isMobile ? 2 : 4,
+        crossAxisCount: isMobile ? 2 : 5,
         mainAxisSpacing: 6,
         crossAxisSpacing: 6,
         itemCount: products.length,
@@ -261,17 +261,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-
-                        Text(
-                          '12000 MMK',
-                          style: GoogleFonts.poppins(
-                            fontSize: fontSize.caption,
-                            color: AppColors.priceLabelColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
                       ],
                     ),
                   ),
@@ -362,7 +351,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     );
   }
 
-  GridView _productGridShimmer(BuildContext context, {int itemCount = 15}) {
+  GridView _productGridShimmer(BuildContext context, {int itemCount = 10}) {
     final responsive = Responsive(context);
     return GridView.builder(
       itemCount: itemCount,
@@ -370,7 +359,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       padding: const EdgeInsets.all(10),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: responsive.isTablet
-            ? 3
+            ? 5
             : responsive.isDesktop
             ? 5
             : 2,

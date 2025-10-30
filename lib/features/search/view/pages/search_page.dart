@@ -67,24 +67,26 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+
       appBar: AppBar(
         scrolledUnderElevation: 0,
         centerTitle: true,
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.white,
         title: Text(
           LocaleKeys.searchProduct.tr(),
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
       ),
+
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.blue.withOpacity(0.3)],
+            colors: [Colors.white, Colors.white],
           ),
         ),
         child: Column(
@@ -167,9 +169,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 },
                 loading: () => const _AnimatedSearchingText(),
                 error: (e, _) => Center(
-                  child: Text(
-                    'Something went wrong',
-                    style: GoogleFonts.poppins(color: Colors.red),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red.shade400,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Oops! Something went wrong.\nPlease try again in a moment.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive(context).body,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -238,11 +254,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off, size: 40, color: Colors.white),
+          const Icon(Icons.search_off, size: 40, color: AppColors.textSecondary),
           const SizedBox(height: 10),
           Text(
             'No products found',
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: GoogleFonts.poppins(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -314,7 +330,7 @@ class _AnimatedSearchingTextState extends State<_AnimatedSearchingText>
         Text(
           'Searching',
           style: TextStyle(
-            color: AppColors.background,
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
             fontSize: Responsive(context).subHeading,
           ),
