@@ -26,7 +26,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final ScrollController _productScrollController = ScrollController();
+  final ScrollController scrollController = ScrollController();
   bool _isFetchingProducts = false;
 
   @override
@@ -36,10 +36,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getNextPageAll();
     });
-
-    _productScrollController.addListener(() {
-      if (_productScrollController.position.pixels >=
-          _productScrollController.position.maxScrollExtent - 200) {
+   
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
         _getNextPageAll();
       }
     });
@@ -216,12 +216,15 @@ class _HomePageState extends ConsumerState<HomePage> {
             onRefresh: _resetAll,
             child: TabBarView(
               children: [
+                //const ProductListPage(),
                 ProductGridSection(
                   productListAsync: productListAsync,
                   buildEmptyState: _buildEmptyState,
                   buildShimmer: ({double height = 200}) =>
                       _buildShimmer(height: height),
+                  scrollController: scrollController,
                 ),
+
                 const BrandListPage(),
                 const CategoryListPage(),
                 Center(
@@ -321,20 +324,22 @@ class SearchBar extends StatelessWidget {
 }
 
 // Product Grid Section
-class ProductGridSection extends StatelessWidget {
+class ProductGridSection extends ConsumerWidget {
   final AsyncValue<List<ProductDataModel>> productListAsync;
   final Widget Function(String message) buildEmptyState;
   final Widget Function({double height}) buildShimmer;
+  final ScrollController scrollController;
 
   const ProductGridSection({
     Key? key,
     required this.productListAsync,
     required this.buildEmptyState,
     required this.buildShimmer,
+    required this.scrollController,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
       child: productListAsync.when(
@@ -343,96 +348,102 @@ class ProductGridSection extends StatelessWidget {
             return buildEmptyState('Product list is currently unavailable.');
           }
 
-          final previewList = list.take(20).toList();
+          final previewList = list.toList();
 
-          return GridView.builder(
-            physics: const BouncingScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: Responsive(context).isMobile ? 2 : 4,
-              crossAxisSpacing: 6,
-              mainAxisSpacing: 6,
-              childAspectRatio: 0.68,
-            ),
-            itemCount: previewList.length,
-            itemBuilder: (context, index) {
-              final product = previewList[index];
-              final productId = product.id;
-              return InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProductDetailPage(productId!),
-                    ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(3),
-                    boxShadow: [
-                      BoxShadow(
-                        // ignore: deprecated_member_use
-                        color: Colors.grey.withOpacity(0.15),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 2),
+          return RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(productNotifierProvider.notifier).reset();
+            },
+            child: GridView.builder(
+              controller: scrollController,
+              physics: const BouncingScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Responsive(context).isMobile ? 2 : 4,
+                crossAxisSpacing: 6,
+                mainAxisSpacing: 6,
+                childAspectRatio: 0.68,
+              ),
+              itemCount: previewList.length,
+              itemBuilder: (context, index) {
+                final product = previewList[index];
+                final productId = product.id;
+                return InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailPage(productId!),
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(4),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(3),
+                      boxShadow: [
+                        BoxShadow(
+                          // ignore: deprecated_member_use
+                          color: Colors.grey.withOpacity(0.15),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
                         ),
-                        child: Image.network(
-                          product.productImage ?? AppImage.emptyContainer,
-                          fit: BoxFit.cover,
-                          height: 160,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) => Image.asset(
-                            AppImage.emptyContainer,
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
+                          child: Image.network(
+                            product.productImage ?? AppImage.emptyContainer,
                             fit: BoxFit.cover,
                             height: 160,
                             width: double.infinity,
+                            errorBuilder: (_, __, ___) => Image.asset(
+                              AppImage.emptyContainer,
+                              fit: BoxFit.cover,
+                              height: 160,
+                              width: double.infinity,
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.name ?? '',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.name ?? '',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              product.productType ?? "",
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: AppColors.priceLabelColor,
+                              const SizedBox(height: 2),
+                              Text(
+                                product.productType ?? "",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: AppColors.priceLabelColor,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
         loading: () => buildShimmer(height: 200),

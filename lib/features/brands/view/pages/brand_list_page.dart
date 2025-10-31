@@ -76,8 +76,9 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
                   loading: () => brandListShimmer(context),
                   error: (e, _) => const SizedBox.shrink(),
                   data: (brands) {
-                    if (brands.isEmpty)
+                    if (brands.isEmpty) {
                       return const Center(child: Text('No brands'));
+                    }
                     return brandListView(
                       context,
                       brands,

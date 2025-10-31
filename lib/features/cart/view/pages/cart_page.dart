@@ -353,6 +353,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50
+                                                // ignore: deprecated_member_use
                                                 .withOpacity(0.95),
                                             borderRadius: BorderRadius.circular(
                                               12,

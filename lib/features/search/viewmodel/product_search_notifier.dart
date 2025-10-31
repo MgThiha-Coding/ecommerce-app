@@ -82,7 +82,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
           queryParameters: {'search': _keyword},
           options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         );
-        final categories = CategoriesListResponse.fromJson(catResp.data).data?.data ?? [];
+        final categories = CategoriesListResponse.fromJson(catResp.data).data.data;
         filterIds = categories.map((c) => c.id).whereType<int>().toList();
         if (filterIds.isEmpty) {
           _isNoMore = true;

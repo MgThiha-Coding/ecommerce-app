@@ -251,6 +251,7 @@ class _ProductPreviewSliderState extends ConsumerState<ProductPreviewSlider> {
                               left: 0,
                               right: 0,
                               child: Container(
+                                // ignore: deprecated_member_use
                                 color: Colors.black.withOpacity(0.4),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4,

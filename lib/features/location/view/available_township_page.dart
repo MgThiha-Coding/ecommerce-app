@@ -81,6 +81,7 @@ class _AvailableTownshipPageState extends ConsumerState<AvailableTownshipPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            // ignore: deprecated_member_use
             colors: [Colors.white, Colors.blue.withOpacity(0.3)],
           ),
         ),

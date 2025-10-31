@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
@@ -19,14 +19,14 @@ class AppInitializer {
   static Future<void> _initializeCritical() async {
     // 1. Localization
     await AppLocalization.ensureInitialized();
-    
+
     // 2. Device orientation
     await _setDeviceOrientation();
-    
+
     // 3. Hive setup
     await HiveConfig.init();
     await HiveConfig.openCriticalBoxes();
-    
+
     // 4. Environment and critical config
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
@@ -35,17 +35,13 @@ class AppInitializer {
   static Future<void> _initializeNonCritical() async {
     // Open non-critical Hive boxes in background
     await HiveConfig.openNonCriticalBoxes();
-    
+
     // Other non-critical initializations can go here
     // await Analytics.init();
     // await PushNotification.init();
   }
 
   static Future<void> _setDeviceOrientation() async {
-    final bool isTablet =
-        WidgetsBinding.instance.window.physicalSize.shortestSide > 600;
-    await SystemChrome.setPreferredOrientations(
-      isTablet ? DeviceOrientation.values : [DeviceOrientation.portraitUp],
-    );
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }
 }
