@@ -1,5 +1,3 @@
-
-
 class CreateOrderResponse {
   final bool success;
   final String message;
@@ -70,31 +68,43 @@ class OrderData {
   });
 
   factory OrderData.fromJson(Map<String, dynamic> json) {
+    dynamic billingRaw = json['billing_address'];
+    List<dynamic> safeBilling;
+    if (billingRaw is List) {
+      safeBilling = billingRaw;
+    } else if (billingRaw is Map) {
+      safeBilling = [billingRaw];
+    } else {
+      safeBilling = [];
+    }
+
     return OrderData(
       orderNumber: json['order_number'] ?? '',
-      contentId: json['content_id'] ?? 0,
+      contentId: int.tryParse(json['content_id'].toString()) ?? 0,
       status: json['status'] ?? '',
       checkoutType: json['checkout_type'] ?? '',
-      saleId: json['sale_id'] ?? 0,
-      shippingMethodId: json['shipping_method_id'],
-      paymentAccountId: json['payment_account_id'] ?? '',
+      saleId: int.tryParse(json['sale_id'].toString()) ?? 0,
+      shippingMethodId: json['shipping_method_id'] != null
+          ? int.tryParse(json['shipping_method_id'].toString())
+          : null,
+      paymentAccountId: json['payment_account_id']?.toString() ?? '',
       paymentsTransactionId: json['payments_transaction_id'],
       approveScreenshoot: json['approve_screenshoot'],
-      amountShipped: (json['amount_shipped'] ?? 0).toDouble(),
-      amountDiscount: (json['amount_discount'] ?? 0).toDouble(),
-      amountTax: (json['amount_tax'] ?? 0).toDouble(),
-      amountTotal: (json['amount_total'] ?? 0).toDouble(),
-      billingAddress: json['billing_address'] ?? [],
+      amountShipped: double.tryParse(json['amount_shipped'].toString()) ?? 0,
+      amountDiscount: double.tryParse(json['amount_discount'].toString()) ?? 0,
+      amountTax: double.tryParse(json['amount_tax'].toString()) ?? 0,
+      amountTotal: double.tryParse(json['amount_total'].toString()) ?? 0,
+      billingAddress: safeBilling,
       shippingAddress: json['shipping_address'] != null
           ? ShippingAddress.fromJson(json['shipping_address'])
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
+          ? DateTime.tryParse(json['updated_at'])
           : null,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
+          ? DateTime.tryParse(json['created_at'])
           : null,
-      id: json['id'] ?? 0,
+      id: int.tryParse(json['id'].toString()) ?? 0,
     );
   }
 

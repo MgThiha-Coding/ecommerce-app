@@ -1,3 +1,4 @@
+
 class CreateAddressRequest {
   final String type;
   final String firstName;

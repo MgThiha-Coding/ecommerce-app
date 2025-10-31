@@ -83,135 +83,172 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       );
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () {
+        ref.read(createOrderNotifierProvider.notifier).cancel();
+        return Future.value(true);
+      },
+      child: Scaffold(
         backgroundColor: AppColors.background,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          LocaleKeys.checkout.tr(),
-          style: TextStyle(
-            fontFamily: "Poppins",
-            fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+        appBar: AppBar(
+          backgroundColor: AppColors.background,
+          scrolledUnderElevation: 0,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            LocaleKeys.checkout.tr(),
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontSize: responsive.subHeading,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
-      ),
-      body: cartItemsAsync.when(
-        data: (cartItems) {
-          final itemCount = cartItems.length;
-          final itemTotal = cartItems.fold<double>(
-            0,
-            (sum, item) => sum + (item.uomPrice * item.quantity),
-          );
-          final shippingAmount = _selectedShipping != null
-              ? double.tryParse(_selectedShipping!.amount) ?? 0.0
-              : 0.0;
+        body: cartItemsAsync.when(
+          data: (cartItems) {
+            final itemCount = cartItems.length;
+            final itemTotal = cartItems.fold<double>(
+              0,
+              (sum, item) => sum + (item.uomPrice * item.quantity),
+            );
+            final shippingAmount = _selectedShipping != null
+                ? double.tryParse(_selectedShipping!.amount) ?? 0.0
+                : 0.0;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader(
-                  LocaleKeys.deliveryAddress.tr(),
-                  responsive,
-                ),
-                const SizedBox(height: 8),
-                _buildCreateAddressCard(responsive),
-                const SizedBox(height: 8),
-                _buildSelectAddressCard(responsive),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(
+                    LocaleKeys.deliveryAddress.tr(),
+                    responsive,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildCreateAddressCard(responsive),
+                  const SizedBox(height: 8),
+                  _buildSelectAddressCard(responsive),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                _buildSectionHeader(LocaleKeys.shippingMethod.tr(), responsive),
-                const SizedBox(height: 8),
-                _buildShippingCard(responsive),
+                  _buildSectionHeader(
+                    LocaleKeys.shippingMethod.tr(),
+                    responsive,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildShippingCard(responsive),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                _buildSectionHeader(LocaleKeys.paymentMethod.tr(), responsive),
-                const SizedBox(height: 8),
-                _buildPaymentCard(responsive),
-                const SizedBox(height: 8),
-                _buildScreenshotPicker(),
+                  _buildSectionHeader(
+                    LocaleKeys.paymentMethod.tr(),
+                    responsive,
+                  ),
+                  const SizedBox(height: 8),
+                  _buildPaymentCard(responsive),
+                  const SizedBox(height: 8),
+                  _buildScreenshotPicker(),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
-                const SizedBox(height: 8),
+                  _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
+                  const SizedBox(height: 8),
 
-                _buildOrderSummary(
-                  itemCount,
-                  itemTotal,
-                  shippingAmount,
-                  itemTotal + shippingAmount,
-                  currency,
-                ),
+                  _buildOrderSummary(
+                    itemCount,
+                    itemTotal,
+                    shippingAmount,
+                    itemTotal + shippingAmount,
+                    currency,
+                  ),
 
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: AppButton(
-                    title: LocaleKeys.placeOrder.tr(),
-                    backgroundColor: AppColors.primary,
-                    labelColor: AppColors.background,
-                    isLoading: orderState.isLoading ? true : false,
-                    onTap: () async {
-                      if (_selectedAddress == null ||
-                          _selectedPayment == null ||
-                          _selectedShipping == null ||
-                          _approveScreenshot == null ||
-                          cartItemsAsync.value == null ||
-                          cartItemsAsync.value!.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please complete all selections and upload screenshot',
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: AppButton(
+                      title: LocaleKeys.placeOrder.tr(),
+                      backgroundColor: AppColors.primary,
+                      labelColor: AppColors.background,
+                      isLoading: orderState is AsyncLoading,
+                      onTap: () async {
+                        if (_selectedAddress == null ||
+                            _selectedPayment == null ||
+                            _selectedShipping == null ||
+                            _approveScreenshot == null ||
+                            cartItemsAsync.value == null ||
+                            cartItemsAsync.value!.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please complete all selections and upload screenshot',
+                              ),
                             ),
-                          ),
-                        );
-                        return;
-                      }
+                          );
+                          return;
+                        }
 
-                      final ids = cartItemsAsync.value!
-                          .map((e) => e.id)
-                          .toList();
+                        final ids = cartItemsAsync.value!
+                            .map((e) => e.id)
+                            .toList();
 
-                      final request = CreateOrderRequest(
-                        orderType: orderType,
-                        cartItemIds: ids,
-                        shipping: ShippingInfo(
+                        final shippingInfo = ShippingInfo(
                           address: _selectedAddress!.addressLine1,
                           township: _selectedAddress!.townshipEnName,
                           region: _selectedAddress!.regionEnName,
                           country: _selectedAddress!.country,
                           phone: _selectedAddress!.phone,
-                        ),
-                        shippingMethodId: _selectedShipping!.id,
-                        shippingAccountId: _selectedAddress!.id,
-                        paymentAccountId: _selectedPayment!.paymentAccount!.id,
-                        approveScreenshoot: _approveScreenshot!,
-                      );
+                        );
 
-                      await ref
-                          .read(createOrderNotifierProvider.notifier)
-                          .createOrder(request);
-                    },
+                        final request = CreateOrderRequest(
+                          orderType: orderType,
+                          cartItemIds: ids,
+                          shipping: shippingInfo,
+                          shippingMethodId: _selectedShipping!.id,
+                          paymentAccountId:
+                              _selectedPayment!.paymentAccount!.id,
+                          approveScreenshot: _approveScreenshot!,
+                        );
+
+                        await ref
+                            .read(createOrderNotifierProvider.notifier)
+                            .createOrder(request);
+
+                        // Feedback
+                        final currentState = ref.read(
+                          createOrderNotifierProvider,
+                        );
+                        currentState.when(
+                          data: (data) {
+                            if (data != null && data.success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Order ${data.data?.orderNumber} created successfully!',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          loading: () {},
+                          error: (err, _) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(err.toString())),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
 
-                // button
-              ],
-            ),
-          );
-        },
-        loading: () => _buildCheckoutShimmerLoading(),
-        error: (err, _) => Center(child: Text("Error: $err")),
+                  // button
+                ],
+              ),
+            );
+          },
+          loading: () => _buildCheckoutShimmerLoading(),
+          error: (err, _) => Center(child: Text("Error: $err")),
+        ),
       ),
     );
   }

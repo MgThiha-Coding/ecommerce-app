@@ -77,12 +77,12 @@ class _AvailableTownshipPageState extends ConsumerState<AvailableTownshipPage> {
         ),
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             // ignore: deprecated_member_use
-            colors: [Colors.white, Colors.blue.withOpacity(0.3)],
+            colors: [Colors.white, Colors.white],
           ),
         ),
         child: Padding(
