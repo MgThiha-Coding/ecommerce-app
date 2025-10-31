@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:intl/intl.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
+import 'package:picoshop_theme2/core/responsive/responsive.dart';
+import 'package:picoshop_theme2/features/category/model/categories_detail_response.dart';
 import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 
 class CategoryDetailPage extends ConsumerStatefulWidget {
-  final int? categoryId;
-  const CategoryDetailPage(this.categoryId, {super.key});
+  final int categoryId;
+  const CategoryDetailPage({super.key, required this.categoryId});
 
   @override
-  ConsumerState<CategoryDetailPage> createState() => _CategoryDetailPageState();
+  ConsumerState<CategoryDetailPage> createState() =>
+      _CategoryDetailPageState();
 }
 
 class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
@@ -18,195 +21,180 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      if (widget.categoryId != null) {
-        ref
-            .read(categoryDetailNotifierProvider.notifier)
-            .getCategoryDetail(widget.categoryId!);
-      }
+      ref
+          .read(categoryDetailNotifierProvider.notifier)
+          .getCategoryDetail(widget.categoryId);
     });
+  }
+
+  String _timeAgo(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inDays >= 365) {
+      final years = diff.inDays ~/ 365;
+      return years == 1 ? 'a year ago' : '$years years ago';
+    } else if (diff.inDays >= 30) {
+      final months = diff.inDays ~/ 30;
+      return months == 1 ? 'a month ago' : '$months months ago';
+    } else if (diff.inDays > 0) {
+      return diff.inDays == 1 ? 'yesterday' : '${diff.inDays} days ago';
+    } else if (diff.inHours > 0) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inMinutes > 0) {
+      return '${diff.inMinutes}m ago';
+    }
+    return 'just now';
+  }
+
+  String _sinceText(DateTime date) {
+    return 'Since ${DateFormat('MMMM yyyy').format(date)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final categoryDetailAsync = ref.watch(categoryDetailNotifierProvider);
-    //final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final categoryState = ref.watch(categoryDetailNotifierProvider);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
-        ),
+        backgroundColor: AppColors.background,
+        elevation: 0.4,
+        centerTitle: true,
         title: Text(
-          'Category Detail',
+          'Category Details',
           style: GoogleFonts.poppins(
             fontSize: responsive.subHeading,
             fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.white],
+      body: categoryState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: EdgeInsets.all(responsive.paddingMedium),
+            child: Text(
+              err.toString(),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: responsive.body,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
-        child: categoryDetailAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(
-            child: Padding(
-              padding: EdgeInsets.all(responsive.paddingMedium),
+        data: (resp) {
+          final Data? category = resp?.data;
+          if (category == null) {
+            return Center(
               child: Text(
-                err.toString(),
-                textAlign: TextAlign.center,
+                'No category information available.',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                   fontSize: responsive.body,
                 ),
               ),
-            ),
-          ),
-          data: (categoryDetail) {
-            if (categoryDetail?.data == null) {
-              return Center(
-                child: Text(
-                  'No category information available.',
-                  style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: responsive.body,
+            );
+          }
+
+          final name = category.name;
+          final description =
+              (category.description?.toString().trim().isEmpty ?? true)
+                  ? 'No description available.'
+                  : category.description.toString();
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(responsive.paddingLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header avatar
+                Center(
+                  child: CircleAvatar(
+                    radius: responsive.iconLarge + 8,
+                    backgroundColor: AppColors.background,
+                    child: Icon(
+                      Icons.category_outlined,
+                      size: responsive.iconLarge + 4,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
-              );
-            }
+                SizedBox(height: responsive.paddingMedium),
 
-            final category = categoryDetail!.data;
-            final categoryName = category.name;
-            final description =
-                category.description ?? 'No description available';
-
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Header / Avatar
-                  Container(
-                    height: screenHeight * 0.25,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade600, Colors.green.shade400],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(40),
-                      ),
-                    ),
-                    child: Center(
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.category_outlined,
-                          size: 50,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                    ),
+                // Name
+                Text(
+                  name.isNotEmpty ? name : 'Unnamed Category',
+                  style: TextStyle(
+                    fontSize: responsive.subHeading,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
-                  SizedBox(height: responsive.paddingLarge),
+                ),
+                SizedBox(height: responsive.paddingSmall),
 
-                  // Category Name
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: responsive.paddingLarge,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          categoryName,
-                          style: TextStyle(
-                            fontSize: responsive.heading,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: responsive.paddingSmall),
-
-                        // Description
-                        Text(
-                          description,
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(
-                            fontSize: responsive.body,
-                            color: AppColors.textSecondary,
-                            height: 1.5,
-                          ),
-                        ),
-                        SizedBox(height: responsive.paddingLarge),
-
-                        // Info rows
-                        _infoRow(
-                          label: 'ID',
-                          value: category.id.toString(),
-                          responsive: responsive,
-                        ),
-                        _infoRow(
-                          label: 'Created At',
-                          value: category.createdAt.toString(),
-                          responsive: responsive,
-                        ),
-                      ],
-                    ),
+                // Description
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: responsive.body,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                SizedBox(height: responsive.paddingLarge),
+
+                // Metadata Section
+                const Divider(),
+                _metaRow(
+                  icon: Icons.calendar_today_outlined,
+                  label: _sinceText(category.createdAt),
+                  responsive: responsive,
+                ),
+                _metaRow(
+                  icon: Icons.update_outlined,
+                  label: 'Updated ${_timeAgo(category.updatedAt)}',
+                  responsive: responsive,
+                ),
+                _metaRow(
+                  icon: Icons.tag_outlined,
+                  label: 'ID: ${category.id}',
+                  responsive: responsive,
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _infoRow({
+  Widget _metaRow({
+    required IconData icon,
     required String label,
-    required String value,
     required Responsive responsive,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: responsive.paddingSmall),
+      padding: EdgeInsets.only(bottom: responsive.paddingSmall, top: 4),
       child: Row(
         children: [
+          Icon(
+            icon,
+            size: 18,
+            color: AppColors.textSecondary.withOpacity(0.8),
+          ),
+          const SizedBox(width: 8),
           Expanded(
-            flex: 3,
             child: Text(
               label,
               style: TextStyle(
                 fontSize: responsive.body,
                 color: AppColors.textSecondary,
               ),
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: responsive.body,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

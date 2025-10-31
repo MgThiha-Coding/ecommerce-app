@@ -41,7 +41,7 @@ class Responsive {
   double get iconLarge => value(mobile: 32, tablet: 36, desktop: 40);
 
   // get started button onboarding page
-  double get buttonHeight => value(mobile: 33, tablet: 28, desktop: 30);
+  double get buttonHeight => value(mobile: 33, tablet: 33, desktop: 30);
   double get buttonWidth => value(mobile: 130, tablet: 100, desktop: 30);
 
   // nav label
@@ -49,7 +49,7 @@ class Responsive {
    double get navIcon => value(mobile: 10, tablet: 18, desktop: 30);
 
   // AuthPage
-  double get authButtonHeight => value(mobile: 50, tablet: 40, desktop: 30);
+  double get authButtonHeight => value(mobile: 50, tablet: 48, desktop: 30);
 
 
   double get authHorizontalPadding {

@@ -157,9 +157,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                   height: 50,
                   width: double.infinity,
                   child: AppButton(
-                    title: orderState is AsyncLoading
-                        ? "Placing Order..."
-                        : LocaleKeys.placeOrder.tr(),
+                    title: LocaleKeys.placeOrder.tr(),
                     backgroundColor: AppColors.primary,
                     labelColor: AppColors.background,
                     isLoading: orderState.isLoading ? true : false,
@@ -369,7 +367,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
           title: Text(
             _selectedPayment == null
-                ? LocaleKeys.selectShippingMethod.tr()
+                ? LocaleKeys.paymentMethod.tr()
                 : _selectedPayment!.name,
             style: GoogleFonts.poppins(
               fontSize: Responsive(context).body,

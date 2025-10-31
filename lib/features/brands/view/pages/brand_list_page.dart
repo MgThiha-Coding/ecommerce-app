@@ -62,7 +62,9 @@ class _BrandListPageState extends ConsumerState<BrandListPage> {
         children: [
           Expanded(
             child: RefreshIndicator(
-              backgroundColor: Colors.blue.shade50,
+              color: AppColors.textSecondary,
+              backgroundColor: AppColors.background,
+
               onRefresh: () => notifier.reset(),
               child: NotificationListener<ScrollNotification>(
                 onNotification: (scrollInfo) {

@@ -244,10 +244,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? user!.email
         : "Unknown";
 
+    final isTablet = Responsive(context).isTablet;
+    final horizontalPadding = isTablet ? 100.0 : 24.0;
+    final verticalPadding = isTablet ? 48.0 : 24.0;
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -461,7 +469,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     bool isTablet,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: SizedBox(
         width: double.infinity,
         child: MaterialButton(

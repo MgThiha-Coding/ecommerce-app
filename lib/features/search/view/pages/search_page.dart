@@ -21,7 +21,6 @@ class SearchPage extends ConsumerStatefulWidget {
 
 class _SearchPageState extends ConsumerState<SearchPage> {
   final _searchController = TextEditingController();
-
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
 
@@ -53,7 +52,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       final notifier = ref.read(combinedProductSearchProvider.notifier);
 
       if (keyword.isEmpty) {
-        notifier.reset();
+        notifier.showRecent();
         return;
       }
 
@@ -67,7 +66,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-
       appBar: AppBar(
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -80,124 +78,109 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         ),
       ),
-
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.white],
-          ),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: SizedBox(
-                height: 40,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
-                        controller: _searchController,
-                        hintText: 'Search by $_selectedFilter...',
-                        validator: (_) => null,
-                        addObscure: false,
-                        onChanged: (_) => _onSearchChanged(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: SizedBox(
+              height: 42,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AppTextField(
+                      controller: _searchController,
+                      hintText: 'Search by $_selectedFilter...',
+                      validator: (_) => null,
+                      addObscure: false,
+                      onChanged: (_) => _onSearchChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  /*
+                  // Filter dropdown commented for now
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedFilter,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'product',
+                            child: Text('Product', style: TextStyle(fontSize: 12)),
+                          ),
+                          DropdownMenuItem(
+                            value: 'brand',
+                            child: Text('Brand', style: TextStyle(fontSize: 12)),
+                          ),
+                          DropdownMenuItem(
+                            value: 'category',
+                            child: Text('Category', style: TextStyle(fontSize: 12)),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _selectedFilter = value);
+                            _onSearchChanged();
+                          }
+                        },
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedFilter,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'product',
-                              child: Text(
-                                'Product',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'brand',
-                              child: Text(
-                                'Brand',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'category',
-                              child: Text(
-                                'Category',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _selectedFilter = value);
-                              _onSearchChanged();
-                            }
-                          },
-                        ),
+                  ),
+                  */
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: searchState.when(
+              data: (products) {
+                if (products.isEmpty) return _buildEmptyState();
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return _buildProductTile(product);
+                  },
+                );
+              },
+              loading: () => const _AnimatedSearchingText(),
+              error: (e, _) => Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red.shade400,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Oops! Something went wrong.\nPlease try again in a moment.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive(context).body,
+                        color: Colors.red.shade700,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            const Divider(height: 1),
-            Expanded(
-              child: searchState.when(
-                data: (products) {
-                  if (products.isEmpty) return _buildEmptyState();
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return _buildProductTile(product);
-                    },
-                  );
-                },
-                loading: () => const _AnimatedSearchingText(),
-                error: (e, _) => Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red.shade400,
-                        size: 48,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Oops! Something went wrong.\nPlease try again in a moment.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive(context).body,
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildProductTile(ProductDataModel product) {
     return Card(
+      color: AppColors.background,
       child: ListTile(
         onTap: () {
           Navigator.push(
@@ -254,7 +237,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off, size: 40, color: AppColors.textSecondary),
+          const Icon(
+            Icons.search_off,
+            size: 40,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 10),
           Text(
             'No products found',
@@ -268,7 +255,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
 class _AnimatedSearchingText extends StatefulWidget {
   const _AnimatedSearchingText({Key? key}) : super(key: key);
-
   @override
   State<_AnimatedSearchingText> createState() => _AnimatedSearchingTextState();
 }

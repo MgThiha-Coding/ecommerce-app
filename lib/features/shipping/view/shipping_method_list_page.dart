@@ -79,7 +79,7 @@ class _ShippingMethodListPageState
 
           final data = response.data;
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+             padding: Responsive(context).isMobile? const EdgeInsets.all(12):const EdgeInsets.all(50),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];

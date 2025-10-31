@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart';
@@ -25,6 +26,30 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
     });
   }
 
+  String _timeAgo(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inDays >= 365) {
+      final years = diff.inDays ~/ 365;
+      return years == 1 ? 'a year ago' : '$years years ago';
+    } else if (diff.inDays >= 30) {
+      final months = diff.inDays ~/ 30;
+      return months == 1 ? 'a month ago' : '$months months ago';
+    } else if (diff.inDays > 0) {
+      return diff.inDays == 1 ? 'yesterday' : '${diff.inDays} days ago';
+    } else if (diff.inHours > 0) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inMinutes > 0) {
+      return '${diff.inMinutes}m ago';
+    }
+    return 'just now';
+  }
+
+  String _sinceText(DateTime date) {
+    return 'Since ${DateFormat('MMMM yyyy').format(date)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
@@ -44,7 +69,6 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
             color: AppColors.textSecondary,
           ),
         ),
-        //    foregroundColor: AppColors.textPrimary,
       ),
       body: brandState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -76,25 +100,25 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
           }
 
           final name = brand.name;
-          final description = brand.description?.toString() ?? '';
+          final description =
+              (brand.description?.toString().trim().isEmpty ?? true)
+                  ? 'No description available.'
+                  : brand.description.toString();
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(responsive.paddingLarge),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header avatar with brand initial
+                // Brand Icon/Avatar
                 Center(
                   child: CircleAvatar(
                     radius: responsive.iconLarge + 8,
                     backgroundColor: AppColors.background,
-                    child: Text(
-                      (name.isNotEmpty ? name[0].toUpperCase() : '?'),
-                      style: TextStyle(
-                        fontSize: responsive.iconLarge,
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: Icon(
+                      Icons.store_mall_directory_outlined,
+                      size: responsive.iconLarge + 4,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -104,38 +128,40 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
                 Text(
                   name.isNotEmpty ? name : 'Unnamed Brand',
                   style: TextStyle(
-                    fontSize: responsive.heading,
+                    fontSize: responsive.subHeading,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 SizedBox(height: responsive.paddingSmall),
 
-                // Description (if available)
-                if (description.isNotEmpty)
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: responsive.body,
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                  )
-                else
-                  Text(
-                    'No description available.',
-                    style: TextStyle(
-                      fontSize: responsive.body,
-                      color: AppColors.textSecondary,
-                    ),
+                // Description
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: responsive.body,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
                   ),
+                ),
 
                 SizedBox(height: responsive.paddingLarge),
+                const Divider(),
 
-                // Info rows
-                _infoRow(
-                  label: 'ID',
-                  value: brand.id.toString(),
+                // Metadata
+                _metaRow(
+                  icon: Icons.calendar_today_outlined,
+                  label: _sinceText(brand.createdAt),
+                  responsive: responsive,
+                ),
+                _metaRow(
+                  icon: Icons.update_outlined,
+                  label: 'Updated ${_timeAgo(brand.updatedAt)}',
+                  responsive: responsive,
+                ),
+                _metaRow(
+                  icon: Icons.tag_outlined,
+                  label: 'ID: ${brand.id}',
                   responsive: responsive,
                 ),
               ],
@@ -146,34 +172,29 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
     );
   }
 
-  Widget _infoRow({
+  Widget _metaRow({
+    required IconData icon,
     required String label,
-    required String value,
     required Responsive responsive,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: responsive.paddingSmall),
+      padding: EdgeInsets.only(bottom: responsive.paddingSmall, top: 4),
       child: Row(
         children: [
+          Icon(
+            icon,
+            size: 18,
+            color: AppColors.textSecondary.withOpacity(0.8),
+          ),
+          const SizedBox(width: 8),
           Expanded(
-            flex: 3,
             child: Text(
               label,
               style: TextStyle(
                 fontSize: responsive.body,
                 color: AppColors.textSecondary,
               ),
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: responsive.body,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

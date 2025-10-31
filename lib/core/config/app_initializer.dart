@@ -1,6 +1,5 @@
 import 'dart:async';
-
-
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
@@ -42,6 +41,23 @@ class AppInitializer {
   }
 
   static Future<void> _setDeviceOrientation() async {
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    // Get device size
+    final window = WidgetsBinding.instance.window;
+    final screenWidth = window.physicalSize.width / window.devicePixelRatio;
+
+    if (screenWidth >= 600) {
+      // Tablet: allow both portrait and landscape
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Mobile: portrait only
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+    }
   }
 }

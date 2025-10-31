@@ -62,7 +62,8 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
         children: [
           Expanded(
             child: RefreshIndicator(
-              backgroundColor: Colors.blue.shade50,
+              color: AppColors.textSecondary,
+              backgroundColor: AppColors.background,
               onRefresh: () => notifier.reset(),
               child: NotificationListener<ScrollNotification>(
                 onNotification: (scrollInfo) {
@@ -76,8 +77,16 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
                   loading: () => categoryListShimmer(context),
                   error: (e, _) => const SizedBox.shrink(),
                   data: (categories) {
-                    if (categories.isEmpty) return const Center(child: Text('No categories'));
-                    return categoryListView(context, categories, notifier.isNoMore, _scrollController, responsive);
+                    if (categories.isEmpty) {
+                      return const Center(child: Text('No categories'));
+                    }
+                    return categoryListView(
+                      context,
+                      categories,
+                      notifier.isNoMore,
+                      _scrollController,
+                      responsive,
+                    );
                   },
                 ),
               ),
@@ -125,14 +134,16 @@ ListView categoryListView(
                       style: GoogleFonts.poppins(
                         fontSize: responsive.subHeading,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary
+                        color: AppColors.textPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: responsive.caption),
                     Text(
-                      description.isEmpty ? "No description available" : description,
+                      description.isEmpty
+                          ? "No description available"
+                          : description,
                       style: GoogleFonts.poppins(
                         fontSize: responsive.caption,
                         color: Colors.grey[700],
@@ -149,7 +160,8 @@ ListView categoryListView(
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CategoryDetailPage(categoryId),
+                      builder: (context) =>
+                          CategoryDetailPage(categoryId: categoryId!),
                     ),
                   );
                 },
@@ -199,7 +211,11 @@ ListView categoryListShimmer(BuildContext context, {int itemCount = 12}) {
           ),
           child: Row(
             children: [
-              Container(width: responsive.body, height: responsive.body, color: Colors.grey.shade300),
+              Container(
+                width: responsive.body,
+                height: responsive.body,
+                color: Colors.grey.shade300,
+              ),
               SizedBox(width: responsive.body),
               Expanded(
                 child: Container(

@@ -97,7 +97,8 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         ),
         child: RefreshIndicator(
-          backgroundColor: Colors.white,
+          color: AppColors.textSecondary,
+          backgroundColor: AppColors.background,
           onRefresh: _onRefresh,
           child: Stack(
             children: [

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
+import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
@@ -126,10 +127,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             builder: (context, ref, _) {
               return Row(
                 children: [
+                  /*
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: CircleAvatar(child: Image.asset(AppImage.appLogo)),
                   ),
+                  */
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -143,12 +146,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                               style: TextStyle(
                                 fontFamily: "Poppins",
                                 fontSize: Responsive(context).body,
-                                color: Colors.blueAccent,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                             const Icon(
                               Icons.waving_hand,
-                              color: Colors.blueAccent,
+                              color: AppColors.textSecondary,
                               size: 16,
                             ),
                           ],
@@ -160,7 +163,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: Responsive(context).subHeading,
-                            color: Colors.blueAccent,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -168,9 +171,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ),
                   const Expanded(child: SearchBar()),
-                  /*
+                  
                   Padding(
-                    padding: const EdgeInsets.all(5.0),
+                    padding: const EdgeInsets.all(2.0),
                     child: IconButton(
                       onPressed: () {
                         Navigator.push(
@@ -182,11 +185,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                       },
                       icon: const Icon(
                         LineIcons.shoppingBag,
-                        color: Colors.blueAccent,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
-                  */
+                  
                 ],
               );
             },
@@ -287,7 +290,7 @@ class SearchBar extends StatelessWidget {
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.blue.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -351,6 +354,8 @@ class ProductGridSection extends ConsumerWidget {
           final previewList = list.toList();
 
           return RefreshIndicator(
+            color: AppColors.textSecondary,
+            backgroundColor: AppColors.background,
             onRefresh: () async {
               await ref.read(productNotifierProvider.notifier).reset();
             },
@@ -359,7 +364,7 @@ class ProductGridSection extends ConsumerWidget {
               physics: const BouncingScrollPhysics(),
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: Responsive(context).isMobile ? 2 : 4,
+                crossAxisCount: Responsive(context).isMobile ? 2 : 5,
                 crossAxisSpacing: 6,
                 mainAxisSpacing: 6,
                 childAspectRatio: 0.68,

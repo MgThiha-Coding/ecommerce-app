@@ -5,10 +5,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
-import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
-import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 
-class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+class CombinedProductSearchNotifier
+    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
   final Dio _dio;
   final Box<ProductHiveModel> _productCache;
   final List<ProductDataModel> _results = [];
@@ -20,8 +19,56 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
   String _filterType = 'product';
 
   CombinedProductSearchNotifier(this._productCache)
-      : _dio = Dio(),
-        super(const AsyncValue.data([]));
+    : _dio = Dio(),
+      super(const AsyncValue.data([])) {
+    loadInitialProducts();
+  }
+
+  // --- Preload 10 recent products or first products ---
+  Future<void> loadInitialProducts({int count = 10}) async {
+    if (_results.isNotEmpty) return;
+    _isLoading = true;
+    try {
+      // Try loading recent products from cache first
+      final recent = _productCache.values.map((e) => e.toDataModel()).toList();
+      if (recent.isNotEmpty) {
+        _results.clear();
+        _results.addAll(recent.take(count));
+        state = AsyncValue.data(List.from(_results));
+        _isLoading = false;
+        return;
+      }
+
+      // Otherwise, load first products from API
+      final resp = await _dio.get(
+        'https://beta.picosbs.com/api/ecommerce/products',
+        queryParameters: {'page': 1, 'per_page': count},
+        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+      );
+      final parsed = ProductListResponse.fromJson(resp.data);
+      var products = parsed.data?.data ?? [];
+
+      _results.clear();
+      _results.addAll(products);
+      _currentPage = 2;
+      _isNoMore = false;
+      state = AsyncValue.data(List.from(_results));
+
+      // Save to cache
+      for (var product in products.take(count)) {
+        if (product.id != null) {
+          _productCache.put(
+            product.id,
+            ProductHiveModel.fromDataModel(product),
+          );
+        }
+      }
+    } catch (_) {
+      state = const AsyncValue.data([]);
+    } finally {
+      _isLoading = false;
+    }
+  }
 
   bool get isNoMore => _isNoMore;
   bool get isLoading => _isLoading;
@@ -45,12 +92,20 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
     _isNoMore = false;
 
     if (_keyword.isEmpty) {
-      await reset();
+      await showRecent();
       return;
     }
 
     state = const AsyncValue.loading();
     await _fetchPage();
+  }
+
+  Future<void> showRecent({int count = 10}) async {
+    _results.clear();
+    _results.addAll(
+      _productCache.values.map((e) => e.toDataModel()).take(count),
+    );
+    state = AsyncValue.data(List.from(_results));
   }
 
   Future<void> loadMore() async {
@@ -61,8 +116,10 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
   Future<void> _fetchPage() async {
     _isLoading = true;
     try {
-      List<int> filterIds = [];
+      //List<int> filterIds = [];
 
+      // --- BRAND AND CATEGORY SEARCH (commented for MVP) ---
+      /*
       if (_filterType == 'brand') {
         final brandResp = await _dio.get(
           'https://beta.picosbs.com/api/ecommerce/brands',
@@ -90,15 +147,11 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
           return;
         }
       }
+      */
 
       final Map<String, dynamic> query = {'page': _currentPage};
-
       if (_filterType == 'product') {
         query['filter[products.name][\$like]'] = '%$_keyword%';
-      } else if (_filterType == 'brand') {
-        query['filter[products.brand_id][\$in]'] = filterIds.join(',');
-      } else if (_filterType == 'category') {
-        query['filter[products.category_id][\$in]'] = filterIds.join(',');
       }
 
       final resp = await _dio.get(
@@ -113,6 +166,7 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
       if (products.isEmpty) {
         _isNoMore = true;
       } else {
+        // Sort by relevance
         products.sort((a, b) {
           final nameA = a.name?.toLowerCase() ?? '';
           final nameB = b.name?.toLowerCase() ?? '';
@@ -132,7 +186,10 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
             _productCache.delete(_productCache.keys.first);
           }
           if (product.id != null) {
-            _productCache.put(product.id, ProductHiveModel.fromDataModel(product));
+            _productCache.put(
+              product.id,
+              ProductHiveModel.fromDataModel(product),
+            );
           }
         }
       }
@@ -143,7 +200,10 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
       if (cached.isNotEmpty) {
         state = AsyncValue.data(cached);
       } else {
-        state = AsyncValue.error(e.response?.data['message'] ?? 'Check Internet', st);
+        state = AsyncValue.error(
+          e.response?.data['message'] ?? 'Check Internet',
+          st,
+        );
       }
     } finally {
       _isLoading = false;
@@ -151,7 +211,11 @@ class CombinedProductSearchNotifier extends StateNotifier<AsyncValue<List<Produc
   }
 }
 
-final combinedProductSearchProvider = StateNotifierProvider<CombinedProductSearchNotifier, AsyncValue<List<ProductDataModel>>>((ref) {
-  final offlineProducts = Hive.box<ProductHiveModel>('products');
-  return CombinedProductSearchNotifier(offlineProducts);
-});
+final combinedProductSearchProvider =
+    StateNotifierProvider<
+      CombinedProductSearchNotifier,
+      AsyncValue<List<ProductDataModel>>
+    >((ref) {
+      final offlineProducts = Hive.box<ProductHiveModel>('products');
+      return CombinedProductSearchNotifier(offlineProducts);
+    });
