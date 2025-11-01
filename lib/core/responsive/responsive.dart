@@ -42,7 +42,7 @@ class Responsive {
 
   // get started button onboarding page
   double get buttonHeight => value(mobile: 33, tablet: 33, desktop: 30);
-  double get buttonWidth => value(mobile: 130, tablet: 100, desktop: 30);
+  double get buttonWidth => value(mobile: 130, tablet: 130, desktop: 30);
 
   // nav label
   double get navLabel => value(mobile: 10, tablet: 12, desktop: 14);

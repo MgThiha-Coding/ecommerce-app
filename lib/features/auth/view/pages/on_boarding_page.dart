@@ -141,7 +141,7 @@
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: SizedBox(
                     width: Responsive(context).buttonWidth,
                     height: Responsive(context).buttonHeight,

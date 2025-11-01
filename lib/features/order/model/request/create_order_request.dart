@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 class CreateOrderRequest {
-  final String orderType; // "delivery" or "pickup"
+  final String orderType; 
   final List<int> cartItemIds;
   final ShippingInfo shipping;
   final int? shippingMethodId;
   final int? shippingAccountId;
   final int paymentAccountId;
-  final File? approveScreenshoot; // optional photo
+  final File approveScreenshot; 
 
   CreateOrderRequest({
     required this.orderType,
@@ -17,52 +17,50 @@ class CreateOrderRequest {
     this.shippingMethodId,
     this.shippingAccountId,
     required this.paymentAccountId,
-    this.approveScreenshoot,
+    required this.approveScreenshot,
   });
 
-  /// Convert to Dio FormData for sending as POST request
+  /// Convert to FormData for multipart upload
   FormData toFormData() {
     final formData = FormData();
 
-    // order type
     formData.fields.add(MapEntry('order_type', orderType));
 
-    // cart_item_ids[0], cart_item_ids[1], ...
+    // Add cart items
     for (int i = 0; i < cartItemIds.length; i++) {
       formData.fields.add(
-          MapEntry('cart_item_ids[$i]', cartItemIds[i].toString()));
+        MapEntry('cart_item_ids[$i]', cartItemIds[i].toString()),
+      );
     }
 
-    // shipping info: shipping[address], shipping[township], ...
+    // Add shipping fields
     formData.fields.add(MapEntry('shipping[address]', shipping.address));
     formData.fields.add(MapEntry('shipping[township]', shipping.township));
     formData.fields.add(MapEntry('shipping[region]', shipping.region));
     formData.fields.add(MapEntry('shipping[country]', shipping.country));
     formData.fields.add(MapEntry('shipping[phone]', shipping.phone));
 
-    // optional fields
+    // Optional fields
     if (shippingMethodId != null) {
-      formData.fields
-          .add(MapEntry('shipping_method_id', shippingMethodId.toString()));
+      formData.fields.add(MapEntry('shipping_method_id', shippingMethodId.toString()));
     }
     if (shippingAccountId != null) {
-      formData.fields
-          .add(MapEntry('shipping_account_id', shippingAccountId.toString()));
+      formData.fields.add(MapEntry('shipping_account_id', shippingAccountId.toString()));
     }
 
-    formData.fields.add(
-        MapEntry('payment_account_id', paymentAccountId.toString()));
+    // Payment field
+    formData.fields.add(MapEntry('payment_account_id', paymentAccountId.toString()));
 
-    // approve screenshot as file
-    if (approveScreenshoot != null) {
-      formData.files.add(MapEntry(
+    // Add screenshot file
+    formData.files.add(
+      MapEntry(
         'approve_screenshoot',
         MultipartFile.fromFileSync(
-          approveScreenshoot!.path,
-          filename: approveScreenshoot!.path.split('/').last,
+          approveScreenshot.path,
+          filename: approveScreenshot.path.split('/').last,
         ),
-      ));
-    }
+      ),
+    );
 
     return formData;
   }

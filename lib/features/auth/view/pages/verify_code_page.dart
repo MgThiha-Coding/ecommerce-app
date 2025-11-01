@@ -95,6 +95,21 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
             storage.isLoggedIn();
 
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.grey[200],
+                content: Text(
+                  data.message,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: Responsive(context).body,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            );
+
             await storage.clearPendingEmail();
             await storage.setVerifyStage(false);
 
@@ -109,7 +124,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
           }
         },
         error: (error, _) {
-           ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.grey[200],
               content: Text(
@@ -140,7 +155,9 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
+            padding: Responsive(context).isMobile
+                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 50)
+                : const EdgeInsets.symmetric(horizontal: 260, vertical: 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
