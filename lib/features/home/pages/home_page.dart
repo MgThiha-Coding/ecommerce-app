@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:picoshop_theme2/features/brands/view/pages/brand_list_page.dart';
 import 'package:picoshop_theme2/features/category/view/pages/category_list_page.dart';
-import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
@@ -127,12 +126,12 @@ class _HomePageState extends ConsumerState<HomePage> {
             builder: (context, ref, _) {
               return Row(
                 children: [
-                  /*
+                  
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: CircleAvatar(child: Image.asset(AppImage.appLogo)),
                   ),
-                  */
+                  
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -171,7 +170,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ),
                   const Expanded(child: SearchBar()),
-                  
+                  /*
                   Padding(
                     padding: const EdgeInsets.all(2.0),
                     child: IconButton(
@@ -189,6 +188,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
+                  */
                   
                 ],
               );

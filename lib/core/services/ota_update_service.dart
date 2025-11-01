@@ -8,13 +8,12 @@ class OtaUpdateService {
   static const otaConfigUrl =
       "https://raw.githubusercontent.com/MgThiha-Coding/pico-mart/production/version.json";
 
+  /// Check for updates
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
-      // 1. Get current app version
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
 
-      // 2. Fetch latest version JSON
       final response = await http.get(Uri.parse(otaConfigUrl));
       if (response.statusCode != 200) return;
 
@@ -24,16 +23,15 @@ class OtaUpdateService {
       final changelog = data['changelog'] as String? ?? '';
       final forceUpdate = data['force_update'] as bool? ?? false;
 
-      // 3. Compare versions
       if (_isNewerVersion(latestVersion, currentVersion)) {
-        _showUpdateDialog(context, apkUrl, changelog, forceUpdate);
+        _showUpdateDialog(context, apkUrl, latestVersion, changelog, forceUpdate);
       }
     } catch (e) {
       print('OTA Update check error: $e');
     }
   }
 
-  // Compare semantic versions
+  /// Compare semantic versions
   static bool _isNewerVersion(String latest, String current) {
     final latestParts = latest.split('.').map(int.parse).toList();
     final currentParts = current.split('.').map(int.parse).toList();
@@ -44,8 +42,9 @@ class OtaUpdateService {
     return false;
   }
 
-  static void _showUpdateDialog(
-      BuildContext context, String apkUrl, String changelog, bool forceUpdate) {
+  /// Show the update dialog
+  static void _showUpdateDialog(BuildContext context, String apkUrl, String version,
+      String changelog, bool forceUpdate) {
     showDialog(
       context: context,
       barrierDismissible: !forceUpdate,
@@ -61,7 +60,7 @@ class OtaUpdateService {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _startOtaUpdate(context, apkUrl);
+              _startOtaUpdate(context, apkUrl, version);
             },
             child: const Text('Update Now'),
           ),
@@ -70,7 +69,8 @@ class OtaUpdateService {
     );
   }
 
-  static void _startOtaUpdate(BuildContext context, String apkUrl) async {
+  /// Start OTA update with versioned filename
+  static void _startOtaUpdate(BuildContext context, String apkUrl, String version) async {
     try {
       showDialog(
         context: context,
@@ -79,7 +79,7 @@ class OtaUpdateService {
           double progress = 0;
           return StatefulBuilder(builder: (context, setState) {
             OtaUpdate()
-                .execute(apkUrl, destinationFilename: 'app_update.apk')
+                .execute(apkUrl, destinationFilename: 'app_update_v$version.apk')
                 .listen((event) {
               if (event.status == OtaStatus.DOWNLOADING) {
                 setState(() {
