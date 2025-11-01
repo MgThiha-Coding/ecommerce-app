@@ -48,7 +48,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
       ),
       body: paymentAsync.when(
         data: (response) {
-          if (response == null || !response.success || response.data.isEmpty) {
+          if (response == null || response.data.isEmpty) {
             return const Center(
               child: Text(
                 'No payment methods available.',
@@ -74,7 +74,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 9),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -175,7 +175,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive(context).body,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),

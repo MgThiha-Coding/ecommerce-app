@@ -68,7 +68,7 @@ class _ShippingMethodListPageState
       ),
       body: shippingAsync.when(
         data: (response) {
-          if (response == null || !response.success || response.data.isEmpty) {
+          if (response == null  || response.data.isEmpty) {
             return const Center(
               child: Text(
                 'No shipping methods available.',
@@ -190,8 +190,8 @@ class _ShippingMethodListPageState
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: Responsive(context).body,
+              fontWeight: FontWeight.w400,
               color: Colors.white,
             ),
           ),

@@ -71,6 +71,7 @@ dependencies:
   another_flushbar: ^1.12.32
   flutter_toastr: ^1.0.3
   fluttertoast: ^9.0.0
+  ota_update: ^7.0.2
 
 
 dev_dependencies:

@@ -61,7 +61,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                 fontSize: fontSize.body,
               ),
             ),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 1),
             backgroundColor: AppColors.background,
           ),
         );

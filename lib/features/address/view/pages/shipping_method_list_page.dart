@@ -190,7 +190,7 @@ class _ShippingMethodListPageState
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive(context).body,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),

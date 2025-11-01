@@ -69,9 +69,20 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             ref.read(cartNotifierProvider.notifier).fetchCart();
             ref.read(cartNotifierProvider.notifier).refreshCart();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Order placed successfully!")),
+              SnackBar(
+                content: Text(
+                  "Order placed successfully!",
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: Responsive(context).body,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                duration: const Duration(seconds: 1),
+                backgroundColor: AppColors.background,
+              ),
             );
-            Navigator.pop(context);
+            Navigator.popUntil(context, (route) => route.isFirst);
           }
         },
         loading: () {},
@@ -225,7 +236,14 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                                 SnackBar(
                                   content: Text(
                                     'Order ${data.data?.orderNumber} created successfully!',
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      color: AppColors.textPrimary,
+                                      fontSize: Responsive(context).body,
+                                    ),
                                   ),
+                                  duration: const Duration(seconds: 1),
+                                  backgroundColor: AppColors.background,
                                 ),
                               );
                             }
