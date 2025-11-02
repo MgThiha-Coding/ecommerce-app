@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -14,12 +12,6 @@ import 'package:picoshop_theme2/features/address/model/response/address_response
 import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
 import 'package:picoshop_theme2/features/address/view/pages/create_address_page.dart';
 import 'package:picoshop_theme2/features/address/view/pages/shipping_method_list_page.dart';
-import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
-import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
-import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.dart';
-import 'package:picoshop_theme2/features/payment/model/response/payment_method_response.dart';
-import 'package:picoshop_theme2/features/payment/view/payment_list_page.dart';
-import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -32,241 +24,100 @@ class CheckOutPage extends ConsumerStatefulWidget {
 
 class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   AddressItem? _selectedAddress;
-  PaymentMethod? _selectedPayment;
-  ShippingMethod? _selectedShipping;
-  File? _approveScreenshot;
-
-  String orderType = "delivery";
-  List<int> cartItemIds = [];
-  ShippingInfo? shipping;
-  int? paymentAccountId;
-
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _pickScreenshot() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      setState(() => _approveScreenshot = File(pickedFile.path));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final cartItemsAsync = ref.watch(cartNotifierProvider);
-    final orderState = ref.watch(createOrderNotifierProvider);
     final currency = ref.watch(businessSettingNotifierProvider);
 
-    ref.listen<AsyncValue<CreateOrderResponse?>>(createOrderNotifierProvider, (
-      previous,
-      next,
-    ) {
-      next.when(
-        data: (response) {
-          if (response != null && response.success) {
-            ref.read(cartNotifierProvider.notifier).fetchCart();
-            ref.read(cartNotifierProvider.notifier).refreshCart();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "Order placed successfully!",
-                  style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontSize: Responsive(context).body,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                duration: const Duration(seconds: 1),
-                backgroundColor: AppColors.background,
-              ),
-            );
-            Navigator.popUntil(context, (route) => route.isFirst);
-          }
-        },
-        loading: () {},
-        error: (err, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(err.toString())));
-        },
-      );
-    });
-
-    return WillPopScope(
-      onWillPop: () {
-        ref.read(createOrderNotifierProvider.notifier).cancel();
-        return Future.value(true);
-      },
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          scrolledUnderElevation: 0,
-          elevation: 0,
-          centerTitle: true,
-          title: Text(
-            LocaleKeys.checkout.tr(),
-            style: TextStyle(
-              fontFamily: "Poppins",
-              fontSize: responsive.subHeading,
-              color: AppColors.textPrimary,
-            ),
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          LocaleKeys.checkout.tr(),
+          style: TextStyle(
+            fontFamily: "Poppins",
+            fontSize: responsive.subHeading,
+            color: AppColors.textPrimary,
           ),
         ),
-        body: cartItemsAsync.when(
-          data: (cartItems) {
-            final itemCount = cartItems.length;
-            final itemTotal = cartItems.fold<double>(
-              0,
-              (sum, item) => sum + (item.uomPrice * item.quantity),
-            );
-            final shippingAmount = _selectedShipping != null
-                ? double.tryParse(_selectedShipping!.amount) ?? 0.0
-                : 0.0;
+      ),
+      body: cartItemsAsync.when(
+        data: (cartItems) {
+          final itemCount = cartItems.length;
+          final itemTotal = cartItems.fold<double>(
+            0,
+            (sum, item) => sum + (item.uomPrice * item.quantity),
+          );
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader(
-                    LocaleKeys.deliveryAddress.tr(),
-                    responsive,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildCreateAddressCard(responsive),
-                  const SizedBox(height: 8),
-                  _buildSelectAddressCard(responsive),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionHeader(
+                  LocaleKeys.deliveryAddress.tr(),
+                  responsive,
+                ),
+                const SizedBox(height: 8),
+                _buildCreateAddressCard(responsive),
+                const SizedBox(height: 8),
+                _buildSelectAddressCard(responsive),
 
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-                  _buildSectionHeader(
-                    LocaleKeys.shippingMethod.tr(),
-                    responsive,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildShippingCard(responsive),
+                _buildOrderSummary(itemCount, itemTotal, currency),
 
-                  const SizedBox(height: 16),
-
-                  _buildSectionHeader(
-                    LocaleKeys.paymentMethod.tr(),
-                    responsive,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildPaymentCard(responsive),
-                  const SizedBox(height: 8),
-                  _buildScreenshotPicker(),
-
-                  const SizedBox(height: 16),
-
-                  _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
-                  const SizedBox(height: 8),
-
-                  _buildOrderSummary(
-                    itemCount,
-                    itemTotal,
-                    shippingAmount,
-                    itemTotal + shippingAmount,
-                    currency,
-                  ),
-
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    height: 50,
-                    width: double.infinity,
-                    child: AppButton(
-                      title: LocaleKeys.placeOrder.tr(),
-                      backgroundColor: AppColors.primary,
-                      labelColor: AppColors.background,
-                      isLoading: orderState is AsyncLoading,
-                      onTap: () async {
-                        if (_selectedAddress == null ||
-                            _selectedPayment == null ||
-                            _selectedShipping == null ||
-                            _approveScreenshot == null ||
-                            cartItemsAsync.value == null ||
-                            cartItemsAsync.value!.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please complete all selections and upload screenshot',
+                const SizedBox(height: 18),
+                SizedBox(
+                  height: 50,
+                  width: double.infinity,
+                  child: AppButton(
+                    title: "Shipping Method >",
+                    onTap: () {
+                      if (_selectedAddress == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Please add your address.",
+                              style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: Responsive(context).body,
+                                color: AppColors.textPrimary,
                               ),
                             ),
-                          );
-                          return;
-                        }
-
-                        final ids = cartItemsAsync.value!
-                            .map((e) => e.id)
-                            .toList();
-
-                        final shippingInfo = ShippingInfo(
-                          address: _selectedAddress!.addressLine1,
-                          township: _selectedAddress!.townshipEnName,
-                          region: _selectedAddress!.regionEnName,
-                          country: _selectedAddress!.country,
-                          phone: _selectedAddress!.phone,
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: AppColors.background,
+                          ),
                         );
-
-                        final request = CreateOrderRequest(
-                          orderType: orderType,
-                          cartItemIds: ids,
-                          shipping: shippingInfo,
-                          shippingMethodId: _selectedShipping!.id,
-                          paymentAccountId:
-                              _selectedPayment!.paymentAccount!.id,
-                          approveScreenshot: _approveScreenshot!,
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ShippingMethodListPage(_selectedAddress!),
+                          ),
                         );
+                      }
+                    },
 
-                        await ref
-                            .read(createOrderNotifierProvider.notifier)
-                            .createOrder(request);
-
-                        // Feedback
-                        final currentState = ref.read(
-                          createOrderNotifierProvider,
-                        );
-                        currentState.when(
-                          data: (data) {
-                            if (data != null && data.success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Order ${data.data?.orderNumber} created successfully!',
-                                    style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      color: AppColors.textPrimary,
-                                      fontSize: Responsive(context).body,
-                                    ),
-                                  ),
-                                  duration: const Duration(seconds: 1),
-                                  backgroundColor: AppColors.background,
-                                ),
-                              );
-                            }
-                          },
-                          loading: () {},
-                          error: (err, _) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(err.toString())),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                    backgroundColor: AppColors.primary,
+                    labelColor: AppColors.background,
                   ),
+                ),
 
-                  // button
-                ],
-              ),
-            );
-          },
-          loading: () => _buildCheckoutShimmerLoading(),
-          error: (err, _) => Center(child: Text("Error: $err")),
-        ),
+                // button
+              ],
+            ),
+          );
+        },
+        loading: () => _buildCheckoutShimmerLoading(),
+        error: (err, _) => Center(child: Text("Error: $err")),
       ),
     );
   }
@@ -276,8 +127,8 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       title,
       style: GoogleFonts.poppins(
         fontSize: responsive.body,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -299,7 +150,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             color: AppColors.primary,
           ),
           title: Text(
-            LocaleKeys.createAddress.tr(),
+            'New Address',
             style: GoogleFonts.poppins(
               fontSize: responsive.body,
               color: AppColors.textSecondary,
@@ -362,118 +213,9 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     );
   }
 
-  Widget _buildShippingCard(Responsive responsive) {
-    final shippingAmount = _selectedShipping != null
-        ? double.tryParse(_selectedShipping!.amount) ?? 0
-        : 0;
-    return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push<ShippingMethod>(
-          context,
-          MaterialPageRoute(builder: (_) => const ShippingMethodListPage()),
-        );
-        if (result != null) setState(() => _selectedShipping = result);
-      },
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(
-            Icons.local_shipping_outlined,
-            color: AppColors.primary,
-          ),
-          title: Text(
-            _selectedShipping == null
-                ? LocaleKeys.selectShippingMethod.tr()
-                : _selectedShipping!.name,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive(context).body,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          subtitle: _selectedShipping != null
-              ? Text(
-                  "Cost: ${shippingAmount.toStringAsFixed(2)} MMK",
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive(context).body - 1,
-                    color: Colors.black54,
-                  ),
-                )
-              : null,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentCard(Responsive responsive) {
-    return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push<PaymentMethod>(
-          context,
-          MaterialPageRoute(builder: (_) => const PaymentListPage()),
-        );
-        if (result != null) setState(() => _selectedPayment = result);
-      },
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
-          title: Text(
-            _selectedPayment == null
-                ? LocaleKeys.paymentMethod.tr()
-                : _selectedPayment!.name,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive(context).body,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          subtitle: _selectedPayment?.paymentAccount?.accountNumber != null
-              ? Text(
-                  "Acc: ${_selectedPayment!.paymentAccount!.accountNumber}",
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive(context).body - 1,
-                    color: Colors.black54,
-                  ),
-                )
-              : null,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildScreenshotPicker() {
-    return GestureDetector(
-      onTap: _pickScreenshot,
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(Icons.photo, color: AppColors.primary),
-          title: Text(
-            _approveScreenshot == null
-                ? LocaleKeys.uploadPaymentScreenshot.tr()
-                : "Screenshot Selected",
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          trailing: _approveScreenshot != null
-              ? const Icon(Icons.check, color: Colors.green)
-              : null,
-        ),
-      ),
-    );
-  }
-
   Widget _buildOrderSummary(
     int itemCount,
     double itemTotal,
-    double shippingAmount,
-    double totalCost,
     AsyncValue<BusinessSettingData?> currency,
   ) {
     String formatPrice(double amount) {
@@ -500,9 +242,8 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           children: [
             _buildSummaryRow("Items ($itemCount)", formatPrice(itemTotal)),
             const SizedBox(height: 6),
-            _buildSummaryRow("Shipping", formatPrice(shippingAmount)),
             const Divider(),
-            _buildSummaryRow("Total", formatPrice(totalCost)),
+            _buildSummaryRow("Total", formatPrice(itemTotal)),
           ],
         ),
       ),

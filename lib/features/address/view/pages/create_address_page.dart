@@ -1,19 +1,15 @@
-//import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-//import 'package:geocoding/geocoding.dart';
-//import 'package:latlong2/latlong.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
-//import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/address/model/request/create_address_request.dart';
 import 'package:picoshop_theme2/features/address/model/response/create_addresss_response.dart';
+import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
 import 'package:picoshop_theme2/features/address/viewmodel/create_address_notifier.dart';
 import 'package:picoshop_theme2/features/location/model/local_region_response.dart';
 import 'package:picoshop_theme2/features/location/view/available_township_page.dart';
-//import 'package:picoshop_theme2/features/location/view/current_location_page.dart';
 import 'package:picoshop_theme2/features/location/viewmodel/local_region_notifier.dart';
+import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:picoshop_theme2/shared/app_text_field.dart';
 
 class CreateAddressPage extends ConsumerStatefulWidget {
@@ -37,9 +33,6 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
   final TextEditingController _townshipNameController = TextEditingController();
   final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-
-  //LatLng? _selectedLocation;
-  //String _detectedAddress = '';
 
   @override
   void dispose() {
@@ -73,45 +66,6 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
           );
     }
   }
-  /*
-  Future<void> _pickLocationOnMap() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CurrentLocationPage()),
-    );
-
-    if (result != null && result is LatLng) {
-      setState(() {
-        _selectedLocation = result;
-      });
-      await _detectZipCodeWithGeocodingPackage(result);
-    }
-  }
-
-  Future<void> _detectZipCodeWithGeocodingPackage(LatLng location) async {
-    try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        location.latitude,
-        location.longitude,
-      );
-
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks.first;
-        setState(() {
-          _detectedAddress =
-              '${place.street}, ${place.locality}, ${place.administrativeArea}';
-          _postalCodeController.text = place.postalCode!;
-          _addressLine1Controller.text = place.street!;
-          _addressLine2Controller.text = place.locality!;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Address detection failed: ${e.toString()}')),
-      );
-    }
-  }
-  */
 
   @override
   Widget build(BuildContext context) {
@@ -126,16 +80,43 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
           data: (data) {
             if (data != null && data.success) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Address saved successfully')),
+                SnackBar(
+                  content: Text(
+                    'Address saved successfully',
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      color: AppColors.textSecondary,
+                      fontSize: Responsive(context).body,
+                    ),
+                  ),
+                  backgroundColor: AppColors.background,
+                  duration: const Duration(milliseconds: 20000),
+                ),
               );
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddressListPage(),
+                ),
+              );
             }
           },
           loading: () {},
           error: (err, _) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(err.toString())));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  err.toString(),
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    color: AppColors.error,
+                    fontSize: Responsive(context).body,
+                  ),
+                ),
+                backgroundColor: AppColors.background,
+                duration: const Duration(milliseconds: 20000),
+              ),
+            );
           },
         );
       },
@@ -147,9 +128,9 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
         backgroundColor: AppColors.background,
         scrolledUnderElevation: 0,
         elevation: 0,
-        centerTitle: true,
+
         title: Text(
-          "Add Shipping Address",
+          "Shipping Address",
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: responsive.subHeading,
@@ -198,7 +179,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 style: TextStyle(
                   fontFamily: "Poppins",
                   fontSize: responsive.subHeading,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 8),
@@ -207,7 +188,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 labelText: "First Name",
                 hintText: 'Enter your first name',
                 validator: (val) => (val == null || val.isEmpty)
-                    ? 'First Name is required'
+                    ? 'Please enter first name'
                     : null,
               ),
               const SizedBox(height: 10),
@@ -216,7 +197,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 labelText: "Last Name",
                 hintText: 'Enter your last name',
                 validator: (val) => (val == null || val.isEmpty)
-                    ? 'Last Name is required'
+                    ? 'Please enter last name'
                     : null,
               ),
               const SizedBox(height: 16),
@@ -227,7 +208,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 style: TextStyle(
                   fontFamily: "Poppins",
                   fontSize: responsive.subHeading,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
 
@@ -237,7 +218,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 labelText: 'Street Address',
                 hintText: 'e.g., 123 Main St',
                 validator: (val) => (val == null || val.isEmpty)
-                    ? 'Please enter your address'
+                    ? 'Please enter your address 1'
                     : null,
               ),
               const SizedBox(height: 10),
@@ -245,112 +226,11 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 controller: _addressLine2Controller,
                 labelText: 'Apartment, Floor, or Block',
                 hintText: 'Optional',
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Please enter your address 2'
+                    : null,
               ),
               const SizedBox(height: 10),
-              /*
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: AppColors.primary),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.map, color: AppColors.primary),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Location on Map',
-                                style: TextStyle(
-                                  fontSize: responsive.body,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _selectedLocation == null
-                                ? 'Tap to select your exact location on map'
-                                : 'Location selected: ${_selectedLocation!.latitude.toStringAsFixed(4)}, ${_selectedLocation!.longitude.toStringAsFixed(4)}',
-                            style: TextStyle(
-                              fontSize: responsive.body,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          if (_detectedAddress.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              'Detected Address:',
-                              style: TextStyle(
-                                fontSize: responsive.body,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _detectedAddress,
-                              style: TextStyle(
-                                fontSize: responsive.body,
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: _pickLocationOnMap,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              minimumSize: const Size(120, 40),
-                            ),
-                            child: Text(
-                              'Select on Map',
-                              style: TextStyle(
-                                fontSize: responsive.body,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    AppTextField(
-                      controller: _addressLine1Controller,
-                      labelText: 'Street Address',
-                      hintText: 'e.g., 123 Main St',
-                      validator: (val) => (val == null || val.isEmpty)
-                          ? 'Please enter your address'
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-                    AppTextField(
-                      controller: _addressLine2Controller,
-                      labelText: 'Apartment, Floor, or Block',
-                      hintText: 'Optional',
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-              */
-              const SizedBox(height: 16),
 
               // Location Details
               Text(
@@ -358,7 +238,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                 style: TextStyle(
                   fontFamily: "Poppins",
                   fontSize: responsive.subHeading,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 8),
@@ -421,8 +301,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                             },
                           );
                         },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => const Center(child: Text('Loading....')),
                         error: (err, _) => Text('Error: $err'),
                       ),
                     );
@@ -435,8 +314,11 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   Flexible(
                     flex: 3,
                     child: AppTextField(
-                      labelText: 'Township Name',
+                      labelText: 'Township',
                       controller: _townshipNameController,
+                      validator: (val) => (val == null || val.isEmpty)
+                          ? 'Please enter township'
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -444,9 +326,8 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                     child: AppTextField(
                       controller: _townshipIdController,
                       labelText: 'ID',
-                      validator: (val) => (val == null || val.isEmpty)
-                          ? 'Township ID is required'
-                          : null,
+                      validator: (val) =>
+                          (val == null || val.isEmpty) ? 'ID' : null,
                     ),
                   ),
                 ],
@@ -455,6 +336,9 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               AppTextField(
                 controller: _postalCodeController,
                 labelText: 'Postal / ZIP Code',
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Please enter postal code'
+                    : null,
               ),
               const SizedBox(height: 10),
 
@@ -471,31 +355,26 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               AppTextField(
                 controller: _phoneController,
                 labelText: 'Phone Number',
-                hintText: 'Enter your phone number',
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Phone is required' : null,
+                keyboardType: TextInputType.number,
+                hintText: 'Phone Number',
+                validator: (val) => (val == null || val.isEmpty)
+                    ? 'Please enter phone number'
+                    : null,
               ),
               const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: createAddressAsync.isLoading ? null : _submitAddress,
-                style: ElevatedButton.styleFrom(
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: AppButton(
+                  title: "Save Address",
+                  onTap: () {
+                    _submitAddress();
+                  },
+                  isLoading: createAddressAsync.isLoading,
                   backgroundColor: AppColors.primary,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  labelColor: AppColors.background,
                 ),
-                child: createAddressAsync.isLoading
-                    ? const SpinKitCircle(color: Colors.white, size: 27)
-                    : Text(
-                        'Save Address',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: responsive.body,
-                          color: Colors.white,
-                        ),
-                      ),
               ),
             ],
           ),

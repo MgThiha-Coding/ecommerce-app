@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/address/view/pages/create_order_page.dart';
 import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_notifier.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -9,7 +11,8 @@ import 'package:picoshop_theme2/features/business_setting/viewmodel/business_set
 import 'package:shimmer/shimmer.dart';
 
 class ShippingMethodListPage extends ConsumerStatefulWidget {
-  const ShippingMethodListPage({super.key});
+  final AddressItem selectedAddress;
+  const ShippingMethodListPage(this.selectedAddress, {super.key});
 
   @override
   ConsumerState<ShippingMethodListPage> createState() =>
@@ -100,8 +103,9 @@ class _ShippingMethodListPageState
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color:
-                          isSelected ? AppColors.primary : Colors.grey.shade300,
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.shade300,
                       width: isSelected ? 1.6 : 1.0,
                     ),
                     boxShadow: [
@@ -179,7 +183,15 @@ class _ShippingMethodListPageState
         child: ElevatedButton(
           onPressed: selectedShipping == null
               ? null
-              : () => Navigator.pop(context, selectedShipping),
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateOrderPage(
+                      widget.selectedAddress,
+                      selectedShipping,
+                    ),
+                  ),
+                ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             minimumSize: const Size(double.infinity, 50),

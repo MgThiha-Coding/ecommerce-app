@@ -95,6 +95,7 @@ class _AppButtonState extends State<AppButton>
                   style: TextStyle(
                     color: widget.labelColor,
                     fontSize: responsive.body,
+                    fontFamily: "Poppins"
                   ),
                 ),
                 _buildAnimatedDots(widget.labelColor),
@@ -104,7 +105,8 @@ class _AppButtonState extends State<AppButton>
               widget.title,
               style: TextStyle(
                 color: widget.labelColor,
-                fontSize: responsive.subHeading,
+                fontSize: responsive.body,
+                fontFamily: "Poppins"
               ),
             ),
     );
