@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,16 +44,106 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
   List<int> cartItemIds = [];
   ShippingInfo? shipping;
   int? paymentAccountId;
-
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickScreenshot() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      setState(() => _approveScreenshot = File(pickedFile.path));
+  Future<void> _pickScreenshot(BuildContext context) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile == null) return;
+
+      final file = File(pickedFile.path);
+      final sizeInMb = file.lengthSync() / (1024 * 1024);
+
+      if (sizeInMb > 5) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selected image is too large. Maximum size is 5 MB.'),
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _approveScreenshot = file;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
     }
+  }
+
+  Widget _buildScreenshotPicker() {
+    return Card(
+      color: AppColors.background,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        height: 250,
+        padding: const EdgeInsets.all(8),
+        child: _approveScreenshot != null
+            ? Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      _approveScreenshot!,
+                      width: double.infinity,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _approveScreenshot = null),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : GestureDetector(
+                onTap: () => _pickScreenshot(context), // pass context!
+                child: DottedBorder(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.upload_file,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          LocaleKeys.uploadPaymentScreenshot.tr(),
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
   }
 
   @override
@@ -163,7 +254,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                     itemTotal + shippingAmount,
                     currency,
                   ),
-                  const SizedBox(height: 18),
+
                   const SizedBox(height: 30),
                   SizedBox(
                     height: 50,
@@ -312,79 +403,6 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
               : null,
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         ),
-      ),
-    );
-  }
-
-  Widget _buildScreenshotPicker() {
-    return Card(
-      color: AppColors.background,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Container(
-        height: 150,
-        padding: const EdgeInsets.all(8),
-        child: _approveScreenshot != null
-            ? Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      _approveScreenshot!,
-                      width: double.infinity,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _approveScreenshot = null;
-                        });
-                      },
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.black54,
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(4),
-                        child: const Icon(
-                          Icons.close,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            : GestureDetector(
-                onTap: _pickScreenshot,
-                child: DottedBorder(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.upload_file,
-                          size: 40,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          LocaleKeys.uploadPaymentScreenshot.tr(),
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
       ),
     );
   }
