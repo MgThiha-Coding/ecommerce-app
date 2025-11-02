@@ -10,6 +10,7 @@ import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart'
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
+import 'package:picoshop_theme2/features/settings/view/settings_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -161,6 +162,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
               ),
+
               /*
               _buildMenuTile(
                 title: LocaleKeys.shippingMethod.tr(),
@@ -170,19 +172,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (_) => const ShippingMethodPage()),
                 ),
               ),
-              _buildMenuTile(
-                title: LocaleKeys.paymentMethod.tr(),
-                icon: Icons.payment,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PaymentMethodPage()),
-                ),
-              ),
               */
               _buildMenuTile(
                 title: LocaleKeys.language.tr(),
                 icon: Icons.language,
                 onTap: () => _showLanguageDialog(),
+              ),
+              _buildMenuTile(
+                title: 'Settings',
+                icon: Icons.settings,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsPage(),
+                    ),
+                  );
+                },
               ),
               const Divider(),
               Padding(

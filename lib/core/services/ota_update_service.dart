@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:ota_update/ota_update.dart';
+// ignore: depend_on_referenced_packages
 import 'package:package_info_plus/package_info_plus.dart';
 
 class OtaUpdateService {
   static const otaConfigUrl =
       "https://raw.githubusercontent.com/MgThiha-Coding/pico-mart/production/version.json";
 
-  /// Check for updates
+  /// Check for updates manually
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -24,14 +26,23 @@ class OtaUpdateService {
       final forceUpdate = data['force_update'] as bool? ?? false;
 
       if (_isNewerVersion(latestVersion, currentVersion)) {
+        // ignore: use_build_context_synchronously
         _showUpdateDialog(context, apkUrl, latestVersion, changelog, forceUpdate);
+      } else {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Your app is up to date.')),
+        );
       }
     } catch (e) {
-      print('OTA Update check error: $e');
+     
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to check update: $e')),
+      );
     }
   }
 
-  /// Compare semantic versions
   static bool _isNewerVersion(String latest, String current) {
     final latestParts = latest.split('.').map(int.parse).toList();
     final currentParts = current.split('.').map(int.parse).toList();
@@ -42,7 +53,6 @@ class OtaUpdateService {
     return false;
   }
 
-  /// Show the update dialog
   static void _showUpdateDialog(BuildContext context, String apkUrl, String version,
       String changelog, bool forceUpdate) {
     showDialog(
@@ -69,15 +79,15 @@ class OtaUpdateService {
     );
   }
 
-  /// Start OTA update with versioned filename
   static void _startOtaUpdate(BuildContext context, String apkUrl, String version) async {
     try {
+      double progress = 0;
+
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) {
-          double progress = 0;
-          return StatefulBuilder(builder: (context, setState) {
+        builder: (_) => StatefulBuilder(
+          builder: (context, setState) {
             OtaUpdate()
                 .execute(apkUrl, destinationFilename: 'app_update_v$version.apk')
                 .listen((event) {
@@ -103,11 +113,14 @@ class OtaUpdateService {
                 ],
               ),
             );
-          });
-        },
+          },
+        ),
       );
     } catch (e) {
-      print('OTA Update failed: $e');
+    
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('OTA Update failed: $e')),
+      );
     }
   }
 }

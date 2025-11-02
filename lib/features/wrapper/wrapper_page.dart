@@ -8,9 +8,9 @@ import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/home/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
+import 'package:badges/badges.dart';
 import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
 import 'package:picoshop_theme2/features/search/view/pages/search_page.dart';
-import 'package:badges/badges.dart';
 
 class WrapperPage extends StatefulWidget {
   const WrapperPage({super.key});
@@ -53,7 +53,6 @@ class _WrapperPageState extends State<WrapperPage>
   }
 
   void _onTabTapped(int index) async {
-    
     await _scaleController.forward();
 
     setState(() {
@@ -61,12 +60,10 @@ class _WrapperPageState extends State<WrapperPage>
       _currentIndex = index;
     });
 
-    
     await Future.delayed(const Duration(milliseconds: 100));
     await _scaleController.reverse();
   }
 
-  
   Widget _buildPageTransition(Widget child, int index) {
     final isForward = index > _previousIndex;
 
@@ -91,9 +88,7 @@ class _WrapperPageState extends State<WrapperPage>
     Animation<double> secondaryAnimation,
     bool isForward,
   ) {
-    
     if (isForward) {
-      
       return SlideTransition(
         position: Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero)
             .animate(
@@ -105,7 +100,6 @@ class _WrapperPageState extends State<WrapperPage>
         child: FadeTransition(opacity: animation, child: child),
       );
     } else {
-    
       return SlideTransition(
         position:
             Tween<Offset>(
@@ -122,7 +116,6 @@ class _WrapperPageState extends State<WrapperPage>
     }
   }
 
- 
   Widget _buildBottomNavBar() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -272,7 +265,6 @@ class _WrapperPageState extends State<WrapperPage>
       child: Scaffold(
         body: Row(
           children: [
-          
             Container(
               decoration: BoxDecoration(
                 color: AppColors.background,
