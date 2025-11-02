@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/address/model/request/create_address_request.dart';
-import 'package:picoshop_theme2/features/address/model/response/create_addresss_response.dart';
+import 'package:picoshop_theme2/features/checkout/model/request/create_address_request.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/create_addresss_response.dart';
 
 class CreateAddressNotifier
     extends StateNotifier<AsyncValue<CreateAddressResponse?>> {

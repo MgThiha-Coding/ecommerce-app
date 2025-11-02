@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +11,7 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
 import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
 import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
 import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.dart';
@@ -89,9 +90,20 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
         },
         loading: () {},
         error: (err, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(err.toString())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                err.toString(),
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: Responsive(context).body,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              duration: const Duration(seconds: 1),
+              backgroundColor: AppColors.background,
+            ),
+          );
         },
       );
     });
@@ -141,12 +153,9 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                   _buildPaymentCard(responsive),
                   const SizedBox(height: 8),
                   _buildScreenshotPicker(),
-
                   const SizedBox(height: 16),
-
                   _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
                   const SizedBox(height: 8),
-
                   _buildOrderSummary(
                     itemCount,
                     itemTotal,
@@ -154,9 +163,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                     itemTotal + shippingAmount,
                     currency,
                   ),
-
                   const SizedBox(height: 18),
-
                   const SizedBox(height: 30),
                   SizedBox(
                     height: 50,
@@ -174,12 +181,20 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                             cartItemsAsync.value == null ||
                             cartItemsAsync.value!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'Please complete all selections and upload screenshot',
+                                "Please complete all selections and upload screenshot",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: Responsive(context).body,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: AppColors.background,
                             ),
                           );
+
                           return;
                         }
 
@@ -209,7 +224,6 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                             .read(createOrderNotifierProvider.notifier)
                             .createOrder(request);
 
-                        // Feedback
                         final currentState = ref.read(
                           createOrderNotifierProvider,
                         );
@@ -242,8 +256,6 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                       },
                     ),
                   ),
-
-                  // button
                 ],
               ),
             );
@@ -305,26 +317,74 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
   }
 
   Widget _buildScreenshotPicker() {
-    return GestureDetector(
-      onTap: _pickScreenshot,
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(Icons.photo, color: AppColors.primary),
-          title: Text(
-            _approveScreenshot == null
-                ? LocaleKeys.uploadPaymentScreenshot.tr()
-                : "Screenshot Selected",
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          trailing: _approveScreenshot != null
-              ? const Icon(Icons.check, color: Colors.green)
-              : null,
-        ),
+    return Card(
+      color: AppColors.background,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        height: 150,
+        padding: const EdgeInsets.all(8),
+        child: _approveScreenshot != null
+            ? Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      _approveScreenshot!,
+                      width: double.infinity,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _approveScreenshot = null;
+                        });
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : GestureDetector(
+                onTap: _pickScreenshot,
+                child: DottedBorder(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.upload_file,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          LocaleKeys.uploadPaymentScreenshot.tr(),
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -344,7 +404,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
             final decimalPlaces = businessSetting.currencyDecimalPlaces;
             return '${amount.toStringAsFixed(decimalPlaces)}$symbol';
           }
-          return amount.toStringAsFixed(2); // fallback
+          return amount.toStringAsFixed(2);
         },
         loading: () => amount.toStringAsFixed(2),
         error: (_, __) => amount.toStringAsFixed(2),

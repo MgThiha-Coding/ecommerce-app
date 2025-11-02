@@ -8,10 +8,10 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
-import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
-import 'package:picoshop_theme2/features/address/view/pages/create_address_page.dart';
-import 'package:picoshop_theme2/features/address/view/pages/shipping_method_list_page.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/checkout/view/pages/address_list_page.dart';
+import 'package:picoshop_theme2/features/checkout/view/pages/create_address_page.dart';
+import 'package:picoshop_theme2/features/checkout/view/pages/shipping_method_list_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
-import 'package:picoshop_theme2/features/address/view/pages/create_order_page.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/checkout/view/pages/create_order_page.dart';
 import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_notifier.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';

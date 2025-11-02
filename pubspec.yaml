@@ -51,6 +51,7 @@ dependencies:
   flutter_toastr: ^1.0.3
   fluttertoast: ^9.0.0
   ota_update: ^7.0.2
+  dotted_border: ^3.1.0
 
 dev_dependencies:
   flutter_test:

@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/address/viewmodel/address_list_notifier.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/checkout/viewmodel/address_list_notifier.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
 
 class AddressListPage extends ConsumerStatefulWidget {
   const AddressListPage({super.key});

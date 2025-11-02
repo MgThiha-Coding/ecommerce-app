@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
 
 class AddressListNotifier extends StateNotifier<AsyncValue<AddressResponse>> {
   final Dio _dio;
