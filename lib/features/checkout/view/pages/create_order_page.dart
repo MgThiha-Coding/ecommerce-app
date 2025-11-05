@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,32 +36,52 @@ class CreateOrderPage extends ConsumerStatefulWidget {
 
 class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
   PaymentMethod? _selectedPayment;
-
   File? _approveScreenshot;
+  final ImagePicker _picker = ImagePicker();
 
   String orderType = "delivery";
   List<int> cartItemIds = [];
   ShippingInfo? shipping;
   int? paymentAccountId;
-  final ImagePicker _picker = ImagePicker();
+
+  // Image size validation
+  bool _validateImageSize() {
+    if (_approveScreenshot == null) return true;
+
+    final fileSize = _approveScreenshot!.lengthSync();
+    const maxSize = 1 * 1024 * 1024;
+
+    return fileSize <= maxSize;
+  }
+
 
   Future<void> _pickScreenshot(BuildContext context) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 85,
       );
 
       if (pickedFile == null) return;
 
       final file = File(pickedFile.path);
-      final sizeInMb = file.lengthSync() / (1024 * 1024);
+      final fileSize = await file.length();
+      const maxSize = 1 * 1024 * 1024;
 
-      if (sizeInMb > 5) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Selected image is too large. Maximum size is 5 MB.'),
-          ),
-        );
+      if (fileSize > maxSize) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Image size: ${(fileSize / (1024 * 1024)).toStringAsFixed(2)} MB. Maximum allowed is 1   MB.',
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
         return;
       }
 
@@ -70,31 +89,48 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
         _approveScreenshot = file;
       });
     } catch (e) {
-      ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
+  // Screenshot picker widget
   Widget _buildScreenshotPicker() {
     return Card(
       color: AppColors.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Container(
-        height: 250,
+        height: 230,
         padding: const EdgeInsets.all(8),
         child: _approveScreenshot != null
             ? Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      _approveScreenshot!,
-                      width: double.infinity,
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          _approveScreenshot!,
+                          width: double.infinity,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Size: ${(_approveScreenshot!.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                   Positioned(
                     top: 8,
@@ -118,9 +154,10 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                 ],
               )
             : GestureDetector(
-                onTap: () => _pickScreenshot(context), // pass context!
+                onTap: () => _pickScreenshot(context),
+                behavior: HitTestBehavior.opaque,
                 child: DottedBorder(
-                  child: Center(
+                  child: SizedBox.expand(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -134,6 +171,14 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                           LocaleKeys.uploadPaymentScreenshot.tr(),
                           style: GoogleFonts.poppins(
                             fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Max size: 1 MB',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -216,7 +261,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
             style: TextStyle(
               fontFamily: "Poppins",
               fontSize: responsive.subHeading,
-              color: AppColors.textPrimary,
+              color: AppColors.textSecondary,
             ),
           ),
         ),
@@ -265,6 +310,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                       labelColor: AppColors.background,
                       isLoading: orderState is AsyncLoading,
                       onTap: () async {
+                        // Validate all required fields including image size
                         if (widget.selectedAddress == null ||
                             _selectedPayment == null ||
                             widget.selectedShipping == null ||
@@ -285,7 +331,19 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
                               backgroundColor: AppColors.background,
                             ),
                           );
+                          return;
+                        }
 
+                        // Validate image size before submission
+                        if (!_validateImageSize()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Image size exceeds 1 MB limit. Please select a smaller image.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
                           return;
                         }
 
@@ -364,7 +422,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
       style: GoogleFonts.poppins(
         fontSize: responsive.body,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -382,7 +440,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
         color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
-          leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
+          leading: const Icon(Icons.payment_outlined, color: AppColors.textSecondary),
           title: Text(
             _selectedPayment == null
                 ? LocaleKeys.paymentMethod.tr()
@@ -455,7 +513,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
           title,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
         ),
         Text(
@@ -463,7 +521,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Colors.green,
           ),
         ),
       ],

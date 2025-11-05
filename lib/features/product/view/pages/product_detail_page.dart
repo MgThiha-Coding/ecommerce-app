@@ -95,7 +95,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 4,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
           'Product Details',

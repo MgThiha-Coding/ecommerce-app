@@ -43,7 +43,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
       ),
@@ -258,7 +258,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           title,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
         ),
         Text(
@@ -266,7 +266,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Colors.green,
           ),
         ),
       ],

@@ -85,7 +85,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           LocaleKeys.cart.tr(),
           style: GoogleFonts.poppins(
             fontSize: fontSize.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -105,7 +105,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                       onPressed: () {},
                       icon: Icon(
                         LineIcons.shoppingCart,
-                        color: AppColors.primary,
+                        color: AppColors.textSecondary,
                         size: fontSize.value(
                           mobile: 26,
                           tablet: 25,
@@ -383,7 +383,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                           // Total and Checkout Section
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 8,
                               vertical: 10,
                             ),
                             child: Column(

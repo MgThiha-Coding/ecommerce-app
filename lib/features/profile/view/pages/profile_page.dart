@@ -112,7 +112,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 name,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  color: AppColors.textPrimary,
+                  color: AppColors.textSecondary,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -178,6 +178,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 icon: Icons.language,
                 onTap: () => _showLanguageDialog(),
               ),
+
               _buildMenuTile(
                 title: 'Settings',
                 icon: Icons.settings,
@@ -190,6 +191,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   );
                 },
               ),
+
               const Divider(),
               Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -225,7 +227,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: AppColors.primary),
+      leading: Icon(icon, color: AppColors.textSecondary),
       title: Text(
         title,
         style: GoogleFonts.poppins(

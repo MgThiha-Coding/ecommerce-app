@@ -64,8 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final latestParts = latest.split('.').map(int.parse).toList();
     final currentParts = current.split('.').map(int.parse).toList();
     for (int i = 0; i < latestParts.length; i++) {
-      if (i >= currentParts.length || latestParts[i] > currentParts[i])
+      if (i >= currentParts.length || latestParts[i] > currentParts[i]) {
         return true;
+      }
       if (latestParts[i] < currentParts[i]) return false;
     }
     return false;

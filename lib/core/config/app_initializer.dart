@@ -42,6 +42,7 @@ class AppInitializer {
 
   static Future<void> _setDeviceOrientation() async {
     // Get device size
+    // ignore: deprecated_member_use
     final window = WidgetsBinding.instance.window;
     final screenWidth = window.physicalSize.width / window.devicePixelRatio;
 

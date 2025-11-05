@@ -63,7 +63,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
         setState(() => _showFloatingCartButton = true);
-        Future.delayed(const Duration(seconds: 12), () {
+        Future.delayed(const Duration(seconds: 20), () {
           if (mounted) setState(() => _showFloatingCartButton = false);
         });
       }
@@ -279,17 +279,17 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   Widget floatingCartButton(BuildContext context, Responsive fontSize) {
     return Positioned(
       bottom: 17,
-      left: 16,
-      right: 16,
+      left: 10,
+      right: 10,
       child: Container(
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.textSecondary,
+              AppColors.background,
               // ignore: deprecated_member_use
-              AppColors.textSecondary.withOpacity(0.8),
+              AppColors.background.withOpacity(0.8),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -334,7 +334,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 Text(
                   'View Cart',
                   style: GoogleFonts.poppins(
-                    color: AppColors.background,
+                    color: AppColors.textSecondary,
                     fontSize: fontSize.subHeading,
                     fontWeight: FontWeight.w300,
                   ),
@@ -342,7 +342,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: AppColors.background,
+                  color: AppColors.textSecondary,
                   size: fontSize.subHeading,
                 ),
               ],

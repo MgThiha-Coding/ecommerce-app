@@ -40,7 +40,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
         centerTitle: true,
@@ -59,7 +59,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
 
           final data = response.data;
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];
@@ -75,7 +75,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: 9),
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),

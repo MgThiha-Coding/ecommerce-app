@@ -23,6 +23,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
     //  async stuff after build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //  await AppInitializer.initialize();
       // read the secure storage provider (where we save first launch, user info etc.)
       final storage = ref.read(secureStorageProvider);
 

@@ -24,7 +24,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
 
-  String _selectedFilter = 'product';
+  final String _selectedFilter = 'product';
 
   @override
   void initState() {
@@ -95,7 +95,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       onChanged: (_) => _onSearchChanged(),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   /*
                   // Filter dropdown commented for now
                   Container(

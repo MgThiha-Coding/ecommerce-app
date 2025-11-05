@@ -63,7 +63,7 @@ class _ShippingMethodListPageState
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
         centerTitle: true,
@@ -82,7 +82,7 @@ class _ShippingMethodListPageState
 
           final data = response.data;
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];
@@ -138,7 +138,7 @@ class _ShippingMethodListPageState
                               item.name,
                               style: GoogleFonts.poppins(
                                 fontSize: responsive.subHeading,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.black87,
                               ),
                             ),
@@ -179,7 +179,7 @@ class _ShippingMethodListPageState
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
         child: ElevatedButton(
           onPressed: selectedShipping == null
               ? null

@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "url": "https://github.com/MgThiha-Coding/pico-mart/releases/download/v1.0.3/app-release.apk",
-  "changelog": "• Added new feature\n• Fixed some bugs",
+  "version": "1.0.0",
+  "url": "https://github.com/MgThiha-Coding/pico-mart/releases/download/v1.0.0/app-release.apk",
+  "changelog": "Initial release",
   "force_update": false
 }
