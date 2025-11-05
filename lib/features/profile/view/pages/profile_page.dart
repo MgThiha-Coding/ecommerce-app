@@ -10,7 +10,6 @@ import 'package:picoshop_theme2/features/auth/view/pages/login_or_register.dart'
 import 'package:picoshop_theme2/features/auth/viewmodel/auth_notifier.dart';
 import 'package:picoshop_theme2/features/order_history/view/order_history_list_page.dart';
 import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
-import 'package:picoshop_theme2/features/settings/view/settings_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -179,6 +178,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onTap: () => _showLanguageDialog(),
               ),
 
+              /*
               _buildMenuTile(
                 title: 'Settings',
                 icon: Icons.settings,
@@ -191,7 +191,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   );
                 },
               ),
-
+              */
               const Divider(),
               Padding(
                 padding: const EdgeInsets.all(12.0),

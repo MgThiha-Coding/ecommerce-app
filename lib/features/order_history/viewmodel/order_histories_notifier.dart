@@ -13,6 +13,7 @@ class OrderHistoriesNotifier
         super(const AsyncValue.data(null));
 
   Future<void> getOrderHistories() async {
+    state = const AsyncValue.loading();
     try {
       final response = await _dio.get(
         'https://beta.picosbs.com/api/ecommerce/order/histories',

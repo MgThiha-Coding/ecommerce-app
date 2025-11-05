@@ -37,7 +37,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getNextPageAll();
     });
-   
+
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
@@ -94,6 +94,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+   /*
   Widget _buildShimmer({required double height}) {
     return Shimmer.fromColors(
       baseColor: AppColors.background,
@@ -108,6 +109,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +135,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     child: CircleAvatar(child: Image.asset(AppImage.appLogo)),
                   ),
                   */
-                  
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -172,7 +173,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ),
                   const Expanded(child: SearchBar()),
-                  
+
                   Padding(
                     padding: const EdgeInsets.all(2.0),
                     child: IconButton(
@@ -190,8 +191,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
-                  
-                  
                 ],
               );
             },
@@ -226,7 +225,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   productListAsync: productListAsync,
                   buildEmptyState: _buildEmptyState,
                   buildShimmer: ({double height = 200}) =>
-                      _buildShimmer(height: height),
+                      _productGridShimmer(context),
                   scrollController: scrollController,
                 ),
 
@@ -458,4 +457,33 @@ class ProductGridSection extends ConsumerWidget {
       ),
     );
   }
+}
+
+GridView _productGridShimmer(BuildContext context, {int itemCount = 10}) {
+  final responsive = Responsive(context);
+  return GridView.builder(
+    itemCount: itemCount,
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.all(10),
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: responsive.isTablet
+          ? 5
+          : responsive.isDesktop
+          ? 5
+          : 2,
+      mainAxisSpacing: 14,
+      crossAxisSpacing: 14,
+      childAspectRatio: responsive.isMobile ? 1 / 1.5 : 1 / 1.3,
+    ),
+    itemBuilder: (_, __) => Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+    ),
+  );
 }

@@ -689,7 +689,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             'Failed to load product.\n$error',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.red,
+              color: AppColors.textSecondary,
               fontSize: Responsive(context).body,
             ),
           ),
