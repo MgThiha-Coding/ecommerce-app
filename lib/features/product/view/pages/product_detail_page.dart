@@ -5,7 +5,7 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
+import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';

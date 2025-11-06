@@ -13,7 +13,7 @@ import 'package:picoshop_theme2/features/auth/model/response/register_response.d
 import 'package:picoshop_theme2/features/auth/model/response/verify_code_response.dart';
 import 'package:picoshop_theme2/features/auth/model/response/log_out_response.dart';
 
-// Refersh Token
+// Refresh Token
 abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
   final Dio _dio;
   final SecureStorage _storage;

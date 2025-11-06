@@ -34,12 +34,11 @@ class _CartPageState extends ConsumerState<CartPage> {
     await ref.read(cartNotifierProvider.notifier).fetchCart();
   }
 
-  // Helper method to format price with currency
+  //  format price with currency
   String _formatPrice(double price, BusinessSettingData? businessSetting) {
     if (businessSetting != null) {
       final symbol = businessSetting.currency.symbol;
       final decimalPlaces = businessSetting.currencyDecimalPlaces;
-      // ✅ Currency symbol AFTER the price number
       return '${price.toStringAsFixed(decimalPlaces)}$symbol';
     }
     return price.toStringAsFixed(2);
@@ -171,7 +170,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                         );
                       }
 
-                      // Calculate total cost
+                      // total cost
                       final totalCost = cartItems.fold<double>(
                         0,
                         (sum, item) => sum + (item.uomPrice * item.quantity),

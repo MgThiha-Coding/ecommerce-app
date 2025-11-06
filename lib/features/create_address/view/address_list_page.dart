@@ -1,98 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
-import 'package:picoshop_theme2/features/checkout/view/pages/create_order_page.dart';
-import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_notifier.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/shipping/model/shipping_method_response.dart';
-import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:picoshop_theme2/features/create_address/viewmodel/address_list_notifier.dart';
+import 'package:picoshop_theme2/features/create_address/model/address_response.dart';
 
-class ShippingMethodListPage extends ConsumerStatefulWidget {
-  final AddressItem selectedAddress;
-  const ShippingMethodListPage(this.selectedAddress, {super.key});
+class AddressListPage extends ConsumerStatefulWidget {
+  const AddressListPage({super.key});
 
   @override
-  ConsumerState<ShippingMethodListPage> createState() =>
-      _ShippingMethodListPageState();
+  ConsumerState<AddressListPage> createState() => _AddressListPageState();
 }
 
-class _ShippingMethodListPageState
-    extends ConsumerState<ShippingMethodListPage> {
-  int? selectedShippingId;
-  ShippingMethod? selectedShipping;
+class _AddressListPageState extends ConsumerState<AddressListPage> {
+  int? selectedAddressId;
+  AddressItem? selectedAddressData;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(shippingMethodNotifierProvider.notifier).getShippingMethod();
+      ref.read(addressListNotifierProvider.notifier).getAddresses();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final shippingAsync = ref.watch(shippingMethodNotifierProvider);
-    final currencyAsync = ref.watch(businessSettingNotifierProvider);
-
-    String formatPrice(String amount) {
-      final parsedAmount = double.tryParse(amount) ?? 0;
-      return currencyAsync.when(
-        data: (businessSetting) {
-          if (businessSetting != null) {
-            final symbol = businessSetting.currency.symbol;
-            final decimalPlaces = businessSetting.currencyDecimalPlaces;
-            return '${parsedAmount.toStringAsFixed(decimalPlaces)}$symbol';
-          }
-          return parsedAmount.toStringAsFixed(2);
-        },
-        loading: () => parsedAmount.toStringAsFixed(2),
-        error: (_, __) => parsedAmount.toStringAsFixed(2),
-      );
-    }
+    final addressesAsync = ref.watch(addressListNotifierProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         title: Text(
-          'Select Shipping Method',
+          'Select Address',
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textSecondary,
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
         elevation: 0,
       ),
-      body: shippingAsync.when(
-        data: (response) {
-          if (response == null || !response.success || response.data.isEmpty) {
+      body: addressesAsync.when(
+        data: (addressResponse) {
+          final data = addressResponse.data;
+
+          if (!addressResponse.success || data.isEmpty) {
             return const Center(
               child: Text(
-                'No shipping methods available.',
+                'No saved addresses found.',
                 style: TextStyle(fontSize: 16, color: Colors.black54),
               ),
             );
           }
 
-          final data = response.data;
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];
-              final isSelected = selectedShippingId == item.id;
+              final isSelected = selectedAddressId == item.id;
 
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    selectedShippingId = item.id;
-                    selectedShipping = item;
+                    selectedAddressId = item.id;
+                    selectedAddressData = item;
                   });
                 },
                 child: AnimatedContainer(
@@ -135,31 +113,52 @@ class _ShippingMethodListPageState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.name,
+                              '${item.firstName} ${item.lastName}',
                               style: GoogleFonts.poppins(
                                 fontSize: responsive.subHeading,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: Colors.black87,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            if (item.amount.isNotEmpty)
-                              Text(
-                                formatPrice(item.amount),
-                                style: GoogleFonts.poppins(
-                                  fontSize: responsive.body,
-                                  color: Colors.black54,
-                                ),
+                            Text(
+                              '${item.addressLine1}, ${item.addressLine2}',
+                              style: GoogleFonts.poppins(
+                                fontSize: responsive.body,
+                                color: Colors.black54,
                               ),
-                            const SizedBox(height: 4),
-                            if (item.descriptions.isNotEmpty)
-                              Text(
-                                item.descriptions,
-                                style: GoogleFonts.poppins(
-                                  fontSize: responsive.body - 1,
-                                  color: Colors.black45,
-                                ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${item.townshipEnName}, ${item.regionEnName}',
+                              style: GoogleFonts.poppins(
+                                fontSize: responsive.body,
+                                color: Colors.black45,
                               ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.phone,
+                                    size: 16, color: Colors.grey.shade600),
+                                const SizedBox(width: 4),
+                                Text(
+                                  item.phone,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: responsive.body,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${item.country}, ${item.postalZipCode}',
+                              style: GoogleFonts.poppins(
+                                fontSize: responsive.body,
+                                color: Colors.black54,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -171,27 +170,15 @@ class _ShippingMethodListPageState
           );
         },
         loading: _buildShimmerList,
-        error: (err, _) => Center(
-          child: Text(
-            err.toString(),
-            style: const TextStyle(color: Colors.redAccent),
-          ),
-        ),
+        error: (err, _) =>
+            Center(child: Text(err.toString(), style: const TextStyle(color: Colors.redAccent))),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+        padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: selectedShipping == null
+          onPressed: selectedAddressData == null
               ? null
-              : () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateOrderPage(
-                      widget.selectedAddress,
-                      selectedShipping,
-                    ),
-                  ),
-                ),
+              : () => Navigator.pop(context, selectedAddressData),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             minimumSize: const Size(double.infinity, 50),
@@ -202,7 +189,7 @@ class _ShippingMethodListPageState
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: Responsive(context).body,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
@@ -230,9 +217,13 @@ class _ShippingMethodListPageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(height: 16, width: 100, color: Colors.white),
+                Container(height: 16, width: 120, color: Colors.white),
                 const SizedBox(height: 8),
-                Container(height: 14, width: 150, color: Colors.white),
+                Container(height: 14, width: double.infinity, color: Colors.white),
+                const SizedBox(height: 6),
+                Container(height: 14, width: 180, color: Colors.white),
+                const SizedBox(height: 10),
+                Container(height: 12, width: 100, color: Colors.white),
               ],
             ),
           ),

@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
+import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
 import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
 import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';

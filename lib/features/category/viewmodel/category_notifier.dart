@@ -8,7 +8,7 @@ import 'package:picoshop_theme2/features/category/model/categories_detail_respon
 import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
 
-// Cate gory State
+// Category State
 class CategoryListNotifier
     extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
   final Box<CategoryHiveModel> _localCache;
@@ -80,12 +80,9 @@ class CategoryListNotifier
       final categories = parsed.data.data;
 
       if (categories.isEmpty) {
-        // if categories is empty noMore true
         _isNoMore = true;
       } else {
-        // add online
         _onlineCategories.addAll(categories);
-        // save 16 items in local
         for (var category in categories.take(16)) {
           _localCache.put(
             category.id,
@@ -102,12 +99,10 @@ class CategoryListNotifier
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineCategories));
       } else {
-        // show offline data when offline
         final cached = _localCache.values.map((e) => e.toDataModel()).toList();
         state = AsyncValue.data(cached);
       }
     } on DioException catch (e, st) {
-      // offline data
       final cached = _localCache.values.map((e) => e.toDataModel()).toList();
       if (cached.isNotEmpty) {
         state = AsyncValue.data(cached);

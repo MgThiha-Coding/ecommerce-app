@@ -11,7 +11,7 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/checkout/model/response/address_response.dart';
+import 'package:picoshop_theme2/features/create_address/model/address_response.dart';
 import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
 import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
 import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.dart';
