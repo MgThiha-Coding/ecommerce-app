@@ -257,7 +257,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            LocaleKeys.checkout.tr(),
+            'Create Order',
             style: TextStyle(
               fontFamily: "Poppins",
               fontSize: responsive.subHeading,

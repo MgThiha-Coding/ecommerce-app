@@ -11,6 +11,7 @@ class ShippingMethodNotifier
       super(const AsyncValue.data(null));
 
   Future<void> getShippingMethod() async {
+    state = const AsyncValue.loading();
     try {
       final response = await _dio.get(
         'https://beta.picosbs.com/api/ecommerce/shipping-methods',

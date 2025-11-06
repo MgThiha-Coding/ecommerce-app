@@ -8,13 +8,11 @@ import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
-// Brand List State ( Online and offline hybrid )
+// Brand List State
 class BrandListNotifier
     extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
-  // Local Hive Model ( offline )
   final Box<BrandHiveModel> _localCache;
   final Dio _dio;
-  // Brand Data Model ( online )
   final List<BrandDataModel> _onlineBrands = [];
   int _currentPage = 1;
   bool _isNoMore = false;
@@ -34,7 +32,6 @@ class BrandListNotifier
 
   bool get isNoMore => _isNoMore;
 
-  // emit local data from localCache
   Future<void> _init() async {
     final cached = _localCache.values.map((e) => e.toDataModel()).toList();
     if (cached.isNotEmpty) {
@@ -44,7 +41,6 @@ class BrandListNotifier
     }
   }
 
-  // reset the pagination
   Future<void> reset() async {
     _onlineBrands.clear();
     _currentPage = 1;
@@ -52,7 +48,6 @@ class BrandListNotifier
     await getNextPage();
   }
 
-  // fetch brand list
   Future<void> getNextPage() async {
     if (_isNoMore || _isLoading) return;
     _isLoading = true;
@@ -71,7 +66,6 @@ class BrandListNotifier
       final isSuccess =
           response.statusCode == 200 && response.data['success'] == true;
 
-      // error state
       if (!isSuccess) {
         final message =
             response.data['message'] ??
@@ -87,7 +81,6 @@ class BrandListNotifier
         _isNoMore = true;
       } else {
         _onlineBrands.addAll(brands);
-        // save 16 items to local ( purpose for UI consistentcy )
         for (var brand in brands.take(16)) {
           if (_localCache.length >= 16) {
             _localCache.delete(_localCache.keys.first);
@@ -101,7 +94,6 @@ class BrandListNotifier
       // ignore: unrelated_type_equality_checks
       final isOnline = connectivityResult != ConnectivityResult.none;
 
-      // devide by connectivty
       if (isOnline) {
         state = AsyncValue.data(List.from(_onlineBrands));
       } else {
@@ -117,7 +109,7 @@ class BrandListNotifier
         if (e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.unknown) {
-          state = AsyncValue.error('Check your connection”', st);
+          state = AsyncValue.error('Check your connection', st);
         } else {
           state = AsyncValue.error(e.response?.data['message'], st);
         }
@@ -136,7 +128,7 @@ final brandListNotifierProvider =
       return BrandListNotifier(offlineBrands);
     });
 
-// Brand Detail State ( online only )
+// Brand Detail State
 class BrandDetailNotifier
     extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
   final Dio _dio;
@@ -153,6 +145,7 @@ class BrandDetailNotifier
       super(const AsyncValue.data(null));
 
   Future<void> getBrandDetail(int id) async {
+    state = const AsyncValue.loading();
     try {
       final response = await _dio.get(
         '${AppConfig.baseUrl}/ecommerce/brands/details/$id',
@@ -169,12 +162,17 @@ class BrandDetailNotifier
       if (isSuccess) {
         final responseData = BrandDetailResponse.fromJson(response.data);
         state = AsyncValue.data(responseData);
+      } else {
+        state = AsyncValue.error(
+          response.data['message'] ?? 'Something went wrong',
+          StackTrace.current,
+        );
       }
     } on DioException catch (e, st) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
-        state = AsyncValue.error('Check your connection”', st);
+        state = AsyncValue.error('Check your connection', st);
       } else {
         state = AsyncValue.error(e.response?.data['message'], st);
       }

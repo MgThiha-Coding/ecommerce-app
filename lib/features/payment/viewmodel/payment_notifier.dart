@@ -11,6 +11,7 @@ class PaymentMethodNotifier
       super(const AsyncValue.data(null));
 
   Future<void> getPaymentMethod() async {
+    state = const AsyncValue.loading();
     try {
       final response = await _dio.get(
         'https://beta.picosbs.com/api/ecommerce/payment-methods',

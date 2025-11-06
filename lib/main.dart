@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_initializer.dart';
 import 'package:picoshop_theme2/core/config/app_localization.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
-import 'core/services/ota_update_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +16,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    /*
     WidgetsBinding.instance.addPostFrameCallback((_) {
       OtaUpdateService.checkForUpdate(context);
     });
+    */
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

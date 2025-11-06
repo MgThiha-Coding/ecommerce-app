@@ -192,6 +192,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 },
               ),
               */
+              
               const Divider(),
               Padding(
                 padding: const EdgeInsets.all(12.0),

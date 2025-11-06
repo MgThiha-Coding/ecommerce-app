@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -59,13 +58,14 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 0.4,
+        scrolledUnderElevation: 0,
+        elevation: 0,
         centerTitle: true,
         title: Text(
           'Brand Details',
-          style: GoogleFonts.poppins(
+          style: TextStyle(
+            fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            fontWeight: FontWeight.w600,
             color: AppColors.textSecondary,
           ),
         ),
@@ -102,8 +102,8 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
           final name = brand.name;
           final description =
               (brand.description?.toString().trim().isEmpty ?? true)
-                  ? 'No description available.'
-                  : brand.description.toString();
+              ? 'No description available.'
+              : brand.description.toString();
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(responsive.paddingLarge),
@@ -181,11 +181,7 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
       padding: EdgeInsets.only(bottom: responsive.paddingSmall, top: 4),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: AppColors.textSecondary.withOpacity(0.8),
-          ),
+          Icon(icon, size: 18, color: AppColors.textSecondary.withOpacity(0.8)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
