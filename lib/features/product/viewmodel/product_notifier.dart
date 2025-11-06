@@ -140,7 +140,7 @@ class ProductDetailNotifier
   Future<void> getProductDetail(int productId) async {
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/products/details/$productId',
+        '${AppConfig.baseUrl}/ecommerce/products/details/$productId',
         options: Options(
           headers: {
             'Accept': 'application/json',
