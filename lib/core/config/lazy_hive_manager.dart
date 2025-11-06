@@ -13,7 +13,6 @@ class LazyHiveManager {
     return Hive.box<T>(boxName);
   }
 
-  // Open box only when first accessed
   static Future<void> preloadBox(String boxName) async {
     if (!_boxOpenStatus.containsKey(boxName)) {
       unawaited(getBox(boxName));

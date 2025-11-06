@@ -18,15 +18,15 @@ android {
     }
 
     compileOptions {
-        // Use Java 1.8 for compatibility with desugaring
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-        // Enable core library desugaring required by ota_update
+        // Use Java 17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        // Enable core library desugaring if needed by plugins
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildTypes {
@@ -37,7 +37,7 @@ android {
 }
 
 dependencies {
-    // Updated desugar_jdk_libs to 2.1.4+
+    // Keep updated desugar_jdk_libs
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,18 @@ import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await AppInitializer.initialize();
+
+  FlutterError.onError = (details) {
+    debugPrint('Flutter error: ${details.exception}');
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Uncaught async error: $error');
+    return true;
+  };
+
   runApp(AppLocalization.setup(child: const ProviderScope(child: MyApp())));
 }
 
@@ -16,12 +28,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    /*
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      OtaUpdateService.checkForUpdate(context);
-    });
-    */
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: context.locale,
