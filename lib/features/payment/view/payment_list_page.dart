@@ -40,7 +40,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
         centerTitle: true,
@@ -48,7 +48,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
       ),
       body: paymentAsync.when(
         data: (response) {
-          if (response == null || !response.success || response.data.isEmpty) {
+          if (response == null || response.data.isEmpty) {
             return const Center(
               child: Text(
                 'No payment methods available.',
@@ -59,7 +59,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
 
           final data = response.data;
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];
@@ -74,8 +74,8 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(14),
+                  margin: const EdgeInsets.only(bottom: 9),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -175,7 +175,7 @@ class _PaymentListPageState extends ConsumerState<PaymentListPage> {
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive(context).body,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),

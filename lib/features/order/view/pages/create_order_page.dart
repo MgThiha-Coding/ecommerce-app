@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,10 +11,7 @@ import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/address/model/response/address_response.dart';
-import 'package:picoshop_theme2/features/address/view/pages/address_list_page.dart';
-import 'package:picoshop_theme2/features/address/view/pages/create_address_page.dart';
-import 'package:picoshop_theme2/features/address/view/pages/shipping_method_list_page.dart';
+import 'package:picoshop_theme2/features/create_address/model/address_response.dart';
 import 'package:picoshop_theme2/features/order/model/request/create_order_request.dart';
 import 'package:picoshop_theme2/features/order/model/response/create_order_response.dart';
 import 'package:picoshop_theme2/features/order/viewmodel/create_order_notifier.dart';
@@ -23,33 +21,174 @@ import 'package:picoshop_theme2/features/shipping/model/shipping_method_response
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CheckOutPage extends ConsumerStatefulWidget {
-  const CheckOutPage({super.key});
+class CreateOrderPage extends ConsumerStatefulWidget {
+  final AddressItem? selectedAddress;
+  final ShippingMethod? selectedShipping;
+  const CreateOrderPage(
+    this.selectedAddress,
+    this.selectedShipping, {
+    super.key,
+  });
 
   @override
-  ConsumerState<CheckOutPage> createState() => _CheckOutPageState();
+  ConsumerState<CreateOrderPage> createState() => _CreateOrderPageState();
 }
 
-class _CheckOutPageState extends ConsumerState<CheckOutPage> {
-  AddressItem? _selectedAddress;
+class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
   PaymentMethod? _selectedPayment;
-  ShippingMethod? _selectedShipping;
   File? _approveScreenshot;
+  final ImagePicker _picker = ImagePicker();
 
   String orderType = "delivery";
   List<int> cartItemIds = [];
   ShippingInfo? shipping;
   int? paymentAccountId;
 
-  final ImagePicker _picker = ImagePicker();
+  // Image size validation
+  bool _validateImageSize() {
+    if (_approveScreenshot == null) return true;
 
-  Future<void> _pickScreenshot() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile != null) {
-      setState(() => _approveScreenshot = File(pickedFile.path));
+    final fileSize = _approveScreenshot!.lengthSync();
+    const maxSize = 1 * 1024 * 1024;
+
+    return fileSize <= maxSize;
+  }
+
+
+  Future<void> _pickScreenshot(BuildContext context) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      final file = File(pickedFile.path);
+      final fileSize = await file.length();
+      const maxSize = 1 * 1024 * 1024;
+
+      if (fileSize > maxSize) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Image size: ${(fileSize / (1024 * 1024)).toStringAsFixed(2)} MB. Maximum allowed is 1   MB.',
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      setState(() {
+        _approveScreenshot = file;
+      });
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
+  }
+
+  // Screenshot picker widget
+  Widget _buildScreenshotPicker() {
+    return Card(
+      color: AppColors.background,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        height: 230,
+        padding: const EdgeInsets.all(8),
+        child: _approveScreenshot != null
+            ? Stack(
+                children: [
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          _approveScreenshot!,
+                          width: double.infinity,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Size: ${(_approveScreenshot!.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _approveScreenshot = null),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(
+                          Icons.close,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : GestureDetector(
+                onTap: () => _pickScreenshot(context),
+                behavior: HitTestBehavior.opaque,
+                child: DottedBorder(
+                  child: SizedBox.expand(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.upload_file,
+                          size: 40,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          LocaleKeys.uploadPaymentScreenshot.tr(),
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Max size: 1 MB',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
   }
 
   @override
@@ -69,20 +208,43 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             ref.read(cartNotifierProvider.notifier).fetchCart();
             ref.read(cartNotifierProvider.notifier).refreshCart();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Order placed successfully!")),
+              SnackBar(
+                content: Text(
+                  "Order placed successfully!",
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: Responsive(context).body,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                duration: const Duration(seconds: 1),
+                backgroundColor: AppColors.background,
+              ),
             );
-            Navigator.pop(context);
+            Navigator.popUntil(context, (route) => route.isFirst);
           }
         },
         loading: () {},
         error: (err, _) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(err.toString())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                err.toString(),
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: Responsive(context).body,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              duration: const Duration(seconds: 1),
+              backgroundColor: AppColors.background,
+            ),
+          );
         },
       );
     });
 
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () {
         ref.read(createOrderNotifierProvider.notifier).cancel();
@@ -96,11 +258,11 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            LocaleKeys.checkout.tr(),
+            'Create Order',
             style: TextStyle(
               fontFamily: "Poppins",
               fontSize: responsive.subHeading,
-              color: AppColors.textPrimary,
+              color: AppColors.textSecondary,
             ),
           ),
         ),
@@ -111,8 +273,8 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
               0,
               (sum, item) => sum + (item.uomPrice * item.quantity),
             );
-            final shippingAmount = _selectedShipping != null
-                ? double.tryParse(_selectedShipping!.amount) ?? 0.0
+            final shippingAmount = widget.selectedShipping != null
+                ? double.tryParse(widget.selectedShipping!.amount) ?? 0.0
                 : 0.0;
 
             return SingleChildScrollView(
@@ -121,26 +283,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(
-                    LocaleKeys.deliveryAddress.tr(),
-                    responsive,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildCreateAddressCard(responsive),
-                  const SizedBox(height: 8),
-                  _buildSelectAddressCard(responsive),
-
-                  const SizedBox(height: 16),
-
-                  _buildSectionHeader(
-                    LocaleKeys.shippingMethod.tr(),
-                    responsive,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildShippingCard(responsive),
-
-                  const SizedBox(height: 16),
-
-                  _buildSectionHeader(
                     LocaleKeys.paymentMethod.tr(),
                     responsive,
                   ),
@@ -148,12 +290,9 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                   _buildPaymentCard(responsive),
                   const SizedBox(height: 8),
                   _buildScreenshotPicker(),
-
                   const SizedBox(height: 16),
-
                   _buildSectionHeader(LocaleKeys.orderSummary.tr(), responsive),
                   const SizedBox(height: 8),
-
                   _buildOrderSummary(
                     itemCount,
                     itemTotal,
@@ -172,17 +311,38 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                       labelColor: AppColors.background,
                       isLoading: orderState is AsyncLoading,
                       onTap: () async {
-                        if (_selectedAddress == null ||
+                        // Validate all required fields including image size
+                        if (widget.selectedAddress == null ||
                             _selectedPayment == null ||
-                            _selectedShipping == null ||
+                            widget.selectedShipping == null ||
                             _approveScreenshot == null ||
                             cartItemsAsync.value == null ||
                             cartItemsAsync.value!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Please complete all selections and upload screenshot",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: Responsive(context).body,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: AppColors.background,
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Validate image size before submission
+                        if (!_validateImageSize()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                'Please complete all selections and upload screenshot',
+                                'Image size exceeds 1 MB limit. Please select a smaller image.',
                               ),
+                              backgroundColor: Colors.red,
                             ),
                           );
                           return;
@@ -193,18 +353,18 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                             .toList();
 
                         final shippingInfo = ShippingInfo(
-                          address: _selectedAddress!.addressLine1,
-                          township: _selectedAddress!.townshipEnName,
-                          region: _selectedAddress!.regionEnName,
-                          country: _selectedAddress!.country,
-                          phone: _selectedAddress!.phone,
+                          address: widget.selectedAddress!.addressLine1,
+                          township: widget.selectedAddress!.townshipEnName,
+                          region: widget.selectedAddress!.regionEnName,
+                          country: widget.selectedAddress!.country,
+                          phone: widget.selectedAddress!.phone,
                         );
 
                         final request = CreateOrderRequest(
                           orderType: orderType,
                           cartItemIds: ids,
                           shipping: shippingInfo,
-                          shippingMethodId: _selectedShipping!.id,
+                          shippingMethodId: widget.selectedShipping!.id,
                           paymentAccountId:
                               _selectedPayment!.paymentAccount!.id,
                           approveScreenshot: _approveScreenshot!,
@@ -214,7 +374,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                             .read(createOrderNotifierProvider.notifier)
                             .createOrder(request);
 
-                        // Feedback
                         final currentState = ref.read(
                           createOrderNotifierProvider,
                         );
@@ -225,7 +384,14 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                                 SnackBar(
                                   content: Text(
                                     'Order ${data.data?.orderNumber} created successfully!',
+                                    style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      color: AppColors.textPrimary,
+                                      fontSize: Responsive(context).body,
+                                    ),
                                   ),
+                                  duration: const Duration(seconds: 1),
+                                  backgroundColor: AppColors.background,
                                 ),
                               );
                             }
@@ -240,8 +406,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                       },
                     ),
                   ),
-
-                  // button
                 ],
               ),
             );
@@ -259,131 +423,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       style: GoogleFonts.poppins(
         fontSize: responsive.body,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
-
-  Widget _buildCreateAddressCard(Responsive responsive) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CreateAddressPage()),
-        );
-      },
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(
-            Icons.location_on_outlined,
-            color: AppColors.primary,
-          ),
-          title: Text(
-            LocaleKeys.createAddress.tr(),
-            style: GoogleFonts.poppins(
-              fontSize: responsive.body,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          subtitle: Text(
-            'Add a new delivery address',
-            style: GoogleFonts.poppins(
-              fontSize: responsive.caption,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectAddressCard(Responsive responsive) {
-    return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push<AddressItem>(
-          context,
-          MaterialPageRoute(builder: (_) => const AddressListPage()),
-        );
-        if (result != null) setState(() => _selectedAddress = result);
-      },
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(
-            Icons.location_on_outlined,
-            color: AppColors.primary,
-          ),
-          title: Text(
-            _selectedAddress == null
-                ? LocaleKeys.selectSavedAddress.tr()
-                : '${_selectedAddress!.firstName} ${_selectedAddress!.lastName}',
-            style: GoogleFonts.poppins(
-              fontSize: Responsive(context).body,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          subtitle: _selectedAddress != null
-              ? Text(
-                  '${_selectedAddress!.addressLine1}, ${_selectedAddress!.addressLine2}\n'
-                  '${_selectedAddress!.townshipEnName}, ${_selectedAddress!.regionEnName}\n'
-                  '${_selectedAddress!.country}, ${_selectedAddress!.postalZipCode}\n'
-                  'Phone: ${_selectedAddress!.phone}',
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive(context).body - 1,
-                    color: Colors.black54,
-                  ),
-                )
-              : null,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShippingCard(Responsive responsive) {
-    final shippingAmount = _selectedShipping != null
-        ? double.tryParse(_selectedShipping!.amount) ?? 0
-        : 0;
-    return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push<ShippingMethod>(
-          context,
-          MaterialPageRoute(builder: (_) => const ShippingMethodListPage()),
-        );
-        if (result != null) setState(() => _selectedShipping = result);
-      },
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(
-            Icons.local_shipping_outlined,
-            color: AppColors.primary,
-          ),
-          title: Text(
-            _selectedShipping == null
-                ? LocaleKeys.selectShippingMethod.tr()
-                : _selectedShipping!.name,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive(context).body,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          subtitle: _selectedShipping != null
-              ? Text(
-                  "Cost: ${shippingAmount.toStringAsFixed(2)} MMK",
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive(context).body - 1,
-                    color: Colors.black54,
-                  ),
-                )
-              : null,
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        ),
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -401,7 +441,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
         color: AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: ListTile(
-          leading: const Icon(Icons.payment_outlined, color: AppColors.primary),
+          leading: const Icon(Icons.payment_outlined, color: AppColors.textSecondary),
           title: Text(
             _selectedPayment == null
                 ? LocaleKeys.paymentMethod.tr()
@@ -426,31 +466,6 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
     );
   }
 
-  Widget _buildScreenshotPicker() {
-    return GestureDetector(
-      onTap: _pickScreenshot,
-      child: Card(
-        color: AppColors.background,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: ListTile(
-          leading: const Icon(Icons.photo, color: AppColors.primary),
-          title: Text(
-            _approveScreenshot == null
-                ? LocaleKeys.uploadPaymentScreenshot.tr()
-                : "Screenshot Selected",
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          trailing: _approveScreenshot != null
-              ? const Icon(Icons.check, color: Colors.green)
-              : null,
-        ),
-      ),
-    );
-  }
-
   Widget _buildOrderSummary(
     int itemCount,
     double itemTotal,
@@ -466,7 +481,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             final decimalPlaces = businessSetting.currencyDecimalPlaces;
             return '${amount.toStringAsFixed(decimalPlaces)}$symbol';
           }
-          return amount.toStringAsFixed(2); // fallback
+          return amount.toStringAsFixed(2);
         },
         loading: () => amount.toStringAsFixed(2),
         error: (_, __) => amount.toStringAsFixed(2),
@@ -499,7 +514,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           title,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: AppColors.textSecondary,
+            color: Colors.black87,
           ),
         ),
         Text(
@@ -507,7 +522,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: Colors.green,
           ),
         ),
       ],

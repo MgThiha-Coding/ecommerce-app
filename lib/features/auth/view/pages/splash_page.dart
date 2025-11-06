@@ -21,9 +21,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   void initState() {
     super.initState();
 
-    //  async stuff after build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // read the secure storage provider (where we save first launch, user info etc.)
+      // read the secure storage provider
       final storage = ref.read(secureStorageProvider);
 
       // check if this is first time launching app
@@ -32,14 +31,14 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       // check if user already logged in
       final isLoggedIn = await storage.isLoggedIn();
 
-      if (!mounted) return; // make sure widget still exists
+      if (!mounted) return;
 
       // wait for 2 seconds to show splash
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(microseconds: 500));
 
       // if first launch, go to onboarding
       if (isFirstLaunch) {
-        await storage.setFirstLaunchFlag(false); // mark first launch as done
+        await storage.setFirstLaunchFlag(false);
         if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
@@ -75,7 +74,6 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         return;
       }
 
-      // if not first launch and not logged in, go to onboarding anyway
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,

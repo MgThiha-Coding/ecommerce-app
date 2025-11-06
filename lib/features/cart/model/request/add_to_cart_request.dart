@@ -1,5 +1,3 @@
-
-
 class AddToCartRequest {
   final int productId;
   final int purchaseQty;
@@ -8,8 +6,6 @@ class AddToCartRequest {
   AddToCartRequest({
     required this.productId,
     required this.purchaseQty,
-    required this.variationId
+    required this.variationId,
   });
-
-  
 }

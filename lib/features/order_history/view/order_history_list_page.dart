@@ -46,6 +46,7 @@ class _OrderHistoryListPageState extends ConsumerState<OrderHistoryListPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
+        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -106,7 +107,7 @@ class _OrderHistoryListPageState extends ConsumerState<OrderHistoryListPage> {
   Widget _buildShimmerList() {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      itemCount: 6,
+      itemCount: 9,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -427,7 +428,7 @@ class _OrderCardState extends State<_OrderCard> {
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ],

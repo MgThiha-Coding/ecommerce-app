@@ -2,48 +2,12 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/core/storage/storage.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
-import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
-import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
+import 'package:picoshop_theme2/core/network/refresh_token_mixin.dart';
+import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
+import 'package:picoshop_theme2/features/cart/model/response/add_to_cart_response.dart';
+import 'package:picoshop_theme2/features/cart/model/response/cart_item_response.dart';
+import 'package:picoshop_theme2/features/cart/model/response/total_cart_item_response.dart';
 
-mixin RefreshTokenMixin {
-  final Dio _refreshDio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 10),
-    ),
-  );
-  final SecureStorage _storage = SecureStorage();
-
-  Future<Response<dynamic>?> refreshAndRetry(
-    Future<Response<dynamic>> Function(String accessToken) retryCallback,
-  ) async {
-    final refreshToken = await _storage.getRefreshToken();
-    if (refreshToken == null) return null;
-    try {
-      final refreshRes = await _refreshDio.post(
-        '${AppConfig.baseUrl}/v1/refresh-token',
-        data: {'refresh_token': refreshToken},
-        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
-      );
-      final accessToken = refreshRes.data['data']['accessToken'];
-      final newRefreshToken = refreshRes.data['data']['refreshToken'];
-      final userId = refreshRes.data['data']['user']['id'].toString();
-      AppConfig.updateAccessToken(accessToken);
-      await _storage.saveAuthData(
-        accessToken: accessToken,
-        refreshToken: newRefreshToken,
-        userId: userId,
-      );
-      return await retryCallback(accessToken);
-    } catch (_) {
-      return null;
-    }
-  }
-}
 
 // Get Cart Item State
 class CartNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>>
@@ -150,7 +114,7 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
     with RefreshTokenMixin {
   final Dio _dio;
   int? _onlineTotal;
-  int? _cachedTotal; // Simple variable instead of Hive box
+  int? _cachedTotal;
   bool _isLoading = false;
 
   TotalCartNotifier()
@@ -221,14 +185,14 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
           if (isSuccess) {
             final parsed = TotalCartItemResponse.fromJson(refreshed.data);
             _onlineTotal = parsed.data;
-            _cachedTotal = _onlineTotal; // Store in variable instead of Hive
+            _cachedTotal = _onlineTotal;
             state = AsyncValue.data(_onlineTotal!);
             _isLoading = false;
             return;
           }
         }
       }
-      // Use cached variable instead of Hive
+
       if (_cachedTotal != null) {
         state = AsyncValue.data(_cachedTotal!);
       }
@@ -256,10 +220,9 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
 
 final totalCartNotifierProvider =
     StateNotifierProvider<TotalCartNotifier, AsyncValue<int>>((ref) {
-      return TotalCartNotifier(); // No more fucking Hive!
+      return TotalCartNotifier();
     });
 
-// Add to cart state
 // Add to cart state
 class AddToCartState {
   final Map<int, bool> itemLoading;

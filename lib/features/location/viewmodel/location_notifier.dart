@@ -2,13 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-/// Model for storing location info
 class UserLocation {
   final double latitude;
   final double longitude;
   final String? addressLine;
-  final String? region; // administrative area
-  final String? township; // locality
+  final String? region;
+  final String? township;
   final String? postalCode;
 
   UserLocation({
@@ -21,11 +20,9 @@ class UserLocation {
   });
 }
 
-/// StateNotifier to manage location
 class LocationNotifier extends StateNotifier<AsyncValue<UserLocation?>> {
   LocationNotifier() : super(const AsyncValue.data(null));
 
-  /// Request location permission and fetch current location
   Future<void> fetchCurrentLocation() async {
     state = const AsyncValue.loading();
 
@@ -66,8 +63,10 @@ class LocationNotifier extends StateNotifier<AsyncValue<UserLocation?>> {
       );
 
       // Reverse geocode to get human-readable address
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
       if (placemarks.isEmpty) {
         state = AsyncValue.error(
@@ -95,8 +94,7 @@ class LocationNotifier extends StateNotifier<AsyncValue<UserLocation?>> {
   }
 }
 
-/// Riverpod provider
 final locationNotifierProvider =
     StateNotifierProvider<LocationNotifier, AsyncValue<UserLocation?>>(
-  (ref) => LocationNotifier(),
-);
+      (ref) => LocationNotifier(),
+    );

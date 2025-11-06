@@ -1,16 +1,17 @@
-# picoshop_theme2
+# PicoMart App Architecture
 
-A new Flutter project.
+```
+lib/
+├── core/           # Config, constants, theme, utils
+├── features/
+│   ├── feature1/
+│   │   ├── model/
+│   │   ├── view/
+│   │   └── viewmodel/
+│   └── feature2/
+├── main.dart       # App entry point
+```
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**Notice:**  
+- Runs with some uncaught exceptions.  
+- MVP ready; some advanced error handling and edge cases are not yet implemented.

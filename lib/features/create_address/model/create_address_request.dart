@@ -1,4 +1,3 @@
-
 class CreateAddressRequest {
   final String type;
   final String firstName;
@@ -24,7 +23,7 @@ class CreateAddressRequest {
 
   factory CreateAddressRequest.fromJson(Map<String, dynamic> json) {
     return CreateAddressRequest(
-      type: json['name'] ?? '', 
+      type: json['name'] ?? '',
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
       addressLine1: json['address_line_1'] ?? '',
@@ -38,7 +37,7 @@ class CreateAddressRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'name': type, 
+      'name': type,
       'first_name': firstName,
       'last_name': lastName,
       'address_line_1': addressLine1,

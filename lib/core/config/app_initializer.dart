@@ -8,25 +8,25 @@ import 'app_localization.dart';
 
 class AppInitializer {
   static Future<void> initialize() async {
-    // Phase 1: Critical synchronous initializations
+    // Critical synchronous initializations
     await _initializeCritical();
 
-    // Phase 2: Non-critical async initializations
+    // Non-critical async initializations
     unawaited(_initializeNonCritical());
   }
 
   static Future<void> _initializeCritical() async {
-    // 1. Localization
+    // Localization
     await AppLocalization.ensureInitialized();
 
-    // 2. Device orientation
+    // Device orientation
     await _setDeviceOrientation();
 
-    // 3. Hive setup
+    //  Hive setup
     await HiveConfig.init();
     await HiveConfig.openCriticalBoxes();
 
-    // 4. Environment and critical config
+    //  Environment and critical config
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
   }
@@ -34,19 +34,16 @@ class AppInitializer {
   static Future<void> _initializeNonCritical() async {
     // Open non-critical Hive boxes in background
     await HiveConfig.openNonCriticalBoxes();
-
-    // Other non-critical initializations can go here
-    // await Analytics.init();
-    // await PushNotification.init();
   }
 
   static Future<void> _setDeviceOrientation() async {
     // Get device size
+    // ignore: deprecated_member_use
     final window = WidgetsBinding.instance.window;
     final screenWidth = window.physicalSize.width / window.devicePixelRatio;
 
     if (screenWidth >= 600) {
-      // Tablet: allow both portrait and landscape
+      // allow both portrait and landscape
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,

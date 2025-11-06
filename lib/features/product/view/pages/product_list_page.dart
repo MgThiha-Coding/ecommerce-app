@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
@@ -64,7 +63,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
         setState(() => _showFloatingCartButton = true);
-        Future.delayed(const Duration(seconds: 12), () {
+        Future.delayed(const Duration(seconds: 20), () {
           if (mounted) setState(() => _showFloatingCartButton = false);
         });
       }
@@ -172,12 +171,15 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         horizontal: isMobile ? 6 : 20,
         vertical: isMobile ? 0 : 10,
       ),
-      child: MasonryGridView.count(
+      child: GridView.builder(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        crossAxisCount: isMobile ? 2 : 5,
-        mainAxisSpacing: 6,
-        crossAxisSpacing: 6,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isMobile ? 2 : 5,
+          crossAxisSpacing: 6,
+          mainAxisSpacing: 6,
+          childAspectRatio: 0.75,
+        ),
         itemCount: products.length,
         itemBuilder: (context, index) {
           final product = products[index];
@@ -214,40 +216,40 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(14),
                     ),
-                    child: product.productImage?.isNotEmpty == true
-                        ? Image.network(
-                            product.productImage!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-
-                            errorBuilder: (_, __, ___) => Image.asset(
+                    child: SizedBox(
+                      height: isMobile ? 130 : 150, // 🔥 Fixed image height
+                      width: double.infinity,
+                      child: product.productImage?.isNotEmpty == true
+                          ? Image.network(
+                              product.productImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                AppImage.emptyContainer,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            )
+                          : Image.asset(
                               AppImage.emptyContainer,
                               fit: BoxFit.cover,
                               width: double.infinity,
                             ),
-                          )
-                        : Image.asset(
-                            AppImage.emptyContainer,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            product.brandName ?? "Brand not provided",
-                            style: GoogleFonts.poppins(
-                              fontSize: fontSize.caption,
-                              color: AppColors.brandLabelColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          product.brandName ?? "Brand not provided",
+                          style: GoogleFonts.poppins(
+                            fontSize: fontSize.caption,
+                            color: AppColors.brandLabelColor,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           product.name ?? '',
@@ -278,17 +280,17 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
   Widget floatingCartButton(BuildContext context, Responsive fontSize) {
     return Positioned(
       bottom: 17,
-      left: 16,
-      right: 16,
+      left: 10,
+      right: 10,
       child: Container(
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.textSecondary,
+              AppColors.background,
               // ignore: deprecated_member_use
-              AppColors.textSecondary.withOpacity(0.8),
+              AppColors.background.withOpacity(0.8),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -333,7 +335,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 Text(
                   'View Cart',
                   style: GoogleFonts.poppins(
-                    color: AppColors.background,
+                    color: AppColors.textSecondary,
                     fontSize: fontSize.subHeading,
                     fontWeight: FontWeight.w300,
                   ),
@@ -341,7 +343,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 const SizedBox(width: 8),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: AppColors.background,
+                  color: AppColors.textSecondary,
                   size: fontSize.subHeading,
                 ),
               ],

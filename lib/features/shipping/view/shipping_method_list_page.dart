@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:picoshop_theme2/features/create_address/model/address_response.dart';
+import 'package:picoshop_theme2/features/order/view/pages/create_order_page.dart';
 import 'package:picoshop_theme2/features/shipping/viewmodel/shipping_method_notifier.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -9,7 +11,8 @@ import 'package:picoshop_theme2/features/business_setting/viewmodel/business_set
 import 'package:shimmer/shimmer.dart';
 
 class ShippingMethodListPage extends ConsumerStatefulWidget {
-  const ShippingMethodListPage({super.key});
+  final AddressItem selectedAddress;
+  const ShippingMethodListPage(this.selectedAddress, {super.key});
 
   @override
   ConsumerState<ShippingMethodListPage> createState() =>
@@ -60,7 +63,7 @@ class _ShippingMethodListPageState
           style: TextStyle(
             fontFamily: "Poppins",
             fontSize: responsive.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
           ),
         ),
         centerTitle: true,
@@ -79,7 +82,7 @@ class _ShippingMethodListPageState
 
           final data = response.data;
           return ListView.builder(
-             padding: Responsive(context).isMobile? const EdgeInsets.all(12):const EdgeInsets.all(50),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             itemCount: data.length,
             itemBuilder: (context, index) {
               final item = data[index];
@@ -100,8 +103,9 @@ class _ShippingMethodListPageState
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color:
-                          isSelected ? AppColors.primary : Colors.grey.shade300,
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.shade300,
                       width: isSelected ? 1.6 : 1.0,
                     ),
                     boxShadow: [
@@ -134,7 +138,7 @@ class _ShippingMethodListPageState
                               item.name,
                               style: GoogleFonts.poppins(
                                 fontSize: responsive.subHeading,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: Colors.black87,
                               ),
                             ),
@@ -175,11 +179,19 @@ class _ShippingMethodListPageState
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
         child: ElevatedButton(
           onPressed: selectedShipping == null
               ? null
-              : () => Navigator.pop(context, selectedShipping),
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateOrderPage(
+                      widget.selectedAddress,
+                      selectedShipping,
+                    ),
+                  ),
+                ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             minimumSize: const Size(double.infinity, 50),
@@ -190,7 +202,7 @@ class _ShippingMethodListPageState
           child: Text(
             'Continue',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive(context).body,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),

@@ -24,7 +24,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
 
-  String _selectedFilter = 'product';
+  final String _selectedFilter = 'product';
 
   @override
   void initState() {
@@ -83,7 +83,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: SizedBox(
-              height: 42,
+              height: 44,
               child: Row(
                 children: [
                   Expanded(
@@ -95,7 +95,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       onChanged: (_) => _onSearchChanged(),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                //  const SizedBox(height: 6),
                   /*
                   // Filter dropdown commented for now
                   Container(
@@ -136,7 +136,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             ),
           ),
-          const Divider(height: 1),
+        //  const Divider(height: 1),
           Expanded(
             child: searchState.when(
               data: (products) {

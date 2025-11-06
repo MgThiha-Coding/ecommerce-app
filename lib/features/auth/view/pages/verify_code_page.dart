@@ -95,6 +95,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
 
             storage.isLoggedIn();
 
+            // ignore: use_build_context_synchronously
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 backgroundColor: Colors.grey[200],
@@ -103,6 +104,7 @@ class _VerifyCodePageState extends ConsumerState<VerifyCodePage> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: "Poppins",
+                    // ignore: use_build_context_synchronously
                     fontSize: Responsive(context).body,
                     color: AppColors.textSecondary,
                   ),

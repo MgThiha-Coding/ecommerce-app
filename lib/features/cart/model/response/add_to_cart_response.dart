@@ -1,29 +1,27 @@
 class AddToCartResponse {
   final bool? success;
   final String? message;
-  final List<CartItem>? data; // Changed from Data? to List<CartItem>?
+  final List<CartItem>? data;
 
-  AddToCartResponse({
-    this.success,
-    this.message,
-    this.data,
-  });
+  AddToCartResponse({this.success, this.message, this.data});
 
   factory AddToCartResponse.fromJson(Map<String, dynamic> json) {
     return AddToCartResponse(
       success: json['success'] as bool?,
       message: json['message'] as String?,
       data: json['data'] is List
-          ? (json['data'] as List).map((item) => CartItem.fromJson(item)).toList()
+          ? (json['data'] as List)
+                .map((item) => CartItem.fromJson(item))
+                .toList()
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-        'data': data?.map((item) => item.toJson()).toList(),
-      };
+    'success': success,
+    'message': message,
+    'data': data?.map((item) => item.toJson()).toList(),
+  };
 }
 
 class CartItem {
@@ -64,16 +62,16 @@ class CartItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'cart_id': cartId,
-        'product_id': productId,
-        'product_variant_id': productVariantId,
-        'quantity': quantity,
-        'uom_price': uomPrice,
-        'product_name': productName,
-        'created_at': createdAt?.toIso8601String(),
-        'updated_at': updatedAt?.toIso8601String(),
-      };
+    'id': id,
+    'cart_id': cartId,
+    'product_id': productId,
+    'product_variant_id': productVariantId,
+    'quantity': quantity,
+    'uom_price': uomPrice,
+    'product_name': productName,
+    'created_at': createdAt?.toIso8601String(),
+    'updated_at': updatedAt?.toIso8601String(),
+  };
 
   static int? _parseInt(dynamic value) {
     if (value == null) return null;
@@ -86,4 +84,3 @@ class CartItem {
     return DateTime.tryParse(value.toString());
   }
 }
-

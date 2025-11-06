@@ -2,10 +2,7 @@ class LogOutResponse {
   final bool success;
   final String message;
 
-  LogOutResponse({
-    required this.success,
-    required this.message,
-  });
+  LogOutResponse({required this.success, required this.message});
 
   factory LogOutResponse.fromJson(Map<String, dynamic> json) {
     return LogOutResponse(
@@ -14,8 +11,5 @@ class LogOutResponse {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-      };
+  Map<String, dynamic> toJson() => {'success': success, 'message': message};
 }

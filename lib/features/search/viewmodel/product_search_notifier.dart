@@ -24,12 +24,10 @@ class CombinedProductSearchNotifier
     loadInitialProducts();
   }
 
-  // --- Preload 10 recent products or first products ---
   Future<void> loadInitialProducts({int count = 10}) async {
     if (_results.isNotEmpty) return;
     _isLoading = true;
     try {
-      // Try loading recent products from cache first
       final recent = _productCache.values.map((e) => e.toDataModel()).toList();
       if (recent.isNotEmpty) {
         _results.clear();
@@ -39,9 +37,8 @@ class CombinedProductSearchNotifier
         return;
       }
 
-      // Otherwise, load first products from API
       final resp = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/products',
+        '${AppConfig.baseUrl}/ecommerce/products',
         queryParameters: {'page': 1, 'per_page': count},
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
       );
@@ -116,46 +113,13 @@ class CombinedProductSearchNotifier
   Future<void> _fetchPage() async {
     _isLoading = true;
     try {
-      //List<int> filterIds = [];
-
-      // --- BRAND AND CATEGORY SEARCH (commented for MVP) ---
-      /*
-      if (_filterType == 'brand') {
-        final brandResp = await _dio.get(
-          'https://beta.picosbs.com/api/ecommerce/brands',
-          queryParameters: {'search': _keyword},
-          options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
-        );
-        final brands = BrandListResponse.fromJson(brandResp.data).data?.data ?? [];
-        filterIds = brands.map((b) => b.id).whereType<int>().toList();
-        if (filterIds.isEmpty) {
-          _isNoMore = true;
-          state = const AsyncValue.data([]);
-          return;
-        }
-      } else if (_filterType == 'category') {
-        final catResp = await _dio.get(
-          'https://beta.picosbs.com/api/ecommerce/categories',
-          queryParameters: {'search': _keyword},
-          options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
-        );
-        final categories = CategoriesListResponse.fromJson(catResp.data).data.data;
-        filterIds = categories.map((c) => c.id).whereType<int>().toList();
-        if (filterIds.isEmpty) {
-          _isNoMore = true;
-          state = const AsyncValue.data([]);
-          return;
-        }
-      }
-      */
-
       final Map<String, dynamic> query = {'page': _currentPage};
       if (_filterType == 'product') {
         query['filter[products.name][\$like]'] = '%$_keyword%';
       }
 
       final resp = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/products',
+        '${AppConfig.baseUrl}/ecommerce/products',
         queryParameters: query,
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
       );
@@ -166,7 +130,6 @@ class CombinedProductSearchNotifier
       if (products.isEmpty) {
         _isNoMore = true;
       } else {
-        // Sort by relevance
         products.sort((a, b) {
           final nameA = a.name?.toLowerCase() ?? '';
           final nameB = b.name?.toLowerCase() ?? '';

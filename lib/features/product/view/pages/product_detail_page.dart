@@ -5,7 +5,7 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/images/app_image.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_request.dart';
+import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
@@ -61,7 +61,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                 fontSize: fontSize.body,
               ),
             ),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 1),
             backgroundColor: AppColors.background,
           ),
         );
@@ -95,7 +95,8 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 4,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
           'Product Details',
@@ -184,7 +185,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
+                                    // ignore: deprecated_member_use
                                     Colors.black.withOpacity(0.1),
+                                    // ignore: deprecated_member_use
                                     Colors.black.withOpacity(0.6),
                                   ],
                                   begin: Alignment.topCenter,
@@ -688,7 +691,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
             'Failed to load product.\n$error',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.red,
+              color: AppColors.textSecondary,
               fontSize: Responsive(context).body,
             ),
           ),

@@ -54,6 +54,7 @@ class _AppTextFormFieldState extends State<AppTextField> {
         hintStyle: TextStyle(
           color: Colors.black,
           fontSize: responsive.subHeading,
+          fontFamily: "Poppins"
         ),
         filled: true,
         fillColor: Colors.grey.shade100,

@@ -184,6 +184,7 @@ class _CategoryDetailPageState extends ConsumerState<CategoryDetailPage> {
           Icon(
             icon,
             size: 18,
+            // ignore: deprecated_member_use
             color: AppColors.textSecondary.withOpacity(0.8),
           ),
           const SizedBox(width: 8),

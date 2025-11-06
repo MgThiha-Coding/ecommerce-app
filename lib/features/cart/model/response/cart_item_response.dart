@@ -20,10 +20,10 @@ class CartItemResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-        'data': data.map((item) => item.toJson()).toList(),
-      };
+    'success': success,
+    'message': message,
+    'data': data.map((item) => item.toJson()).toList(),
+  };
 }
 
 class CartItemModel {
@@ -62,20 +62,24 @@ class CartItemModel {
       uomPrice: (json['uom_price'] is String)
           ? double.tryParse(json['uom_price']) ?? 0
           : (json['uom_price'] as num?)?.toDouble() ?? 0,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(json['updated_at'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'product_name': productName,
-        'cart_id': cartId,
-        'product_id': productId,
-        'product_variant_id': productVariantId,
-        'quantity': quantity.toStringAsFixed(2),
-        'uom_price': uomPrice.toStringAsFixed(2),
-        'created_at': createdAt.toIso8601String(),
-        'updated_at': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'product_name': productName,
+    'cart_id': cartId,
+    'product_id': productId,
+    'product_variant_id': productVariantId,
+    'quantity': quantity.toStringAsFixed(2),
+    'uom_price': uomPrice.toStringAsFixed(2),
+    'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }
