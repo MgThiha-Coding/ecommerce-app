@@ -1,6 +1,3 @@
-// address_response.dart
-// Null-safe Dart models for the provided JSON structure.
-
 class AddressResponse {
   final bool success;
   final String message;
@@ -16,7 +13,8 @@ class AddressResponse {
     return AddressResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => AddressItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           <AddressItem>[],
@@ -24,10 +22,10 @@ class AddressResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-        'data': data.map((e) => e.toJson()).toList(),
-      };
+    'success': success,
+    'message': message,
+    'data': data.map((e) => e.toJson()).toList(),
+  };
 
   AddressResponse copyWith({
     bool? success,
@@ -59,7 +57,7 @@ class AddressItem {
   final String postalZipCode;
   final String country;
   final String phone;
-  final int isDefault; // server uses 0/1
+  final int isDefault; 
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String regionEnName;
@@ -119,24 +117,24 @@ class AddressItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'contact_id': contactId,
-        'name': name,
-        'first_name': firstName,
-        'last_name': lastName,
-        'address_line_1': addressLine1,
-        'address_line_2': addressLine2,
-        'township_id': townshipId,
-        'region_id': regionId,
-        'postal_zip_code': postalZipCode,
-        'country': country,
-        'phone': phone,
-        'is_default': isDefault,
-        'created_at': createdAt?.toUtc().toIso8601String(),
-        'updated_at': updatedAt?.toUtc().toIso8601String(),
-        'region_en_name': regionEnName,
-        'township_en_name': townshipEnName,
-      };
+    'id': id,
+    'contact_id': contactId,
+    'name': name,
+    'first_name': firstName,
+    'last_name': lastName,
+    'address_line_1': addressLine1,
+    'address_line_2': addressLine2,
+    'township_id': townshipId,
+    'region_id': regionId,
+    'postal_zip_code': postalZipCode,
+    'country': country,
+    'phone': phone,
+    'is_default': isDefault,
+    'created_at': createdAt?.toUtc().toIso8601String(),
+    'updated_at': updatedAt?.toUtc().toIso8601String(),
+    'region_en_name': regionEnName,
+    'township_en_name': townshipEnName,
+  };
 
   AddressItem copyWith({
     int? id,

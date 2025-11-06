@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
@@ -54,7 +53,11 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
             return const Center(
               child: Text(
                 'No saved addresses found.',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
               ),
             );
           }
@@ -88,7 +91,6 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
@@ -114,7 +116,8 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                           children: [
                             Text(
                               '${item.firstName} ${item.lastName}',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: "Poppins",
                                 fontSize: responsive.subHeading,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black87,
@@ -123,7 +126,8 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                             const SizedBox(height: 4),
                             Text(
                               '${item.addressLine1}, ${item.addressLine2}',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: "Poppins",
                                 fontSize: responsive.body,
                                 color: Colors.black54,
                               ),
@@ -131,7 +135,8 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                             const SizedBox(height: 2),
                             Text(
                               '${item.townshipEnName}, ${item.regionEnName}',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: "Poppins",
                                 fontSize: responsive.body,
                                 color: Colors.black45,
                               ),
@@ -144,7 +149,8 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                                 const SizedBox(width: 4),
                                 Text(
                                   item.phone,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(
+                                    fontFamily: "Poppins",
                                     fontSize: responsive.body,
                                     color: Colors.black87,
                                   ),
@@ -154,7 +160,8 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                             const SizedBox(height: 6),
                             Text(
                               '${item.country}, ${item.postalZipCode}',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: "Poppins",
                                 fontSize: responsive.body,
                                 color: Colors.black54,
                               ),
@@ -170,8 +177,15 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
           );
         },
         loading: _buildShimmerList,
-        error: (err, _) =>
-            Center(child: Text(err.toString(), style: const TextStyle(color: Colors.redAccent))),
+        error: (err, _) => Center(
+          child: Text(
+            err.toString(),
+            style: const TextStyle(
+              fontFamily: "Poppins",
+              color: Colors.redAccent,
+            ),
+          ),
+        ),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
@@ -186,9 +200,10 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text(
+          child: const Text(
             'Continue',
-            style: GoogleFonts.poppins(
+            style: TextStyle(
+              fontFamily: "Poppins",
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.white,

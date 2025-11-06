@@ -4,7 +4,6 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/create_address/model/create_address_request.dart';
 import 'package:picoshop_theme2/features/create_address/model/create_addresss_response.dart';
-import 'package:picoshop_theme2/features/create_address/view/address_list_page.dart';
 import 'package:picoshop_theme2/features/create_address/viewmodel/create_address_notifier.dart';
 import 'package:picoshop_theme2/features/location/model/local_region_response.dart';
 import 'package:picoshop_theme2/features/location/view/available_township_page.dart';
@@ -93,12 +92,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   duration: const Duration(milliseconds: 20000),
                 ),
               );
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddressListPage(),
-                ),
-              );
+              Navigator.pop(context);
             }
           },
           loading: () {},

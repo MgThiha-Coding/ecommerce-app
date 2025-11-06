@@ -9,8 +9,8 @@ import 'package:picoshop_theme2/features/business_setting/model/business_setting
 import 'package:picoshop_theme2/features/business_setting/viewmodel/business_setting_notifier.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/create_address/model/address_response.dart';
-import 'package:picoshop_theme2/features/create_address/view/address_list_page.dart';
-import 'package:picoshop_theme2/features/create_address/view/create_address_page.dart';
+import 'package:picoshop_theme2/features/create_address/view/pages/address_list_page.dart';
+import 'package:picoshop_theme2/features/create_address/view/pages/create_address_page.dart';
 import 'package:picoshop_theme2/features/shipping/view/shipping_method_list_page.dart';
 import 'package:picoshop_theme2/shared/app_button.dart';
 import 'package:shimmer/shimmer.dart';
