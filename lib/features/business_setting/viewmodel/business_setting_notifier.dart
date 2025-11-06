@@ -24,13 +24,10 @@ class BusinessSettingNotifier
   }
 
   Future<void> _init() async {
-    // Business settings usually don't have pagination, so we load from cache first
     final cached = _localCache.get('business_settings');
     if (cached != null) {
       state = AsyncValue.data(cached.toDataModel());
     }
-
-    // Then try to fetch fresh data
     await fetchBusinessSetting();
   }
 
@@ -40,7 +37,7 @@ class BusinessSettingNotifier
 
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/settings',
+        '${AppConfig.baseUrl}/ecommerce/settings',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -64,13 +61,11 @@ class BusinessSettingNotifier
 
       if (parsed.data.isNotEmpty) {
         final businessSetting = parsed.data.first;
-
         // Save to local cache
         final hiveModel = BusinessSettingHiveModel.fromDataModel(
           businessSetting,
         );
         _localCache.put('business_settings', hiveModel);
-
         state = AsyncValue.data(businessSetting);
       } else {
         state = AsyncValue.error(
@@ -124,7 +119,6 @@ class BusinessSettingNotifier
   }
 }
 
-// Provider
 final businessSettingNotifierProvider =
     StateNotifierProvider<
       BusinessSettingNotifier,

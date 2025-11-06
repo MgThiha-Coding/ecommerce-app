@@ -185,7 +185,9 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
+                                    // ignore: deprecated_member_use
                                     Colors.black.withOpacity(0.1),
+                                    // ignore: deprecated_member_use
                                     Colors.black.withOpacity(0.6),
                                   ],
                                   begin: Alignment.topCenter,
