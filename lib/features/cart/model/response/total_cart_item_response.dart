@@ -20,8 +20,8 @@ class TotalCartItemResponse {
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-        'data': data,
-      };
+    'success': success,
+    'message': message,
+    'data': data,
+  };
 }

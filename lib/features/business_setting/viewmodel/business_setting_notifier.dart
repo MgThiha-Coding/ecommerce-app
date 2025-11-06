@@ -2,32 +2,73 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
+import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_model.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 
+mixin RefreshTokenMixin {
+  final Dio _refreshDio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+    ),
+  );
+  final SecureStorage _storage = SecureStorage();
+
+  Future<Response<dynamic>?> refreshAndRetry(
+    Future<Response<dynamic>> Function(String accessToken) retryCallback,
+  ) async {
+    final refreshToken = await _storage.getRefreshToken();
+    if (refreshToken == null) return null;
+
+    try {
+      final refreshRes = await _refreshDio.post(
+        '${AppConfig.baseUrl}/v1/refresh-token',
+        data: {'refresh_token': refreshToken},
+        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
+      );
+
+      final accessToken = refreshRes.data['data']['accessToken'];
+      final newRefreshToken = refreshRes.data['data']['refreshToken'];
+      final userId = refreshRes.data['data']['user']['id'].toString();
+
+      AppConfig.updateAccessToken(accessToken);
+      await _storage.saveAuthData(
+        accessToken: accessToken,
+        refreshToken: newRefreshToken,
+        userId: userId,
+      );
+
+      return await retryCallback(accessToken);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
 class BusinessSettingNotifier
-    extends StateNotifier<AsyncValue<BusinessSettingData?>> {
+    extends StateNotifier<AsyncValue<BusinessSettingData?>>
+    with RefreshTokenMixin {
   final Box<BusinessSettingHiveModel> _localCache;
   final Dio _dio;
   bool _isLoading = false;
 
   BusinessSettingNotifier(this._localCache)
-    : _dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 15),
-          sendTimeout: const Duration(seconds: 10),
+      : _dio = Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 15),
+            sendTimeout: const Duration(seconds: 10),
+          ),
         ),
-      ),
-      super(const AsyncValue.loading()) {
+        super(const AsyncValue.loading()) {
     _init();
   }
 
   Future<void> _init() async {
     final cached = _localCache.get('business_settings');
-    if (cached != null) {
-      state = AsyncValue.data(cached.toDataModel());
-    }
+    if (cached != null) state = AsyncValue.data(cached.toDataModel());
     await fetchBusinessSetting();
   }
 
@@ -47,34 +88,29 @@ class BusinessSettingNotifier
         ),
       );
 
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
-
-      if (!isSuccess) {
-        final message =
-            response.data['message'] ?? "Failed to fetch business settings";
-        state = AsyncValue.error(message, StackTrace.current);
-        return;
-      }
-
-      final parsed = BusinessSettingResponse.fromJson(response.data);
-
-      if (parsed.data.isNotEmpty) {
-        final businessSetting = parsed.data.first;
-        // Save to local cache
-        final hiveModel = BusinessSettingHiveModel.fromDataModel(
-          businessSetting,
-        );
-        _localCache.put('business_settings', hiveModel);
-        state = AsyncValue.data(businessSetting);
-      } else {
-        state = AsyncValue.error(
-          'No business settings found',
-          StackTrace.current,
-        );
-      }
+      await _handleResponse(response);
     } on DioException catch (e, st) {
-      // If online fetch fails, use cached data if available
+      if (e.response?.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.get(
+            '${AppConfig.baseUrl}/ecommerce/settings',
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+
+        if (refreshed != null) {
+          await _handleResponse(refreshed);
+          _isLoading = false;
+          return;
+        }
+      }
+
       final cached = _localCache.get('business_settings');
       if (cached != null) {
         state = AsyncValue.data(cached.toDataModel());
@@ -95,23 +131,38 @@ class BusinessSettingNotifier
     }
   }
 
-  // Helper method to get currency info for products
-  Currency? get currency {
-    return state.value?.currency;
+  Future<void> _handleResponse(Response response) async {
+    final isSuccess =
+        response.statusCode == 200 && response.data['success'] == true;
+
+    if (!isSuccess) {
+      state = AsyncValue.error(
+        response.data['message'] ?? "Failed to fetch business settings",
+        StackTrace.current,
+      );
+      return;
+    }
+
+    final parsed = BusinessSettingResponse.fromJson(response.data);
+
+    if (parsed.data.isNotEmpty) {
+      final businessSetting = parsed.data.first;
+      final hiveModel = BusinessSettingHiveModel.fromDataModel(businessSetting);
+      _localCache.put('business_settings', hiveModel);
+      state = AsyncValue.data(businessSetting);
+    } else {
+      state = AsyncValue.error('No business settings found', StackTrace.current);
+    }
   }
 
-  // Helper method to get currency symbol
-  String get currencySymbol {
-    return state.value?.currency.symbol ?? '';
-  }
+  Currency? get currency => state.value?.currency;
 
-  // Helper method to format price according to business settings
+  String get currencySymbol => state.value?.currency.symbol ?? '';
+
   String formatPrice(double price) {
     final setting = state.value;
     if (setting == null) return price.toString();
-
-    final decimalPlaces = setting.currencyDecimalPlaces;
-    return '${setting.currency.symbol}${price.toStringAsFixed(decimalPlaces)}';
+    return '${setting.currency.symbol}${price.toStringAsFixed(setting.currencyDecimalPlaces)}';
   }
 
   Future<void> refresh() async {
@@ -120,10 +171,9 @@ class BusinessSettingNotifier
 }
 
 final businessSettingNotifierProvider =
-    StateNotifierProvider<
-      BusinessSettingNotifier,
-      AsyncValue<BusinessSettingData?>
-    >((ref) {
-      final box = Hive.box<BusinessSettingHiveModel>('business_settings');
-      return BusinessSettingNotifier(box);
-    });
+    StateNotifierProvider<BusinessSettingNotifier, AsyncValue<BusinessSettingData?>>(
+  (ref) {
+    final box = Hive.box<BusinessSettingHiveModel>('business_settings');
+    return BusinessSettingNotifier(box);
+  },
+);

@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/storage/storage.dart';
 import 'package:picoshop_theme2/features/cart/model/request/add_to_cart_request.dart';
-import 'package:picoshop_theme2/features/cart/model/add_to_cart_response.dart';
-import 'package:picoshop_theme2/features/cart/model/cart_item_response.dart';
-import 'package:picoshop_theme2/features/cart/model/total_cart_item_response.dart';
+import 'package:picoshop_theme2/features/cart/model/response/add_to_cart_response.dart';
+import 'package:picoshop_theme2/features/cart/model/response/cart_item_response.dart';
+import 'package:picoshop_theme2/features/cart/model/response/total_cart_item_response.dart';
 
+// Refreshes the access token using the stored refresh token and retries the request if expired.
 mixin RefreshTokenMixin {
   final Dio _refreshDio = Dio(
     BaseOptions(
@@ -150,7 +151,7 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
     with RefreshTokenMixin {
   final Dio _dio;
   int? _onlineTotal;
-  int? _cachedTotal; // Simple variable instead of Hive box
+  int? _cachedTotal;
   bool _isLoading = false;
 
   TotalCartNotifier()
@@ -221,14 +222,14 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
           if (isSuccess) {
             final parsed = TotalCartItemResponse.fromJson(refreshed.data);
             _onlineTotal = parsed.data;
-            _cachedTotal = _onlineTotal; // Store in variable instead of Hive
+            _cachedTotal = _onlineTotal;
             state = AsyncValue.data(_onlineTotal!);
             _isLoading = false;
             return;
           }
         }
       }
-      // Use cached variable instead of Hive
+
       if (_cachedTotal != null) {
         state = AsyncValue.data(_cachedTotal!);
       }
@@ -256,10 +257,9 @@ class TotalCartNotifier extends StateNotifier<AsyncValue<int>>
 
 final totalCartNotifierProvider =
     StateNotifierProvider<TotalCartNotifier, AsyncValue<int>>((ref) {
-      return TotalCartNotifier(); // No more fucking Hive!
+      return TotalCartNotifier();
     });
 
-// Add to cart state
 // Add to cart state
 class AddToCartState {
   final Map<int, bool> itemLoading;

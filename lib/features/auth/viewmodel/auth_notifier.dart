@@ -43,12 +43,9 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
         state = AsyncValue.error('Request failed', StackTrace.current);
       }
     } on DioException catch (e, st) {
-      // if status code 401 : access token invalid , refersh token by adding stored access token in authdata
       if (e.response?.statusCode == 401) {
-        // refresh token
         final refreshed = await _refreshAndRetry(data);
         if (refreshed != null) {
-          // and emit result to state
           state = AsyncValue.data(refreshed);
           return;
         }
@@ -59,10 +56,8 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
           e.type == DioExceptionType.receiveTimeout ||
           e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.unknown) {
-        // dio exception error
         state = AsyncValue.error('Check internet connection', st);
       } else {
-        // error message from api response
         state = AsyncValue.error(
           e.response?.data?['message'] ?? 'Unexpected error',
           st,
@@ -73,25 +68,21 @@ abstract class BaseAuthNotifier<T> extends StateNotifier<AsyncValue<T?>> {
 
   // refresh token
   Future<T?> _refreshAndRetry(Map<String, dynamic> data) async {
-    // get saved refersh token from secureStorage
     final refreshToken = await _storage.getRefreshToken();
-    // if token is null , stop here
+
     if (refreshToken == null) return null;
 
     try {
-      // refresh token and receive new token
       final refreshRes = await _dio.post(
         '${AppConfig.baseUrl}/v1/refresh-token',
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
         data: {"refresh_token": refreshToken},
       );
 
-      // received new tokens and data
       final accessToken = refreshRes.data['data']['accessToken'];
       final newRefreshToken = refreshRes.data['data']['refreshToken'];
       final userId = refreshRes.data['data']['user']['id'].toString();
 
-      // and update the securestorage
       AppConfig.updateAccessToken(accessToken);
       await _storage.saveAuthData(
         accessToken: accessToken,

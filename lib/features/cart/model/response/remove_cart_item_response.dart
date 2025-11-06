@@ -13,15 +13,17 @@ class RemoveCartItemResponse {
     return RemoveCartItemResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
-      data: RemoveCartItemData.fromJson(json['data'] as Map<String, dynamic>? ?? {}),
+      data: RemoveCartItemData.fromJson(
+        json['data'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'success': success,
-        'message': message,
-        'data': data.toJson(),
-      };
+    'success': success,
+    'message': message,
+    'data': data.toJson(),
+  };
 }
 
 class RemoveCartItemData {
@@ -35,13 +37,14 @@ class RemoveCartItemData {
 
   factory RemoveCartItemData.fromJson(Map<String, dynamic> json) {
     return RemoveCartItemData(
-      remainingCartTotal: double.tryParse(json['remaining_cart_total']?.toString() ?? '0') ?? 0,
+      remainingCartTotal:
+          double.tryParse(json['remaining_cart_total']?.toString() ?? '0') ?? 0,
       remainingItemsCount: json['remaining_items_count'] as int? ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'remaining_cart_total': remainingCartTotal.toStringAsFixed(2),
-        'remaining_items_count': remainingItemsCount,
-      };
+    'remaining_cart_total': remainingCartTotal.toStringAsFixed(2),
+    'remaining_items_count': remainingItemsCount,
+  };
 }
