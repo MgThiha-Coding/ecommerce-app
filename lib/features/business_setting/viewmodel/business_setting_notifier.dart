@@ -2,50 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/network/refresh_token_mixin.dart';
 import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_model.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
-
-mixin RefreshTokenMixin {
-  final Dio _refreshDio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 10),
-    ),
-  );
-  final SecureStorage _storage = SecureStorage();
-
-  Future<Response<dynamic>?> refreshAndRetry(
-    Future<Response<dynamic>> Function(String accessToken) retryCallback,
-  ) async {
-    final refreshToken = await _storage.getRefreshToken();
-    if (refreshToken == null) return null;
-
-    try {
-      final refreshRes = await _refreshDio.post(
-        '${AppConfig.baseUrl}/v1/refresh-token',
-        data: {'refresh_token': refreshToken},
-        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
-      );
-
-      final accessToken = refreshRes.data['data']['accessToken'];
-      final newRefreshToken = refreshRes.data['data']['refreshToken'];
-      final userId = refreshRes.data['data']['user']['id'].toString();
-
-      AppConfig.updateAccessToken(accessToken);
-      await _storage.saveAuthData(
-        accessToken: accessToken,
-        refreshToken: newRefreshToken,
-        userId: userId,
-      );
-
-      return await retryCallback(accessToken);
-    } catch (_) {
-      return null;
-    }
-  }
-}
 
 class BusinessSettingNotifier
     extends StateNotifier<AsyncValue<BusinessSettingData?>>
@@ -55,14 +14,14 @@ class BusinessSettingNotifier
   bool _isLoading = false;
 
   BusinessSettingNotifier(this._localCache)
-      : _dio = Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 15),
-            sendTimeout: const Duration(seconds: 10),
-          ),
+    : _dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 10),
         ),
-        super(const AsyncValue.loading()) {
+      ),
+      super(const AsyncValue.loading()) {
     _init();
   }
 
@@ -151,7 +110,10 @@ class BusinessSettingNotifier
       _localCache.put('business_settings', hiveModel);
       state = AsyncValue.data(businessSetting);
     } else {
-      state = AsyncValue.error('No business settings found', StackTrace.current);
+      state = AsyncValue.error(
+        'No business settings found',
+        StackTrace.current,
+      );
     }
   }
 
@@ -171,9 +133,10 @@ class BusinessSettingNotifier
 }
 
 final businessSettingNotifierProvider =
-    StateNotifierProvider<BusinessSettingNotifier, AsyncValue<BusinessSettingData?>>(
-  (ref) {
-    final box = Hive.box<BusinessSettingHiveModel>('business_settings');
-    return BusinessSettingNotifier(box);
-  },
-);
+    StateNotifierProvider<
+      BusinessSettingNotifier,
+      AsyncValue<BusinessSettingData?>
+    >((ref) {
+      final box = Hive.box<BusinessSettingHiveModel>('business_settings');
+      return BusinessSettingNotifier(box);
+    });

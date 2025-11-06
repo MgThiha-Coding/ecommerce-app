@@ -47,7 +47,7 @@ class ProductListNotifier
 
     try {
       final response = await _dio.get(
-        'https://beta.picosbs.com/api/ecommerce/products',
+        '${AppConfig.baseUrl}/ecommerce/products',
         queryParameters: {'page': _currentPage},
         options: Options(
           headers: {

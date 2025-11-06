@@ -1,50 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/core/storage/storage.dart';
+import 'package:picoshop_theme2/core/network/refresh_token_mixin.dart';
 import 'package:picoshop_theme2/features/create_address/model/create_address_request.dart';
 import 'package:picoshop_theme2/features/create_address/model/create_addresss_response.dart';
-
-mixin RefreshTokenMixin {
-  final Dio _refreshDio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 10),
-    ),
-  );
-  final SecureStorage _storage = SecureStorage();
-
-  Future<Response<dynamic>?> refreshAndRetry(
-    Future<Response<dynamic>> Function(String accessToken) retryCallback,
-  ) async {
-    final refreshToken = await _storage.getRefreshToken();
-    if (refreshToken == null) return null;
-
-    try {
-      final refreshRes = await _refreshDio.post(
-        '${AppConfig.baseUrl}/v1/refresh-token',
-        data: {'refresh_token': refreshToken},
-        options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
-      );
-
-      final accessToken = refreshRes.data['data']['accessToken'];
-      final newRefreshToken = refreshRes.data['data']['refreshToken'];
-      final userId = refreshRes.data['data']['user']['id'].toString();
-
-      AppConfig.updateAccessToken(accessToken);
-      await _storage.saveAuthData(
-        accessToken: accessToken,
-        refreshToken: newRefreshToken,
-        userId: userId,
-      );
-
-      return await retryCallback(accessToken);
-    } catch (_) {
-      return null;
-    }
-  }
-}
 
 class CreateAddressNotifier
     extends StateNotifier<AsyncValue<CreateAddressResponse?>>
@@ -53,8 +12,8 @@ class CreateAddressNotifier
   bool _isLoading = false;
 
   CreateAddressNotifier([Dio? dio])
-      : _dio = dio ?? Dio(),
-        super(const AsyncValue.data(null));
+    : _dio = dio ?? Dio(),
+      super(const AsyncValue.data(null));
 
   Future<void> createAddress(CreateAddressRequest params) async {
     if (_isLoading) return;
@@ -99,7 +58,8 @@ class CreateAddressNotifier
         }
       }
 
-      final errorData = e.response?.data['message'] ??
+      final errorData =
+          e.response?.data['message'] ??
           (e.type == DioExceptionType.connectionError ||
                   e.type == DioExceptionType.connectionTimeout ||
                   e.type == DioExceptionType.unknown
@@ -129,7 +89,8 @@ class CreateAddressNotifier
   }
 }
 
-final createAddressNotifierProvider = StateNotifierProvider<
-    CreateAddressNotifier, AsyncValue<CreateAddressResponse?>>(
-  (ref) => CreateAddressNotifier(),
-);
+final createAddressNotifierProvider =
+    StateNotifierProvider<
+      CreateAddressNotifier,
+      AsyncValue<CreateAddressResponse?>
+    >((ref) => CreateAddressNotifier());
