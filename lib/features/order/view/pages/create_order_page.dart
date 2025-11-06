@@ -244,6 +244,7 @@ class _CreateOrderPageState extends ConsumerState<CreateOrderPage> {
       );
     });
 
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () {
         ref.read(createOrderNotifierProvider.notifier).cancel();

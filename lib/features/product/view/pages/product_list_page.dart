@@ -201,6 +201,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.grey.withOpacity(0.15),
                     blurRadius: 8,
                     spreadRadius: 1,

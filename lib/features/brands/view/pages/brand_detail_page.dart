@@ -181,6 +181,7 @@ class _BrandDetailPageState extends ConsumerState<BrandDetailPage> {
       padding: EdgeInsets.only(bottom: responsive.paddingSmall, top: 4),
       child: Row(
         children: [
+          // ignore: deprecated_member_use
           Icon(icon, size: 18, color: AppColors.textSecondary.withOpacity(0.8)),
           const SizedBox(width: 8),
           Expanded(
