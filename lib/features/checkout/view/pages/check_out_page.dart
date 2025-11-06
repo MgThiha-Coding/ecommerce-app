@@ -60,13 +60,20 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Delivery Address
                 _buildSectionHeader(
                   LocaleKeys.deliveryAddress.tr(),
                   responsive,
                 ),
+
                 const SizedBox(height: 8),
+
+                // Create Address
                 _buildCreateAddressCard(responsive),
+
                 const SizedBox(height: 8),
+
+                // Select Address
                 _buildSelectAddressCard(responsive),
 
                 const SizedBox(height: 16),
@@ -74,6 +81,8 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
                 _buildOrderSummary(itemCount, itemTotal, currency),
 
                 const SizedBox(height: 18),
+
+                // next to shipping method >>
                 SizedBox(
                   height: 50,
                   width: double.infinity,
@@ -125,7 +134,8 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
   Widget _buildSectionHeader(String title, Responsive responsive) {
     return Text(
       title,
-      style: GoogleFonts.poppins(
+      style: TextStyle(
+        fontFamily: "Poppins",
         fontSize: responsive.body,
         fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
@@ -256,10 +266,7 @@ class _CheckOutPageState extends ConsumerState<CheckOutPage> {
       children: [
         Text(
           title,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.black87,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
         ),
         Text(
           value,
