@@ -1,19 +1,21 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
+import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 
 class CombinedProductSearchNotifier
-    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+    extends StateNotifier<AsyncValue<List<dynamic>>> {
   final Dio _dio = Dio();
-  final List<ProductDataModel> _results = [];
+  final List<dynamic> _results = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _isNoMore = false;
 
   String _keyword = '';
+  String _filterType = 'product';
 
   CombinedProductSearchNotifier() : super(const AsyncValue.data([])) {
     loadInitialProducts();
@@ -60,6 +62,7 @@ class CombinedProductSearchNotifier
     required String filterType,
   }) async {
     _keyword = keyword.trim();
+    _filterType = filterType;
     _results.clear();
     _currentPage = 1;
     _isNoMore = false;
@@ -82,27 +85,47 @@ class CombinedProductSearchNotifier
     _isLoading = true;
     try {
       final Map<String, dynamic> query = {'page': _currentPage};
-      query['filter[products.name][\$like]'] = '%$_keyword%';
+
+      switch (_filterType) {
+        case 'brand':
+          query['filter[brands.name][\$like]'] = '%$_keyword%';
+          break;
+        case 'category':
+          query['filter[categories.name][\$like]'] = '%$_keyword%';
+          break;
+        default:
+          query['filter[products.name][\$like]'] = '%$_keyword%';
+      }
+
+      final url = switch (_filterType) {
+        'brand' => '${AppConfig.baseUrl}/ecommerce/brands',
+        'category' => '${AppConfig.baseUrl}/ecommerce/categories',
+        _ => '${AppConfig.baseUrl}/ecommerce/products',
+      };
 
       final resp = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/products',
+        url,
         queryParameters: query,
         options: Options(headers: {'X-API-Token': AppConfig.xApiToken}),
       );
 
-      final parsed = ProductListResponse.fromJson(resp.data);
-      var products = parsed.data?.data ?? [];
+      List<dynamic> results;
 
-      if (products.isEmpty) {
+      if (_filterType == 'product') {
+        final parsed = ProductListResponse.fromJson(resp.data);
+        results = parsed.data?.data ?? [];
+      } else if (_filterType == 'brand') {
+        final parsed = BrandListResponse.fromJson(resp.data);
+        results = parsed.data?.data ?? [];
+      } else {
+        final parsed = CategoriesListResponse.fromJson(resp.data);
+        results = parsed.data.data;
+      }
+
+      if (results.isEmpty) {
         _isNoMore = true;
       } else {
-        // Sort/filter off the main thread
-        products = await compute(_sortProducts, {
-          'products': products,
-          'keyword': _keyword,
-        });
-
-        _results.addAll(products);
+        _results.addAll(results);
         _currentPage++;
       }
 
@@ -118,28 +141,7 @@ class CombinedProductSearchNotifier
   }
 }
 
-/// Top-level function for compute
-List<ProductDataModel> _sortProducts(Map<String, dynamic> params) {
-  final products = List<ProductDataModel>.from(params['products']);
-  final keyword = (params['keyword'] as String).toLowerCase();
-
-  products.sort((a, b) {
-    final nameA = a.name?.toLowerCase() ?? '';
-    final nameB = b.name?.toLowerCase() ?? '';
-
-    if (nameA.startsWith(keyword) && !nameB.startsWith(keyword)) return -1;
-    if (!nameA.startsWith(keyword) && nameB.startsWith(keyword)) return 1;
-    if (nameA.contains(keyword) && !nameB.contains(keyword)) return -1;
-    if (!nameA.contains(keyword) && nameB.contains(keyword)) return 1;
-    return nameA.compareTo(nameB);
-  });
-
-  return products;
-}
-
-/// Provider
+/// Riverpod provider
 final combinedProductSearchProvider =
-    StateNotifierProvider<
-      CombinedProductSearchNotifier,
-      AsyncValue<List<ProductDataModel>>
-    >((ref) => CombinedProductSearchNotifier());
+    StateNotifierProvider<CombinedProductSearchNotifier, AsyncValue<List<dynamic>>>(
+        (ref) => CombinedProductSearchNotifier());

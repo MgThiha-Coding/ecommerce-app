@@ -9,7 +9,6 @@ import 'package:picoshop_theme2/core/storage/user_provider.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/on_boarding_page.dart';
 import 'package:picoshop_theme2/features/wrapper/wrapper_page.dart';
 
-
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
@@ -23,41 +22,35 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // read the secure storage provider
       final storage = ref.read(secureStorageProvider);
 
-      // check if this is first time launching app
+      // read flags and login status
       final isFirstLaunch = await storage.getFirstLaunchFlag() ?? true;
-
-      // check if user already logged in
       final isLoggedIn = await storage.isLoggedIn();
+
+      // show splash for 2 seconds
+      await Future.delayed(const Duration(seconds: 2));
 
       if (!mounted) return;
 
-      // wait for 2 seconds to show splash
-      await Future.delayed(const Duration(microseconds: 500));
-
-      // if first launch, go to onboarding
+      // first time open → onboarding
       if (isFirstLaunch) {
         await storage.setFirstLaunchFlag(false);
-        if (!mounted) return;
-        Navigator.pushAndRemoveUntil(
+
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const OnboardingPage()),
-          (route) => false,
         );
         return;
       }
 
-      // if user is logged in, set user info and go to wrapper/home
+      // already logged in
       if (isLoggedIn) {
         final userInfo = await storage.getUserInfo();
         final userId = await storage.getUserId();
 
-        // only set user if all important info exists
-        if (userInfo['name'] != null &&
-            userInfo['email'] != null &&
-            userId != null) {
+        // set user data if available
+        if (userId != null) {
           ref.read(userProvider.notifier).state = UserModel(
             id: userId,
             name: userInfo['name'] ?? '',
@@ -66,20 +59,17 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           );
         }
 
-        if (!mounted) return;
-        Navigator.pushAndRemoveUntil(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const WrapperPage()),
-          (route) => false,
         );
         return;
       }
 
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
+      // default → go to onboarding
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const OnboardingPage()),
-        (route) => false,
       );
     });
   }
@@ -87,6 +77,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   Widget build(BuildContext context) {
     final fontSize = Responsive(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -94,10 +85,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // app logo
               Image.asset(AppImage.appLogo, scale: 3),
               const SizedBox(height: 8),
-              // app labels
               Text(
                 'Welcome to Pico Mart',
                 style: TextStyle(

@@ -3,14 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/core/network/safe_api_call.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_detail_response.dart';
 import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
 
-
 /// Brand List Notifier
-class BrandListNotifier
-    extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
+class BrandListNotifier extends StateNotifier<AsyncValue<List<BrandDataModel>>> {
   final Dio _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 10),
@@ -25,9 +22,9 @@ class BrandListNotifier
   bool _isLoading = false;
 
   BrandListNotifier() : super(const AsyncValue.loading()) {
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-    _init();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
 
   bool get isNoMore => _isNoMore;
@@ -45,7 +42,7 @@ class BrandListNotifier
     if (_isNoMore || _isLoading) return;
     _isLoading = true;
 
-    await safeApiCall(() async {
+    try {
       final response = await _dio.get(
         '${AppConfig.baseUrl}/ecommerce/brands',
         queryParameters: {'page': _currentPage},
@@ -65,6 +62,7 @@ class BrandListNotifier
           response.data['message'] ?? "Something went wrong",
           StackTrace.current,
         );
+        _isLoading = false;
         return;
       }
 
@@ -79,14 +77,26 @@ class BrandListNotifier
       }
 
       state = AsyncValue.data(List.from(_onlineBrands));
-    }, onError: (message) {
+    } on DioException catch (e) {
+      String message = 'Check your internet connection.';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        message = e.response!.data['message'];
+      }
+
       if (_onlineBrands.isNotEmpty) {
         state = AsyncValue.data(List.from(_onlineBrands));
       } else {
         _isNoMore = true;
         state = AsyncValue.error(message, StackTrace.current);
       }
-    });
+    } catch (e, st) {
+      if (_onlineBrands.isNotEmpty) {
+        state = AsyncValue.data(List.from(_onlineBrands));
+      } else {
+        _isNoMore = true;
+        state = AsyncValue.error(e.toString(), st);
+      }
+    }
 
     _isLoading = false;
   }
@@ -94,12 +104,11 @@ class BrandListNotifier
 
 final brandListNotifierProvider =
     StateNotifierProvider<BrandListNotifier, AsyncValue<List<BrandDataModel>>>(
-  (ref) => BrandListNotifier(),
-);
+        (ref) => BrandListNotifier());
+
 
 /// Brand Detail Notifier
-class BrandDetailNotifier
-    extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
+class BrandDetailNotifier extends StateNotifier<AsyncValue<BrandDetailResponse?>> {
   final Dio _dio;
 
   BrandDetailNotifier([Dio? dio])
@@ -116,7 +125,7 @@ class BrandDetailNotifier
   Future<void> getBrandDetail(int id) async {
     state = const AsyncValue.loading();
 
-    await safeApiCall(() async {
+    try {
       final response = await _dio.get(
         '${AppConfig.baseUrl}/ecommerce/brands/details/$id',
         options: Options(
@@ -138,14 +147,18 @@ class BrandDetailNotifier
           StackTrace.current,
         );
       }
-    }, onError: (message) {
+    } on DioException catch (e) {
+      String message = 'Check your internet connection.';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        message = e.response!.data['message'];
+      }
       state = AsyncValue.error(message, StackTrace.current);
-    });
+    } catch (e, st) {
+      state = AsyncValue.error(e.toString(), st);
+    }
   }
 }
 
 final brandDetailNotifierProvider =
     StateNotifierProvider.autoDispose<BrandDetailNotifier,
-        AsyncValue<BrandDetailResponse?>>(
-  (ref) => BrandDetailNotifier(),
-);
+        AsyncValue<BrandDetailResponse?>>((ref) => BrandDetailNotifier());

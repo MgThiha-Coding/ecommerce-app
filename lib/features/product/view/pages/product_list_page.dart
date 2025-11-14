@@ -11,6 +11,7 @@ import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
 import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
 import 'package:picoshop_theme2/features/product/viewmodel/product_notifier.dart';
+import 'package:picoshop_theme2/features/category/viewmodel/category_notifier.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductListPage extends ConsumerStatefulWidget {
@@ -23,42 +24,48 @@ class ProductListPage extends ConsumerStatefulWidget {
 class _ProductListPageState extends ConsumerState<ProductListPage> {
   final ScrollController _scrollController = ScrollController();
   bool _showFloatingCartButton = false;
+  int? _selectedCategoryId;
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(() async {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        ref.read(productNotifierProvider.notifier).getNextPage();
-      }
-    });
-  }
-
-  Future<void> _fetchNextIfNeeded() async {
-    final notifier = ref.read(productNotifierProvider.notifier);
-    await notifier.getNextPage();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.position.maxScrollExtent == 0 &&
-          !notifier.isNoMore) {
-        _fetchNextIfNeeded();
-      }
-    });
-  }
+ @override
+void initState() {
+  super.initState();
+  _scrollController.addListener(() async {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return; // <-- check widget still exists
+      ref.read(productNotifierProvider.notifier).getNextPage();
+    }
+  });
+}
 
   Future<void> _onRefresh() async {
-    final notifier = ref.read(productNotifierProvider.notifier);
-    await notifier.reset();
+    final productNotifier = ref.read(productNotifierProvider.notifier);
+    await productNotifier.reset();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchNextIfNeeded();
+      if (_scrollController.position.maxScrollExtent == 0 &&
+          !productNotifier.isNoMore) {
+        productNotifier.getNextPage();
+      }
     });
+  }
+
+  void _onCategorySelected(int? categoryId) {
+    setState(() => _selectedCategoryId = categoryId);
+    final productNotifier = ref.read(productNotifierProvider.notifier);
+    if (categoryId == null) {
+      productNotifier.setFilters({});
+    } else {
+      productNotifier.setFilters({'category_id': categoryId});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final productListAsync = ref.watch(productNotifierProvider);
     final fontSize = Responsive(context);
+    final categoriesAsync = ref.watch(categoryListNotifierProvider);
+    final productsAsync = ref.watch(productNotifierProvider);
+
     ref.listen<AddToCartState>(addToCartNotifierProvider, (previous, next) {
       if (next.lastResponse != null &&
           next.lastResponse != previous?.lastResponse) {
@@ -71,9 +78,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        // ignore: deprecated_member_use
         backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -85,92 +90,110 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           ),
         ),
       ),
-
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            // ignore: deprecated_member_use
-            colors: [Colors.white, Colors.white],
-          ),
-        ),
-        child: RefreshIndicator(
-          color: AppColors.textSecondary,
-          backgroundColor: AppColors.background,
-          onRefresh: _onRefresh,
-          child: Stack(
-            children: [
-              // Product List
-              productListAsync.when(
-                loading: () => _productGridShimmer(context),
-                error: (error, _) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.grey[100],
-                        content: Text(
-                          error.toString(),
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            color: Colors.blueGrey,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    );
-                  });
-                  return const SizedBox.shrink();
-                },
-                data: (products) {
-                  // Empty Widget
-                  if (products.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Product list is currently unavailable.',
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.w300,
-                          fontSize: fontSize.body,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    );
+      body: Column(
+        children: [
+          // Categories
+          SizedBox(
+            height: 50,
+            child: categoriesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (categories) => ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemCount: categories.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _categoryChip(null, 'All');
                   }
-
-                  // Product List
-                  return productListView(
-                    context,
-                    _scrollController,
-                    products,
-                    fontSize,
-                  );
+                  final category = categories[index - 1];
+                  return _categoryChip(category.id, category.name);
                 },
               ),
-
-              // FloatingCartButton
-              if (_showFloatingCartButton)
-                floatingCartButton(context, fontSize),
-            ],
+            ),
           ),
+
+          Expanded(
+            child: RefreshIndicator(
+              color: AppColors.textSecondary,
+              backgroundColor: AppColors.background,
+              onRefresh: _onRefresh,
+              child: Stack(
+                children: [
+                  productsAsync.when(
+                    loading: () => _productGridShimmer(context),
+                    error: (error, _) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.grey[100],
+                            content: Text(
+                              error.toString(),
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                color: Colors.blueGrey,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                      return const SizedBox.shrink();
+                    },
+                    data: (products) {
+                      if (products.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Product list is currently unavailable.',
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w300,
+                              fontSize: fontSize.body,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        );
+                      }
+                      return productListView(
+                          context, _scrollController, products, fontSize);
+                    },
+                  ),
+
+                  if (_showFloatingCartButton)
+                    floatingCartButton(context, fontSize),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categoryChip(int? id, String label) {
+    final isSelected = id == _selectedCategoryId || (id == null && _selectedCategoryId == null);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (_) => _onCategorySelected(id),
+        selectedColor: AppColors.primary,
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.white : AppColors.textSecondary,
         ),
       ),
     );
   }
 
   Widget productListView(
-    BuildContext context,
-    ScrollController scrollController,
-    List<ProductDataModel> products,
-    Responsive fontSize,
-  ) {
+      BuildContext context,
+      ScrollController scrollController,
+      List<ProductDataModel> products,
+      Responsive fontSize) {
     final isMobile = Responsive(context).isMobile;
-
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 6 : 20,
-        vertical: isMobile ? 0 : 10,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 20, vertical: isMobile ? 0 : 10),
       child: GridView.builder(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -190,9 +213,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => ProductDetailPage(productId!),
-                ),
+                MaterialPageRoute(builder: (_) => ProductDetailPage(productId!)),
               );
             },
             child: Container(
@@ -201,7 +222,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    // ignore: deprecated_member_use
                     color: Colors.grey.withOpacity(0.15),
                     blurRadius: 8,
                     spreadRadius: 1,
@@ -213,11 +233,9 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(14),
-                    ),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
                     child: SizedBox(
-                      height: isMobile ? 130 : 150, // 🔥 Fixed image height
+                      height: isMobile ? 130 : 150,
                       width: double.infinity,
                       child: product.productImage?.isNotEmpty == true
                           ? Image.network(
@@ -255,9 +273,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                           product.name ?? '',
                           style: GoogleFonts.poppins(
                             fontSize: fontSize.body,
-                            fontWeight: isMobile
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+                            fontWeight: isMobile ? FontWeight.w600 : FontWeight.w400,
                             color: AppColors.textPrimary,
                           ),
                           maxLines: 2,
@@ -276,7 +292,6 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
     );
   }
 
-  // FloatingCartButton
   Widget floatingCartButton(BuildContext context, Responsive fontSize) {
     return Positioned(
       bottom: 17,
@@ -287,18 +302,13 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              AppColors.background,
-              // ignore: deprecated_member_use
-              AppColors.background.withOpacity(0.8),
-            ],
+            colors: [AppColors.background, AppColors.background.withOpacity(0.8)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              // ignore: deprecated_member_use
               color: AppColors.primary.withOpacity(0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
@@ -310,10 +320,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(28),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CartPage()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CartPage()));
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -321,15 +328,10 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
                     color: Colors.white.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.shopping_cart_checkout,
-                    color: AppColors.background,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.shopping_cart_checkout, color: AppColors.background, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -341,11 +343,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.textSecondary,
-                  size: fontSize.subHeading,
-                ),
+                Icon(Icons.arrow_forward_ios, color: AppColors.textSecondary, size: fontSize.subHeading),
               ],
             ),
           ),
@@ -361,11 +359,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(10),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: responsive.isTablet
-            ? 5
-            : responsive.isDesktop
-            ? 5
-            : 2,
+        crossAxisCount: responsive.isTablet ? 5 : responsive.isDesktop ? 5 : 2,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
         childAspectRatio: responsive.isMobile ? 1 / 1.5 : 1 / 1.3,
@@ -374,10 +368,7 @@ class _ProductListPageState extends ConsumerState<ProductListPage> {
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-          ),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
         ),
       ),
     );

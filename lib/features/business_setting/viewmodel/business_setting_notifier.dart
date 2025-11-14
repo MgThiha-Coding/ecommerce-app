@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/network/refresh_token_mixin.dart';
-import 'package:picoshop_theme2/core/network/safe_api_call.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 
 class BusinessSettingNotifier
@@ -21,9 +20,9 @@ class BusinessSettingNotifier
   BusinessSettingData? _cachedSetting;
 
   BusinessSettingNotifier() : super(const AsyncValue.loading()) {
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-    _init();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
   }
 
   Future<void> _init() async {
@@ -37,48 +36,57 @@ class BusinessSettingNotifier
     if (_isLoading) return;
     _isLoading = true;
 
-    await safeApiCall(
-      () async {
-        final response = await _dio.get(
-          '${AppConfig.baseUrl}/ecommerce/settings',
-          options: Options(
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ${AppConfig.accessToken}',
-              'X-API-Token': AppConfig.xApiToken,
-            },
-          ),
-        );
+    try {
+      final response = await _dio.get(
+        '${AppConfig.baseUrl}/ecommerce/settings',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ${AppConfig.accessToken}',
+            'X-API-Token': AppConfig.xApiToken,
+          },
+        ),
+      );
 
-        if (response.statusCode == 401) {
-          final refreshed = await refreshAndRetry((token) async {
-            return await _dio.get(
-              '${AppConfig.baseUrl}/ecommerce/settings',
-              options: Options(
-                headers: {
-                  'Accept': 'application/json',
-                  'Authorization': 'Bearer $token',
-                  'X-API-Token': AppConfig.xApiToken,
-                },
-              ),
-            );
-          });
-          if (refreshed != null) {
-            await _handleResponse(refreshed);
-            return;
-          }
+      if (response.statusCode == 401) {
+        final refreshed = await refreshAndRetry((token) async {
+          return await _dio.get(
+            '${AppConfig.baseUrl}/ecommerce/settings',
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
+        });
+        if (refreshed != null) {
+          await _handleResponse(refreshed);
+          _isLoading = false;
+          return;
         }
+      }
 
-        await _handleResponse(response);
-      },
-      onError: (message) {
-        if (_cachedSetting != null) {
-          state = AsyncValue.data(_cachedSetting);
-        } else {
-          state = AsyncValue.error(message, StackTrace.current);
-        }
-      },
-    );
+      await _handleResponse(response);
+    } on DioException catch (e) {
+      String message = 'Check your internet connection.';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        message = e.response!.data['message'];
+      }
+
+      if (_cachedSetting != null) {
+        state = AsyncValue.data(_cachedSetting);
+      } else {
+        state = AsyncValue.error(message, StackTrace.current);
+      }
+    } catch (e, st) {
+      if (_cachedSetting != null) {
+        state = AsyncValue.data(_cachedSetting);
+      } else {
+        state = AsyncValue.error(e.toString(), st);
+      }
+    }
 
     _isLoading = false;
   }
@@ -126,7 +134,5 @@ class BusinessSettingNotifier
 
 // Provider
 final businessSettingNotifierProvider =
-    StateNotifierProvider<
-      BusinessSettingNotifier,
-      AsyncValue<BusinessSettingData?>
-    >((ref) => BusinessSettingNotifier());
+    StateNotifierProvider<BusinessSettingNotifier, AsyncValue<BusinessSettingData?>>(
+        (ref) => BusinessSettingNotifier());
