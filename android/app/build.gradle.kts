@@ -18,10 +18,8 @@ android {
     }
 
     compileOptions {
-        // Use Java 17
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        // Enable core library desugaring if needed by plugins
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -31,13 +29,12 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug") // replace for production
         }
     }
 }
 
 dependencies {
-    // Keep updated desugar_jdk_libs
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 

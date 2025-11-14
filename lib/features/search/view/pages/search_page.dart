@@ -52,7 +52,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       final notifier = ref.read(combinedProductSearchProvider.notifier);
 
       if (keyword.isEmpty) {
-        notifier.showRecent();
         return;
       }
 
@@ -95,7 +94,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       onChanged: (_) => _onSearchChanged(),
                     ),
                   ),
-                //  const SizedBox(height: 6),
+                  //  const SizedBox(height: 6),
                   /*
                   // Filter dropdown commented for now
                   Container(
@@ -136,7 +135,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             ),
           ),
-        //  const Divider(height: 1),
+          //  const Divider(height: 1),
           Expanded(
             child: searchState.when(
               data: (products) {

@@ -1,33 +1,35 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/network/refresh_token_mixin.dart';
-import 'package:picoshop_theme2/features/business_setting/local/business_setting_hive_model.dart';
+import 'package:picoshop_theme2/core/network/safe_api_call.dart';
 import 'package:picoshop_theme2/features/business_setting/model/business_setting_response.dart';
 
 class BusinessSettingNotifier
     extends StateNotifier<AsyncValue<BusinessSettingData?>>
     with RefreshTokenMixin {
-  final Box<BusinessSettingHiveModel> _localCache;
-  final Dio _dio;
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+    ),
+  );
   bool _isLoading = false;
 
-  BusinessSettingNotifier(this._localCache)
-    : _dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 15),
-          sendTimeout: const Duration(seconds: 10),
-        ),
-      ),
-      super(const AsyncValue.loading()) {
+  BusinessSettingData? _cachedSetting;
+
+  BusinessSettingNotifier() : super(const AsyncValue.loading()) {
+     WidgetsBinding.instance.addPostFrameCallback((_) {
     _init();
+  });
   }
 
   Future<void> _init() async {
-    final cached = _localCache.get('business_settings');
-    if (cached != null) state = AsyncValue.data(cached.toDataModel());
+    if (_cachedSetting != null) {
+      state = AsyncValue.data(_cachedSetting);
+    }
     await fetchBusinessSetting();
   }
 
@@ -35,59 +37,50 @@ class BusinessSettingNotifier
     if (_isLoading) return;
     _isLoading = true;
 
-    try {
-      final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/settings',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ${AppConfig.accessToken}',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+    await safeApiCall(
+      () async {
+        final response = await _dio.get(
+          '${AppConfig.baseUrl}/ecommerce/settings',
+          options: Options(
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ${AppConfig.accessToken}',
+              'X-API-Token': AppConfig.xApiToken,
+            },
+          ),
+        );
 
-      await _handleResponse(response);
-    } on DioException catch (e, st) {
-      if (e.response?.statusCode == 401) {
-        final refreshed = await refreshAndRetry((token) async {
-          return await _dio.get(
-            '${AppConfig.baseUrl}/ecommerce/settings',
-            options: Options(
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer $token',
-                'X-API-Token': AppConfig.xApiToken,
-              },
-            ),
-          );
-        });
-
-        if (refreshed != null) {
-          await _handleResponse(refreshed);
-          _isLoading = false;
-          return;
+        if (response.statusCode == 401) {
+          final refreshed = await refreshAndRetry((token) async {
+            return await _dio.get(
+              '${AppConfig.baseUrl}/ecommerce/settings',
+              options: Options(
+                headers: {
+                  'Accept': 'application/json',
+                  'Authorization': 'Bearer $token',
+                  'X-API-Token': AppConfig.xApiToken,
+                },
+              ),
+            );
+          });
+          if (refreshed != null) {
+            await _handleResponse(refreshed);
+            return;
+          }
         }
-      }
 
-      final cached = _localCache.get('business_settings');
-      if (cached != null) {
-        state = AsyncValue.data(cached.toDataModel());
-      } else {
-        if (e.type == DioExceptionType.connectionError ||
-            e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.unknown) {
-          state = AsyncValue.error('Check your connection', st);
+        await _handleResponse(response);
+      },
+      onError: (message) {
+        if (_cachedSetting != null) {
+          state = AsyncValue.data(_cachedSetting);
         } else {
-          state = AsyncValue.error(
-            e.response?.data['message'] ?? 'Failed to fetch settings',
-            st,
-          );
+          state = AsyncValue.error(message, StackTrace.current);
         }
-      }
-    } finally {
-      _isLoading = false;
-    }
+      },
+    );
+
+    _isLoading = false;
   }
 
   Future<void> _handleResponse(Response response) async {
@@ -106,8 +99,7 @@ class BusinessSettingNotifier
 
     if (parsed.data.isNotEmpty) {
       final businessSetting = parsed.data.first;
-      final hiveModel = BusinessSettingHiveModel.fromDataModel(businessSetting);
-      _localCache.put('business_settings', hiveModel);
+      _cachedSetting = businessSetting;
       state = AsyncValue.data(businessSetting);
     } else {
       state = AsyncValue.error(
@@ -132,11 +124,9 @@ class BusinessSettingNotifier
   }
 }
 
+// Provider
 final businessSettingNotifierProvider =
     StateNotifierProvider<
       BusinessSettingNotifier,
       AsyncValue<BusinessSettingData?>
-    >((ref) {
-      final box = Hive.box<BusinessSettingHiveModel>('business_settings');
-      return BusinessSettingNotifier(box);
-    });
+    >((ref) => BusinessSettingNotifier());

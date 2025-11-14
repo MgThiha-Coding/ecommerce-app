@@ -65,13 +65,15 @@ class _CartPageState extends ConsumerState<CartPage> {
           if (next.itemError[id] == null) {
             const message = "Item removed successfully";
             ScaffoldMessenger.of(context).showSnackBar(
-            
               const SnackBar(
                 backgroundColor: AppColors.background,
-                content: Text(message,style: TextStyle( 
-                   fontFamily: "Poppins",
-                   color: AppColors.textPrimary
-                ),),
+                content: Text(
+                  message,
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 duration: Duration(seconds: 2),
               ),
             );
@@ -89,7 +91,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           LocaleKeys.cart.tr(),
           style: GoogleFonts.poppins(
             fontSize: fontSize.subHeading,
-            color: AppColors.textPrimary,
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -109,7 +111,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                       onPressed: () {},
                       icon: Icon(
                         LineIcons.shoppingCart,
-                        color: AppColors.primary,
+                        color: AppColors.textSecondary,
                         size: fontSize.value(
                           mobile: 26,
                           tablet: 25,
