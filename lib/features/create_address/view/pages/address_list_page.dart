@@ -145,8 +145,11 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                Icon(Icons.phone,
-                                    size: 16, color: Colors.grey.shade600),
+                                Icon(
+                                  Icons.phone,
+                                  size: 16,
+                                  color: Colors.grey.shade600,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   item.phone,
@@ -201,13 +204,12 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text(
+          child: Text(
             'Continue',
             style: TextStyle(
               fontFamily: "Poppins",
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+              fontSize: Responsive(context).body,
+              color: AppColors.background
             ),
           ),
         ),
@@ -235,7 +237,11 @@ class _AddressListPageState extends ConsumerState<AddressListPage> {
               children: [
                 Container(height: 16, width: 120, color: Colors.white),
                 const SizedBox(height: 8),
-                Container(height: 14, width: double.infinity, color: Colors.white),
+                Container(
+                  height: 14,
+                  width: double.infinity,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 6),
                 Container(height: 14, width: 180, color: Colors.white),
                 const SizedBox(height: 10),

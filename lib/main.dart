@@ -1,13 +1,17 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picoshop_theme2/core/config/app_initializer.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:picoshop_theme2/core/config/app_config.dart';
 import 'package:picoshop_theme2/core/config/app_localization.dart';
 import 'package:picoshop_theme2/features/auth/view/pages/splash_page.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppInitializer.initialize();
+  await EasyLocalization.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+  await AppConfig.loadAccessToken();
   runApp(AppLocalization.setup(child: const ProviderScope(child: MyApp())));
 }
 
@@ -16,12 +20,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    /*
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      OtaUpdateService.checkForUpdate(context);
-    });
-    */
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: context.locale,

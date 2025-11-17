@@ -1,16 +1,11 @@
 import 'dart:async';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:picoshop_theme2/core/consts/app_colors.dart';
-import 'package:picoshop_theme2/core/images/app_image.dart';
-import 'package:picoshop_theme2/core/localization/locale_keys.g.dart';
-import 'package:picoshop_theme2/core/responsive/responsive.dart';
-import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
-import 'package:picoshop_theme2/features/product/view/pages/product_detail_page.dart';
+import 'package:picoshop_theme2/features/brands/model/brand_list_response.dart';
+import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 import 'package:picoshop_theme2/features/search/viewmodel/product_search_notifier.dart';
-import 'package:picoshop_theme2/shared/app_text_field.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -23,8 +18,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
-
-  final String _selectedFilter = 'product';
+  String _selectedFilter = 'product';
 
   @override
   void initState() {
@@ -32,7 +26,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        ref.read(combinedProductSearchProvider.notifier).loadMore();
+        if (mounted) {
+          ref.read(combinedProductSearchProvider.notifier).loadMore();
+        }
       }
     });
   }
@@ -48,15 +44,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   void _onSearchChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
       final keyword = _searchController.text.trim();
-      final notifier = ref.read(combinedProductSearchProvider.notifier);
-
-      if (keyword.isEmpty) {
-        notifier.showRecent();
-        return;
-      }
-
-      notifier.search(keyword: keyword, filterType: _selectedFilter);
+      ref.read(combinedProductSearchProvider.notifier).search(
+            keyword: keyword,
+            filterType: _selectedFilter,
+          );
     });
   }
 
@@ -71,7 +64,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         title: Text(
-          LocaleKeys.searchProduct.tr(),
+          'Search',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: AppColors.textSecondary,
@@ -81,94 +74,81 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: SizedBox(
-              height: 44,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _searchController,
+            padding: const EdgeInsets.all(6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
                       hintText: 'Search by $_selectedFilter...',
-                      validator: (_) => null,
-                      addObscure: false,
-                      onChanged: (_) => _onSearchChanged(),
-                    ),
-                  ),
-                //  const SizedBox(height: 6),
-                  /*
-                  // Filter dropdown commented for now
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedFilter,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'product',
-                            child: Text('Product', style: TextStyle(fontSize: 12)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'brand',
-                            child: Text('Brand', style: TextStyle(fontSize: 12)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'category',
-                            child: Text('Category', style: TextStyle(fontSize: 12)),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedFilter = value);
-                            _onSearchChanged();
-                          }
-                        },
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    onChanged: (_) => _onSearchChanged(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedFilter,
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'product',
+                            child: Text('Product', style: TextStyle(fontSize: 12))),
+                        DropdownMenuItem(
+                            value: 'brand',
+                            child: Text('Brand', style: TextStyle(fontSize: 12))),
+                        DropdownMenuItem(
+                            value: 'category',
+                            child: Text('Category', style: TextStyle(fontSize: 12))),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedFilter = value);
+                          _onSearchChanged();
+                        }
+                      },
                     ),
                   ),
-                  */
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        //  const Divider(height: 1),
           Expanded(
             child: searchState.when(
-              data: (products) {
-                if (products.isEmpty) return _buildEmptyState();
+              data: (results) {
+                if (results.isEmpty) return _buildEmptyState();
                 return ListView.builder(
                   controller: _scrollController,
-                  itemCount: products.length,
+                  itemCount: results.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
-                    return _buildProductTile(product);
+                    final item = results[index];
+                    switch (_selectedFilter) {
+                      case 'brand':
+                        return _buildBrandTile(item);
+                      case 'category':
+                        return _buildCategoryTile(item);
+                      default:
+                        return _buildProductTile(item);
+                    }
                   },
                 );
               },
-              loading: () => const _AnimatedSearchingText(),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.red.shade400,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Oops! Something went wrong.\nPlease try again in a moment.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive(context).body,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Error: $e',
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
             ),
@@ -178,151 +158,40 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
-  Widget _buildProductTile(ProductDataModel product) {
-    return Card(
-      color: AppColors.background,
-      child: ListTile(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product.id!),
-            ),
-          );
-        },
-        leading: CircleAvatar(
-          backgroundColor: Colors.grey.shade200,
-          radius: 25,
-          child: ClipOval(
-            child: product.image != null && product.image!.isNotEmpty
-                ? Image.network(
-                    product.image!,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Image.asset(
-                      AppImage.emptyContainer,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Image.asset(
-                    AppImage.emptyContainer,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-          ),
-        ),
-        title: Text(
-          product.name ?? 'Unknown Product',
-          style: TextStyle(
-            fontFamily: "Poppins",
-            fontSize: Responsive(context).body,
-          ),
-        ),
-        subtitle: Text(
-          product.brandName ?? '',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
-        ),
-      ),
+  Widget _buildProductTile(dynamic product) {
+    return ListTile(
+      leading: const CircleAvatar(child: Icon(Icons.shopping_bag)),
+      title: Text(product.name ?? 'Unknown Product'),
+      subtitle: Text(product.brandName ?? ''),
+    );
+  }
+
+  Widget _buildBrandTile(BrandDataModel brand) {
+    return ListTile(
+      leading: const CircleAvatar(child: Icon(Icons.business)),
+      title: Text(brand.name),
+      subtitle: Text('ID: ${brand.id}'),
+    );
+  }
+
+  Widget _buildCategoryTile(CategoryDataModel category) {
+    return ListTile(
+      leading: const CircleAvatar(child: Icon(Icons.category)),
+      title: Text(category.name),
+      subtitle: Text('ID: ${category.id}'),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.search_off,
-            size: 40,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'No products found',
-            style: GoogleFonts.poppins(color: AppColors.textSecondary),
-          ),
+          Icon(Icons.search_off, size: 40, color: AppColors.textSecondary),
+          SizedBox(height: 10),
+          Text('No results found'),
         ],
       ),
-    );
-  }
-}
-
-class _AnimatedSearchingText extends StatefulWidget {
-  const _AnimatedSearchingText({Key? key}) : super(key: key);
-  @override
-  State<_AnimatedSearchingText> createState() => _AnimatedSearchingTextState();
-}
-
-class _AnimatedSearchingTextState extends State<_AnimatedSearchingText>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat();
-    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget _buildAnimatedDots(Color color) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        int activeDot = (_animation.value * 3).floor();
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < 3; i++)
-              AnimatedOpacity(
-                opacity: i <= activeDot ? 1 : 0.2,
-                duration: const Duration(milliseconds: 250),
-                child: Text(
-                  '.',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: Responsive(context).body,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const color = AppColors.textSecondary;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Searching',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-            fontSize: Responsive(context).subHeading,
-          ),
-        ),
-        _buildAnimatedDots(color),
-      ],
     );
   }
 }

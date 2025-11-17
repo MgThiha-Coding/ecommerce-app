@@ -219,7 +219,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
               AppTextField(
                 controller: _addressLine2Controller,
                 labelText: 'Apartment, Floor, or Block',
-                hintText: 'Optional',
+                hintText: 'Apartment, Floor, or Block',
                 validator: (val) => (val == null || val.isEmpty)
                     ? 'Please enter your address 2'
                     : null,
@@ -365,7 +365,7 @@ class _CreateAddressPageState extends ConsumerState<CreateAddressPage> {
                   onTap: () {
                     _submitAddress();
                   },
-                  isLoading: createAddressAsync.isLoading,
+                  isLoading: createAddressAsync.isLoading? true : false,
                   backgroundColor: AppColors.primary,
                   labelColor: AppColors.background,
                 ),

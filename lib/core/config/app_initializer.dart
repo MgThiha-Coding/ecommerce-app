@@ -1,49 +1,44 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'hive_config.dart';
 import 'app_localization.dart';
 
 class AppInitializer {
-  static Future<void> initialize() async {
-    // Critical synchronous initializations
-    await _initializeCritical();
-
-    // Non-critical async initializations
-    unawaited(_initializeNonCritical());
-  }
-
-  static Future<void> _initializeCritical() async {
-    // Localization
+  /// Fast critical initialization needed for first frame
+  static Future<void> initializeCriticalFast() async {
+    // Ensure localization is ready
     await AppLocalization.ensureInitialized();
 
-    // Device orientation
+    // Set device orientation quickly
     await _setDeviceOrientation();
 
-    //  Hive setup
-    await HiveConfig.init();
-    await HiveConfig.openCriticalBoxes();
-
-    //  Environment and critical config
+    // Load critical config / env
     await dotenv.load(fileName: '.env');
     await AppConfig.loadAccessToken();
   }
 
-  static Future<void> _initializeNonCritical() async {
-    // Open non-critical Hive boxes in background
-    await HiveConfig.openNonCriticalBoxes();
+  /// Optional delayed non-critical initialization
+  static Future<void> initializeNonCriticalDelayed() async {
+    // Can run other heavy tasks here if needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() async {
+        // Add any non-critical setup here
+        // e.g., prefetch data, analytics initialization
+      });
+    });
   }
 
+  /// Device orientation logic
   static Future<void> _setDeviceOrientation() async {
-    // Get device size
     // ignore: deprecated_member_use
     final window = WidgetsBinding.instance.window;
     final screenWidth = window.physicalSize.width / window.devicePixelRatio;
 
     if (screenWidth >= 600) {
-      // allow both portrait and landscape
+      // Tablet: allow portrait & landscape
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -56,5 +51,14 @@ class AppInitializer {
         DeviceOrientation.portraitUp,
       ]);
     }
+  }
+
+  /// Optional helper to run truly heavy tasks off main isolate
+  static Future<void> runHeavyTaskInBackground(Future<void> Function() task) async {
+    await compute(_runTaskWrapper, task);
+  }
+
+  static Future<void> _runTaskWrapper(Future<void> Function() task) async {
+    await task();
   }
 }

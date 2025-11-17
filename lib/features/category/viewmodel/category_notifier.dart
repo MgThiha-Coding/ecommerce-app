@@ -1,186 +1,160 @@
-import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/category/model/categories_detail_response.dart';
-import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
-import 'package:picoshop_theme2/features/category/local/category_data_hive.dart';
+  import 'dart:async';
+  import 'package:dio/dio.dart';
+  import 'package:flutter/widgets.dart';
+  import 'package:flutter_riverpod/flutter_riverpod.dart';
+  import 'package:picoshop_theme2/core/config/app_config.dart';
+  import 'package:picoshop_theme2/features/category/model/categories_detail_response.dart';
+  import 'package:picoshop_theme2/features/category/model/categories_list_response.dart';
 
-// Category State
-class CategoryListNotifier
-    extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
-  final Box<CategoryHiveModel> _localCache;
-  final Dio _dio;
-
-  final List<CategoryDataModel> _onlineCategories = [];
-  int _currentPage = 1;
-  bool _isNoMore = false;
-  bool _isLoading = false;
-
-  CategoryListNotifier(this._localCache)
-    : _dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 15),
-          sendTimeout: const Duration(seconds: 10),
-        ),
+  /// Category List Notifier
+  class CategoryListNotifier extends StateNotifier<AsyncValue<List<CategoryDataModel>>> {
+    final Dio _dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 10),
       ),
-      super(const AsyncValue.loading()) {
-    _init();
-  }
+    );
 
-  bool get isNoMore => _isNoMore;
+    final List<CategoryDataModel> _onlineCategories = [];
+    int _currentPage = 1;
+    bool _isNoMore = false;
+    bool _isLoading = false;
 
-  Future<void> _init() async {
-    final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-    if (cached.isNotEmpty) {
-      state = AsyncValue.data(cached);
-    } else {
+    CategoryListNotifier() : super(const AsyncValue.loading()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _init();
+      });
+    }
+
+    bool get isNoMore => _isNoMore;
+
+    Future<void> _init() async => await getNextPage();
+
+    Future<void> reset() async {
+      _onlineCategories.clear();
+      _currentPage = 1;
+      _isNoMore = false;
       await getNextPage();
     }
-  }
 
-  Future<void> reset() async {
-    _onlineCategories.clear();
-    _currentPage = 1;
-    _isNoMore = false;
-    await getNextPage();
-  }
+    Future<void> getNextPage() async {
+      if (_isNoMore || _isLoading) return;
+      _isLoading = true;
 
-  Future<void> getNextPage() async {
-    if (_isNoMore || _isLoading) return;
-    _isLoading = true;
-
-    try {
-      final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/categories',
-        queryParameters: {'page': _currentPage},
-        options: Options(
-          headers: {
+      try {
+        final response = await _dio.get(
+          '${AppConfig.baseUrl}/ecommerce/categories',
+          queryParameters: {'page': _currentPage},
+          options: Options(headers: {
             'Accept': 'application/json',
             'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+          }),
+        );
 
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
+        final isSuccess =
+            response.statusCode == 200 && response.data['success'] == true;
 
-      if (!isSuccess) {
-        final message =
-            response.data['message'] ??
-            "Something went wrong\nPlease try again";
-        state = AsyncValue.error(message, StackTrace.current);
-        return;
-      }
-
-      final parsed = CategoriesListResponse.fromJson(response.data);
-      final categories = parsed.data.data;
-
-      if (categories.isEmpty) {
-        _isNoMore = true;
-      } else {
-        _onlineCategories.addAll(categories);
-        for (var category in categories.take(16)) {
-          _localCache.put(
-            category.id,
-            CategoryHiveModel.fromDataModel(category),
+        if (!isSuccess) {
+          state = AsyncValue.error(
+            response.data['message'] ?? "Something went wrong",
+            StackTrace.current,
           );
+          _isLoading = false;
+          return;
         }
-        _currentPage++;
-      }
 
-      final connectivityResult = await Connectivity().checkConnectivity();
-      // ignore: unrelated_type_equality_checks
-      final isOnline = connectivityResult != ConnectivityResult.none;
+        final parsed = CategoriesListResponse.fromJson(response.data);
+        final categories = parsed.data.data;
 
-      if (isOnline) {
-        state = AsyncValue.data(List.from(_onlineCategories));
-      } else {
-        final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-        state = AsyncValue.data(cached);
-      }
-    } on DioException catch (e, st) {
-      final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      if (cached.isNotEmpty) {
-        state = AsyncValue.data(cached);
-      } else {
-        _isNoMore = true;
-        if (e.type == DioExceptionType.connectionError ||
-            e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.unknown) {
-          state = AsyncValue.error('Check your connection”', st);
+        if (categories.isEmpty) {
+          _isNoMore = true;
         } else {
-          state = AsyncValue.error(e.response?.data['message'], st);
+          _onlineCategories.addAll(categories);
+          _currentPage++;
+        }
+
+        state = AsyncValue.data(List.from(_onlineCategories));
+      } on DioException catch (e) {
+        String message = 'Check your internet connection.';
+        if (e.response?.data != null && e.response?.data['message'] != null) {
+          message = e.response!.data['message'];
+        }
+
+        if (_onlineCategories.isNotEmpty) {
+          state = AsyncValue.data(List.from(_onlineCategories));
+        } else {
+          _isNoMore = true;
+          state = AsyncValue.error(message, StackTrace.current);
+        }
+      } catch (e, st) {
+        if (_onlineCategories.isNotEmpty) {
+          state = AsyncValue.data(List.from(_onlineCategories));
+        } else {
+          _isNoMore = true;
+          state = AsyncValue.error(e.toString(), st);
         }
       }
-    } finally {
+
       _isLoading = false;
     }
   }
-}
 
-final categoryListNotifierProvider =
-    StateNotifierProvider<
-      CategoryListNotifier,
-      AsyncValue<List<CategoryDataModel>>
-    >((ref) {
-      final offlineCategories = Hive.box<CategoryHiveModel>('category');
-      return CategoryListNotifier(offlineCategories);
-    });
+  final categoryListNotifierProvider =
+      StateNotifierProvider<CategoryListNotifier, AsyncValue<List<CategoryDataModel>>>(
+          (ref) => CategoryListNotifier());
 
-// Category Details
-class CategoryDetailNotifier
-    extends StateNotifier<AsyncValue<CategoryDetailResponse?>> {
-  final Dio _dio;
 
-  CategoryDetailNotifier([Dio? dio])
-    : _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 15),
-              sendTimeout: const Duration(seconds: 10),
-            ),
-          ),
-      super(const AsyncValue.data(null));
+  /// Category Detail Notifier
+  class CategoryDetailNotifier extends StateNotifier<AsyncValue<CategoryDetailResponse?>> {
+    final Dio _dio;
 
-  Future<void> getCategoryDetail(int id) async {
-    try {
-      final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/categories/details/$id',
-        options: Options(
-          headers: {
+    CategoryDetailNotifier([Dio? dio])
+        : _dio = dio ??
+              Dio(
+                BaseOptions(
+                  connectTimeout: const Duration(seconds: 10),
+                  receiveTimeout: const Duration(seconds: 15),
+                  sendTimeout: const Duration(seconds: 10),
+                ),
+              ),
+          super(const AsyncValue.data(null));
+
+    Future<void> getCategoryDetail(int id) async {
+      state = const AsyncValue.loading();
+
+      try {
+        final response = await _dio.get(
+          '${AppConfig.baseUrl}/ecommerce/categories/details/$id',
+          options: Options(headers: {
             'Accept': 'application/json',
             'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+          }),
+        );
 
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
+        final isSuccess =
+            response.statusCode == 200 && response.data['success'] == true;
 
-      if (isSuccess) {
-        final responseData = CategoryDetailResponse.fromJson(response.data);
-        state = AsyncValue.data(responseData);
-      } else {
-        final message = response.data['message'] ?? 'Something went wrong';
+        if (isSuccess) {
+          state = AsyncValue.data(CategoryDetailResponse.fromJson(response.data));
+        } else {
+          state = AsyncValue.error(
+            response.data['message'] ?? "Something went wrong",
+            StackTrace.current,
+          );
+        }
+      } on DioException catch (e) {
+        String message = 'Check your internet connection.';
+        if (e.response?.data != null && e.response?.data['message'] != null) {
+          message = e.response!.data['message'];
+        }
         state = AsyncValue.error(message, StackTrace.current);
+      } catch (e, st) {
+        state = AsyncValue.error(e.toString(), st);
       }
-    } on DioException catch (e, st) {
-      final message = (e.response?.data is Map)
-          ? e.response?.data['message']
-          : 'Check your connection';
-      state = AsyncValue.error(message, st);
     }
   }
-}
 
-final categoryDetailNotifierProvider =
-    StateNotifierProvider<
-      CategoryDetailNotifier,
-      AsyncValue<CategoryDetailResponse?>
-    >((ref) => CategoryDetailNotifier());
+  final categoryDetailNotifierProvider =
+      StateNotifierProvider.autoDispose<CategoryDetailNotifier,
+          AsyncValue<CategoryDetailResponse?>>((ref) => CategoryDetailNotifier());

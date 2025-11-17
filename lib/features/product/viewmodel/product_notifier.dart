@@ -1,170 +1,189 @@
-import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:picoshop_theme2/core/config/app_config.dart';
-import 'package:picoshop_theme2/features/product/local/product_data_hive.dart';
-import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
-import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
+  import 'dart:async';
+  import 'package:dio/dio.dart';
+  import 'package:flutter/widgets.dart';
+  import 'package:flutter_riverpod/flutter_riverpod.dart';
+  import 'package:picoshop_theme2/core/config/app_config.dart';
+  import 'package:picoshop_theme2/core/network/safe_api_call.dart';
+  import 'package:picoshop_theme2/features/product/model/product_detail_response.dart';
+  import 'package:picoshop_theme2/features/product/model/product_list_response.dart';
 
-class ProductListNotifier
-    extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
-  final Box<ProductHiveModel> _localCache;
-  final Dio _dio;
-  final List<ProductDataModel> _onlineProducts = [];
-  int _currentPage = 1;
-  bool _isNoMore = false;
-  bool _isLoading = false;
+  /// Helper class to define filter operator and value
+  class FilterValue {
+    final String operator; // eq, ne, lt, lte, gt, gte, like
+    final dynamic value;
 
-  ProductListNotifier(this._localCache)
-    : _dio = Dio(),
-      super(const AsyncValue.loading()) {
-    _init();
+    FilterValue(this.operator, this.value);
   }
 
-  bool get isNoMore => _isNoMore;
+  /// Build query parameters for filters automatically
+  Map<String, dynamic> buildFilterParams(Map<String, dynamic> filters) {
+    final Map<String, dynamic> queryParams = {};
+    filters.forEach((key, value) {
+      if (value is FilterValue) {
+        queryParams['filter[products.$key][\$${value.operator}]'] = value.value;
+      } else {
+        // Default to equality if raw value
+        queryParams['filter[products.$key][\$eq]'] = value;
+      }
+    });
+    return queryParams;
+  }
 
-  Future<void> _init() async {
-    final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-    if (cached.isNotEmpty) {
-      state = AsyncValue.data(cached);
-    } else {
+  /// Product List Notifier
+  class ProductListNotifier
+      extends StateNotifier<AsyncValue<List<ProductDataModel>>> {
+    final Dio _dio = Dio();
+    final List<ProductDataModel> _onlineProducts = [];
+    int _currentPage = 1;
+    bool _isNoMore = false;
+    bool _isLoading = false;
+
+    Map<String, dynamic> _filters = {};
+
+    ProductListNotifier() : super(const AsyncValue.loading()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _init();
+      });
+    }
+
+    bool get isNoMore => _isNoMore;
+
+    Future<void> _init() async {
       await getNextPage();
     }
-  }
 
-  Future<void> reset() async {
-    _onlineProducts.clear();
-    _currentPage = 1;
-    _isNoMore = false;
-    await getNextPage();
-  }
+    /// Set filters (category, price, etc.) and refresh list
+    Future<void> setFilters(Map<String, dynamic> filters) async {
+      _filters = filters;
+      await reset();
+    }
 
-  Future<void> getNextPage() async {
-    if (_isNoMore || _isLoading) return;
-    _isLoading = true;
+    Future<void> reset() async {
+      _onlineProducts.clear();
+      _currentPage = 1;
+      _isNoMore = false;
+      await getNextPage();
+    }
 
-    try {
-      final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/products',
-        queryParameters: {'page': _currentPage},
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+    Future<void> getNextPage() async {
+      if (_isNoMore || _isLoading) return;
+      _isLoading = true;
 
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
-      if (!isSuccess) {
-        state = AsyncValue.error(
-          response.data['message'] ?? 'Something went wrong',
-          StackTrace.current,
-        );
-        return;
-      }
+      await safeApiCall(
+        () async {
+          try {
+            // Merge pagination and filters
+            final queryParams = {
+              'page': _currentPage,
+              ...buildFilterParams(_filters),
+            };
 
-      final parsed = ProductListResponse.fromJson(response.data);
-      final products = parsed.data?.data ?? [];
-
-      if (products.isEmpty) {
-        _isNoMore = true;
-      } else {
-        _onlineProducts.addAll(products);
-
-        for (var product in products.take(8)) {
-          if (_localCache.length >= 8) {
-            _localCache.delete(_localCache.keys.first);
-          }
-          if (product.id != null) {
-            _localCache.put(
-              product.id,
-              ProductHiveModel.fromDataModel(product),
+            final response = await _dio.get(
+              '${AppConfig.baseUrl}/ecommerce/products',
+              queryParameters: queryParams,
+              options: Options(
+                headers: {
+                  'Accept': 'application/json',
+                  'X-API-Token': AppConfig.xApiToken,
+                },
+              ),
             );
+
+            final isSuccess =
+                response.statusCode == 200 && response.data['success'] == true;
+            if (!isSuccess) {
+              state = AsyncValue.error(
+                response.data['message'] ?? 'Something went wrong',
+                StackTrace.current,
+              );
+              return;
+            }
+
+            final parsed = ProductListResponse.fromJson(response.data);
+            final products = parsed.data?.data ?? [];
+
+            if (products.isEmpty) {
+              _isNoMore = true;
+            } else {
+              _onlineProducts.addAll(products);
+              _currentPage++;
+            }
+
+            state = AsyncValue.data(List.from(_onlineProducts));
+          } on DioException catch (e) {
+            String message = 'Check your internet connection.';
+            if (e.response?.data != null && e.response?.data['message'] != null) {
+              message = e.response!.data['message'];
+            }
+            state = AsyncValue.error(message, StackTrace.current);
+          } catch (e, st) {
+            state = AsyncValue.error(e.toString(), st);
           }
-        }
-
-        _currentPage++;
-      }
-
-      final connectivityResult = await Connectivity().checkConnectivity();
-      // ignore: unrelated_type_equality_checks
-      final isOnline = connectivityResult != ConnectivityResult.none;
-
-      state = AsyncValue.data(
-        isOnline
-            ? List.from(_onlineProducts)
-            : _localCache.values.map((e) => e.toDataModel()).toList(),
+        },
+        onError: (message) {
+          state = AsyncValue.error(message, StackTrace.current);
+        },
       );
-    } on DioException catch (e, st) {
-      final cached = _localCache.values.map((e) => e.toDataModel()).toList();
-      if (cached.isNotEmpty) {
-        state = AsyncValue.data(cached);
-      } else {
-        _isNoMore = true;
-        state = AsyncValue.error(
-          e.response?.data['message'] ?? 'Check Internet',
-          st,
-        );
-      }
-    } finally {
+
       _isLoading = false;
     }
   }
-}
 
-final productNotifierProvider =
-    StateNotifierProvider<
-      ProductListNotifier,
-      AsyncValue<List<ProductDataModel>>
-    >((ref) {
-      final offlineProducts = Hive.box<ProductHiveModel>('products');
-      return ProductListNotifier(offlineProducts);
-    });
+  /// Riverpod provider
+  final productNotifierProvider =
+      StateNotifierProvider<
+        ProductListNotifier,
+        AsyncValue<List<ProductDataModel>>
+      >((ref) => ProductListNotifier());
 
-class ProductDetailNotifier
-    extends StateNotifier<AsyncValue<ProductDetailResponse?>> {
-  final Dio _dio;
+  /// Product Detail Notifier
+  class ProductDetailNotifier
+      extends StateNotifier<AsyncValue<ProductDetailResponse?>> {
+    final Dio _dio;
 
-  ProductDetailNotifier([Dio? dio])
-    : _dio = dio ?? Dio(),
-      super(const AsyncValue.data(null));
+    ProductDetailNotifier([Dio? dio])
+      : _dio = dio ?? Dio(),
+        super(const AsyncValue.data(null));
 
-  void reset() {
-    state = const AsyncValue.loading();
-  }
+    void reset() {
+      state = const AsyncValue.loading();
+    }
 
-  Future<void> getProductDetail(int productId) async {
-    try {
-      final response = await _dio.get(
-        '${AppConfig.baseUrl}/ecommerce/products/details/$productId',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Token': AppConfig.xApiToken,
-          },
-        ),
-      );
+    Future<void> getProductDetail(int productId) async {
+      await safeApiCall(
+        () async {
+          final response = await _dio.get(
+            '${AppConfig.baseUrl}/ecommerce/products/details/$productId',
+            options: Options(
+              headers: {
+                'Accept': 'application/json',
+                'X-API-Token': AppConfig.xApiToken,
+              },
+            ),
+          );
 
-      final isSuccess =
-          response.statusCode == 200 && response.data['success'] == true;
-      if (isSuccess) {
-        state = AsyncValue.data(ProductDetailResponse.fromJson(response.data));
-      }
-    } on DioException catch (e, st) {
-      state = AsyncValue.error(
-        e.response?.data['message'] ?? 'Check your connection!',
-        st,
+          final isSuccess =
+              response.statusCode == 200 && response.data['success'] == true;
+          if (isSuccess) {
+            state = AsyncValue.data(
+              ProductDetailResponse.fromJson(response.data),
+            );
+          } else {
+            state = AsyncValue.error(
+              response.data['message'] ?? 'Something went wrong',
+              StackTrace.current,
+            );
+          }
+        },
+        onError: (message) {
+          state = AsyncValue.error(message, StackTrace.current);
+        },
       );
     }
   }
-}
 
-final productDetailNotifierProvider =
-    StateNotifierProvider.autoDispose<
-      ProductDetailNotifier,
-      AsyncValue<ProductDetailResponse?>
-    >((ref) => ProductDetailNotifier());
+  final productDetailNotifierProvider =
+      StateNotifierProvider.autoDispose<
+        ProductDetailNotifier,
+        AsyncValue<ProductDetailResponse?>
+      >((ref) => ProductDetailNotifier());
