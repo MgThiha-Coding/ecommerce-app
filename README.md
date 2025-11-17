@@ -7,7 +7,7 @@ PicoMart is a Flutter-based e-commerce app supporting English and Myanmar. It fe
 ```text
 lib/
 ├── core/
-│   ├── configs/           # App configuration
+│   ├── configs/           # App configuration (stores APP_URL, X_API_TOKEN,)
 │   ├── consts/            # Central colors, fonts, and responsive setup
 │   ├── images/
 │   ├── localizations/
