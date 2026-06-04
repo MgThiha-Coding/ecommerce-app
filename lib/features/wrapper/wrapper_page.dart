@@ -6,7 +6,7 @@ import 'package:picoshop_theme2/core/consts/app_colors.dart';
 import 'package:picoshop_theme2/core/responsive/responsive.dart';
 import 'package:picoshop_theme2/features/cart/view/pages/cart_page.dart';
 import 'package:picoshop_theme2/features/cart/viewmodel/cart_notifier.dart';
-import 'package:picoshop_theme2/features/home/pages/home_page.dart';
+import 'package:picoshop_theme2/features/home/view/pages/home_page.dart';
 import 'package:picoshop_theme2/features/product/view/pages/product_list_page.dart';
 import 'package:badges/badges.dart';
 import 'package:picoshop_theme2/features/profile/view/pages/profile_page.dart';
