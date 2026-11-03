@@ -57,6 +57,6 @@ lib/
 ## Developer
 
 ```text
-Nathan James
+Min Thiha Aung
 Final deliverable as of November 2025
 ```
